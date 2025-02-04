@@ -31,8 +31,8 @@ internal sealed class RuleCommand : ApplicationCommandModule
     [SlashCommand("rule", "Displays a rule.")]
     [SlashRequireGuild]
     public async Task RuleAsync(InteractionContext context,
-        [Option("rule", "The rule to display.", true), Autocomplete(typeof(RuleAutocompleteProvider))]
-        string search)
+        [Option("rule", "The rule to display.", true), Autocomplete(typeof(RuleAutocompleteProvider))] string search,
+        [Option("mention", "The user to mention.")] DiscordUser? mentionUser = null)
     {
         DiscordGuild guild = context.Guild;
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
@@ -68,6 +68,6 @@ internal sealed class RuleCommand : ApplicationCommandModule
         embed.WithTitle(string.IsNullOrWhiteSpace(rule.Brief) ? $"Rule #{rule.Id}" : $"Rule #{rule.Id}. {rule.Brief}");
         embed.WithDescription(rule.Description);
 
-        await context.CreateResponseAsync(embed);
+        await context.CreateResponseAsync(mentionUser?.Mention, embed).ConfigureAwait(false);
     }
 }

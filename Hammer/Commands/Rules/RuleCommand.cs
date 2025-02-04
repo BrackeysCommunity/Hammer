@@ -68,6 +68,15 @@ internal sealed class RuleCommand : ApplicationCommandModule
         embed.WithTitle(string.IsNullOrWhiteSpace(rule.Brief) ? $"Rule #{rule.Id}" : $"Rule #{rule.Id}. {rule.Brief}");
         embed.WithDescription(rule.Description);
 
-        await context.CreateResponseAsync(mentionUser?.Mention, embed).ConfigureAwait(false);
+        var response  = new DiscordInteractionResponseBuilder();
+        response.AddEmbed(embed);
+        
+        if (mentionUser is not null)
+        {
+            response.WithContent(mentionUser.Mention);
+            response.AddMention(new UserMention(mentionUser.Id));
+        }
+
+        await context.CreateResponseAsync(response).ConfigureAwait(false);
     }
 }

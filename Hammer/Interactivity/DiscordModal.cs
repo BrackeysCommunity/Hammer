@@ -73,8 +73,8 @@ public sealed class DiscordModal
 
         _discordClient.ModalSubmitted -= OnModalSubmitted;
 
-        IEnumerable<DiscordComponent> components = e.Interaction.Data.Components.SelectMany(c => c.Components);
-        IEnumerable<TextInputComponent> inputComponents = components.OfType<TextInputComponent>();
+        IEnumerable<DiscordActionRowComponent> components = e.Interaction.Data.Components.OfType<DiscordActionRowComponent>();
+        IEnumerable<TextInputComponent> inputComponents = components.SelectMany(a => a.Components).OfType<TextInputComponent>();
         foreach (TextInputComponent inputComponent in inputComponents)
         {
             if (_inputs.TryGetValue(inputComponent.CustomId, out DiscordModalTextInput? input))
@@ -82,6 +82,6 @@ public sealed class DiscordModal
         }
 
         _taskCompletionSource.TrySetResult();
-        return e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource);
+        return e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
     }
 }

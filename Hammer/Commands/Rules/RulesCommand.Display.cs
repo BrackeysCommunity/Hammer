@@ -1,3 +1,4 @@
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -8,7 +9,7 @@ internal sealed partial class RulesCommand
 {
     [SlashCommand("display", "Displays 1 or more embeds with the guild rules.", false)]
     [SlashRequireGuild]
-    public async Task DisplayAsync(InteractionContext context,
+    public async Task DisplayAsync(CommandContext context,
         [Option("channel", "The channel in which to display the rules. Defaults to the current channel.")]
         DiscordChannel? channel = null)
     {

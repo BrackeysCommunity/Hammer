@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -34,7 +35,7 @@ internal sealed class UserInfoCommand
 
     [SlashCommand("userinfo", "Displays information about a user.")]
     [SlashRequireGuild]
-    public async Task UserInfoAsync(InteractionContext context,
+    public async Task UserInfoAsync(CommandContext context,
         [Option("user", "The user whose information to view.", true)]
         DiscordUser user)
     {

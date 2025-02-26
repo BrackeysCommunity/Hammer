@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Text;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -14,7 +15,7 @@ internal sealed partial class NoteCommand
 {
     [SlashCommand("viewall", "Views all notes for a given user.", false)]
     [SlashRequireGuild]
-    public async Task ViewAllAsync(InteractionContext context,
+    public async Task ViewAllAsync(CommandContext context,
         [Option("user", "The user whose notes to view.")]
         DiscordUser user)
     {

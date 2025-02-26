@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hammer.Data;
@@ -26,7 +27,7 @@ internal sealed class MessageHistoryCommand
 
     [SlashCommand("messagehistory", "Views the message history for a user.", false)]
     public async Task MessageHistoryAsync(
-        InteractionContext context,
+        CommandContext context,
         [Option("user", "The user whose message history to view.")]
         DiscordUser user
     )

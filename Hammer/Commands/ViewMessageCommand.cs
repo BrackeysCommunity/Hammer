@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hammer.Configuration;
@@ -32,7 +33,7 @@ internal sealed class ViewMessageCommand
 
     [SlashCommand("viewmessage", "Views a staff message, or deleted message, by its ID.", false)]
     public async Task ViewMessageAsync(
-        InteractionContext context,
+        CommandContext context,
         [Option("id", "The ID of the message to retrieve.")]
         string rawId
     )

@@ -1,3 +1,4 @@
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -11,7 +12,7 @@ internal sealed partial class RulesCommand
 {
     [SlashCommand("delete", "Deletes a rule.", false)]
     [SlashRequireGuild]
-    public async Task DeleteAsync(InteractionContext context,
+    public async Task DeleteAsync(CommandContext context,
         [Autocomplete(typeof(RuleAutocompleteProvider))] [Option("rule", "The rule to modify")]
         long ruleId)
     {

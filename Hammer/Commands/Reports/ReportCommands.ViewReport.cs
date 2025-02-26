@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
@@ -12,7 +13,7 @@ internal sealed partial class ReportCommands
 {
     [SlashCommand("viewreport", "Views all reports made against this user.", false)]
     [SlashRequireGuild]
-    public async Task ViewReportAsync(InteractionContext context, [Option("id", "The ID of the report to view.")] long id)
+    public async Task ViewReportAsync(CommandContext context, [Option("id", "The ID of the report to view.")] long id)
     {
         await context.DeferAsync();
 

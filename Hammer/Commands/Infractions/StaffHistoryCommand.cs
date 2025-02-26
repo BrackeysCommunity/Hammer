@@ -1,5 +1,6 @@
 using System.Text;
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -28,7 +29,7 @@ internal sealed class StaffHistoryCommand
 
     [SlashCommand("staffhistory", "Searches a staff member's history.", false)]
     [SlashRequireGuild]
-    public async Task StaffHistoryAsync(InteractionContext context,
+    public async Task StaffHistoryAsync(CommandContext context,
         [Option("staffMember", "The staff member whose infractions to search.")]
         DiscordUser user)
     {

@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -72,7 +73,7 @@ internal sealed class GagCommand
     [SlashCommand("gag", "Temporarily gags a user, so that a more final infraction can be issued.", false)]
     [SlashRequireGuild]
     public async Task GagAsync(
-        InteractionContext context,
+        CommandContext context,
         [Option("user", "The user to gag.")] DiscordUser user,
         [Option("duration", "The duration of the gag. Defaults to 5 minutes")]
         string? duration = null

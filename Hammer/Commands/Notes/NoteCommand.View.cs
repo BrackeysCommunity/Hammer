@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -14,7 +15,7 @@ internal sealed partial class NoteCommand
 {
     [SlashCommand("view", "Views a note.", false)]
     [SlashRequireGuild]
-    public async Task ViewAsync(InteractionContext context,
+    public async Task ViewAsync(CommandContext context,
         [Autocomplete(typeof(NoteAutocompleteProvider))] [Option("note", "The note to view.")]
         long noteId)
     {

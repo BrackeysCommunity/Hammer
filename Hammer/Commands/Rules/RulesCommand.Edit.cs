@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -15,7 +16,7 @@ internal sealed partial class RulesCommand
 {
     [SlashCommand("edit", "Edits a rule.", false)]
     [SlashRequireGuild]
-    public async Task EditAsync(InteractionContext context,
+    public async Task EditAsync(CommandContext context,
         [Autocomplete(typeof(RuleAutocompleteProvider))] [Option("rule", "The rule to modify")]
         long ruleId)
     {

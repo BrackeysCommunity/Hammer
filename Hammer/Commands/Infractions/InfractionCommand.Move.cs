@@ -1,3 +1,4 @@
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -10,7 +11,7 @@ internal sealed partial class InfractionCommand
 {
     [SlashCommand("move", "Moves all infractions from one user to another.", false)]
     [SlashRequireGuild]
-    public async Task MoveAsync(InteractionContext context,
+    public async Task MoveAsync(CommandContext context,
         [Option("source", "The user whose infractions to move.")]
         DiscordUser source,
         [Option("destination", "The user who will acquire the moved infractions.")]

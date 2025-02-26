@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -26,7 +27,7 @@ internal sealed class MessageCommand
     [SlashCommand("message", "Sends a private staff message to a member.", false)]
     [SlashRequireGuild]
     public async Task MessageAsync(
-        InteractionContext context,
+        CommandContext context,
         [Option("member", "The member to message.")]
         DiscordUser user
     )

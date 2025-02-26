@@ -1,5 +1,6 @@
 using System.Text;
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -24,7 +25,7 @@ internal sealed class AltCommand
 
     [SlashCommand("add", "Adds an alt account to a user.", false)]
     [SlashRequireGuild]
-    public async Task AddAltAsync(InteractionContext context,
+    public async Task AddAltAsync(CommandContext context,
         [Option("user", "The user to add an alt account to.")]
         DiscordUser user,
         [Option("alt", "The alt account to add.")]
@@ -48,7 +49,7 @@ internal sealed class AltCommand
 
     [SlashCommand("remove", "Removes an alt account from a user.", false)]
     [SlashRequireGuild]
-    public async Task RemoveAltAsync(InteractionContext context,
+    public async Task RemoveAltAsync(CommandContext context,
         [Option("user", "The user to remove an alt account from.")]
         DiscordUser user,
         [Option("alt", "The alt account to remove.")]
@@ -70,7 +71,7 @@ internal sealed class AltCommand
 
     [SlashCommand("view", "Views the alt accounts for a user.", false)]
     [SlashRequireGuild]
-    public async Task ViewAltsAsync(InteractionContext context,
+    public async Task ViewAltsAsync(CommandContext context,
         [Option("user", "The user to add an alt account to.")]
         DiscordUser user)
     {

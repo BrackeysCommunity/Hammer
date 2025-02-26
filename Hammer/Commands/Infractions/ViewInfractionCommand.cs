@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -24,7 +25,7 @@ internal sealed class ViewInfractionCommand
 
     [SlashCommand("viewinfraction", "Views an infraction.", false)]
     [SlashRequireGuild]
-    public async Task ViewInfractionAsync(InteractionContext context,
+    public async Task ViewInfractionAsync(CommandContext context,
         [Option("infraction", "The infraction to view.")]
         long infractionId
     )

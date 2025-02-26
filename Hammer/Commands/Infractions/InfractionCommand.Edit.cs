@@ -1,3 +1,4 @@
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -11,7 +12,7 @@ internal sealed partial class InfractionCommand
 {
     [SlashCommand("edit", "Edits an infraction.", false)]
     [SlashRequireGuild]
-    public async Task EditAsync(InteractionContext context,
+    public async Task EditAsync(CommandContext context,
         [Option("infraction", "The infraction to modify.")]
         long infractionId,
         [Option("reason", "The new reason for the infraction. To remove the reason, enter a single hyphen ( - ).")]

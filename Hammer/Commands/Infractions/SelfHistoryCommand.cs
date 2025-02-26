@@ -1,3 +1,4 @@
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -24,7 +25,7 @@ internal sealed class SelfHistoryCommand
 
     [SlashCommand("selfhistory", "View your own infraction history.")]
     [SlashRequireGuild]
-    public async Task SelfHistoryAsync(InteractionContext context)
+    public async Task SelfHistoryAsync(CommandContext context)
     {
         await context.DeferAsync(true);
 

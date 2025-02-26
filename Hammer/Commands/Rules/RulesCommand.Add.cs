@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -13,7 +14,7 @@ internal sealed partial class RulesCommand
 {
     [SlashCommand("add", "Add a rule.", false)]
     [SlashRequireGuild]
-    public async Task AddAsync(InteractionContext context)
+    public async Task AddAsync(CommandContext context)
     {
         DiscordGuild guild = context.Guild;
 

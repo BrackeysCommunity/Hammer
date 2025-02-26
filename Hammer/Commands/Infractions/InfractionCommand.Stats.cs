@@ -1,3 +1,4 @@
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -10,7 +11,7 @@ internal sealed partial class InfractionCommand
 {
     [SlashCommand("stats", "View infraction stats.", false)]
     [SlashRequireGuild]
-    public async Task StatsAsync(InteractionContext context)
+    public async Task StatsAsync(CommandContext context)
     {
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(context.Guild);
 

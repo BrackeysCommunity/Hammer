@@ -1,3 +1,4 @@
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -29,7 +30,7 @@ internal sealed class UnmuteCommand
 
     [SlashCommand("unmute", "Unmutes a user.", false)]
     [SlashRequireGuild]
-    public async Task UnmuteAsync(InteractionContext context,
+    public async Task UnmuteAsync(CommandContext context,
         [Option("user", "The user to unmute.")]
         DiscordUser user,
         [Option("reason", "The reason for the mute revocation.")]

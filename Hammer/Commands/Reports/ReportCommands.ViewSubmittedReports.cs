@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
@@ -14,7 +15,7 @@ internal sealed partial class ReportCommands
     [SlashCommand("viewsubmittedreports", "Views all reports submitted by a user.", false)]
     [SlashRequireGuild]
     public async Task ViewSubmittedReportsAsync(
-        InteractionContext context,
+        CommandContext context,
         [Option("user", "The user whose submitted reports to view.")]
         DiscordUser user
     )

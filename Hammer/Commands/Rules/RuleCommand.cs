@@ -12,7 +12,7 @@ namespace Hammer.Commands.Rules;
 /// <summary>
 ///     Represents a class which implements the <c>rule</c> command.
 /// </summary>
-internal sealed class RuleCommand : ApplicationCommandModule
+internal sealed class RuleCommand
 {
     private readonly ConfigurationService _configurationService;
     private readonly RuleService _ruleService;

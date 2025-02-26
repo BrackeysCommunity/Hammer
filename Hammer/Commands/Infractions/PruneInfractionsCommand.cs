@@ -12,7 +12,7 @@ namespace Hammer.Commands.Infractions;
 /// <summary>
 ///     Represents a module which implements the <c>/infraction prune</c>.
 /// </summary>
-internal sealed class PruneInfractionsCommand : ApplicationCommandModule
+internal sealed class PruneInfractionsCommand
 {
     private readonly InfractionService _infractionService;
 

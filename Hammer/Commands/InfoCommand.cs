@@ -13,7 +13,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a class which implements the <c>info</c> command.
 /// </summary>
-internal sealed class InfoCommand : ApplicationCommandModule
+internal sealed class InfoCommand
 {
     private readonly BotService _botService;
     private readonly ConfigurationService _configurationService;

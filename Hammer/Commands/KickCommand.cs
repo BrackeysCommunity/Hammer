@@ -14,7 +14,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>kick</c> command.
 /// </summary>
-internal sealed class KickCommand : ApplicationCommandModule
+internal sealed class KickCommand
 {
     private readonly ILogger<KickCommand> _logger;
     private readonly BanService _banService;

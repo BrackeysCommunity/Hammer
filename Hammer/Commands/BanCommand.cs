@@ -15,7 +15,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>ban</c> command.
 /// </summary>
-internal sealed class BanCommand : ApplicationCommandModule
+internal sealed class BanCommand
 {
     private readonly ILogger<BanCommand> _logger;
     private readonly BanService _banService;

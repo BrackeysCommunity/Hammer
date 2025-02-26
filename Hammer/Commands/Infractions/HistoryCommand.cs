@@ -12,7 +12,7 @@ namespace Hammer.Commands.Infractions;
 /// <summary>
 ///     Represents a class which implements the <c>history</c> command.
 /// </summary>
-internal sealed class HistoryCommand : ApplicationCommandModule
+internal sealed class HistoryCommand
 {
     private readonly ILogger<HistoryCommand> _logger;
     private readonly InfractionService _infractionService;

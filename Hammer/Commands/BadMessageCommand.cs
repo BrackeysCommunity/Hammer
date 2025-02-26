@@ -15,7 +15,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a class which implements the <c>Warn For This</c> context menu.
 /// </summary>
-internal sealed class BadMessageCommand : ApplicationCommandModule
+internal sealed class BadMessageCommand
 {
     private readonly ILogger<BadMessageCommand> _logger;
     private readonly ConfigurationService _configurationService;

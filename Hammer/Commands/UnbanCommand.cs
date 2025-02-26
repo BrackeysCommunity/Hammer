@@ -11,7 +11,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>unban</c> command.
 /// </summary>
-internal sealed class UnbanCommand : ApplicationCommandModule
+internal sealed class UnbanCommand
 {
     private readonly ILogger<UnbanCommand> _logger;
     private readonly BanService _banService;

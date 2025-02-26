@@ -13,7 +13,7 @@ namespace Hammer.Commands.Infractions;
 /// <summary>
 ///     Represents a class which implements the <c>staffhistory</c> command.
 /// </summary>
-internal sealed class StaffHistoryCommand : ApplicationCommandModule
+internal sealed class StaffHistoryCommand
 {
     private readonly InfractionService _infractionService;
 

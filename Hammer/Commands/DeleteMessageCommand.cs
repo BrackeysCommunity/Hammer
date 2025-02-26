@@ -9,7 +9,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a class which implements the <c>Delete Message</c> context menu.
 /// </summary>
-internal sealed class DeleteMessageCommand : ApplicationCommandModule
+internal sealed class DeleteMessageCommand
 {
     private readonly MessageDeletionService _deletionService;
 

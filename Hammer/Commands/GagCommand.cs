@@ -12,7 +12,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a class which implements the gag user context menu.
 /// </summary>
-internal sealed class GagCommand : ApplicationCommandModule
+internal sealed class GagCommand
 {
     private readonly ILogger<GagCommand> _logger;
     private readonly InfractionService _infractionService;

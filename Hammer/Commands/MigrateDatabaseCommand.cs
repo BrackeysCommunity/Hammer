@@ -1,4 +1,4 @@
-﻿using DSharpPlus;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Hammer.Commands;
 
-internal sealed class MigrateDatabaseCommand : ApplicationCommandModule
+internal sealed class MigrateDatabaseCommand
 {
     private readonly ILogger<MigrateDatabaseCommand> _logger;
     private readonly DatabaseService _databaseService;

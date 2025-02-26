@@ -11,7 +11,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements staff commands.
 /// </summary>
-internal sealed class MessageCommand : ApplicationCommandModule
+internal sealed class MessageCommand
 {
     private readonly MessageService _messageService;
 

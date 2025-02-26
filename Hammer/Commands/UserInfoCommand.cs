@@ -12,7 +12,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a class which implements the <c>userinfo</c> command.
 /// </summary>
-internal sealed class UserInfoCommand : ApplicationCommandModule
+internal sealed class UserInfoCommand
 {
     private readonly ConfigurationService _configurationService;
     private readonly AltAccountService _altAccountService;

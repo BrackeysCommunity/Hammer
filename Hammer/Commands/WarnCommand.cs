@@ -13,7 +13,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a class which implements the <c>warn</c> command.
 /// </summary>
-internal sealed class WarnCommand : ApplicationCommandModule
+internal sealed class WarnCommand
 {
     private readonly ILogger<WarnCommand> _logger;
     private readonly InfractionCooldownService _cooldownService;

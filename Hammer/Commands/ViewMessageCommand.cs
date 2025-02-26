@@ -11,7 +11,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>viewmessage</c> command.
 /// </summary>
-internal sealed class ViewMessageCommand : ApplicationCommandModule
+internal sealed class ViewMessageCommand
 {
     private readonly ConfigurationService _configurationService;
     private readonly MessageService _messageService;

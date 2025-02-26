@@ -10,7 +10,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>messagehistory</c> command.
 /// </summary>
-internal sealed class MessageHistoryCommand : ApplicationCommandModule
+internal sealed class MessageHistoryCommand
 {
     private readonly MessageService _messageService;
     private readonly MessageDeletionService _messageDeletionService;

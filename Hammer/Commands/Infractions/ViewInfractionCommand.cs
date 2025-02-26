@@ -9,7 +9,7 @@ using Humanizer;
 
 namespace Hammer.Commands.Infractions;
 
-internal sealed class ViewInfractionCommand : ApplicationCommandModule
+internal sealed class ViewInfractionCommand
 {
     private readonly InfractionService _infractionService;
 

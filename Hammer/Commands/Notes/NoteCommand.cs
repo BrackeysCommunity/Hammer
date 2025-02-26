@@ -8,7 +8,7 @@ namespace Hammer.Commands.Notes;
 ///     Represents a class which implements the <c>note</c> command.
 /// </summary>
 [SlashCommandGroup("note", "Manages member notes.", false)]
-internal sealed partial class NoteCommand : ApplicationCommandModule
+internal sealed partial class NoteCommand
 {
     private readonly ILogger<NoteCommand> _logger;
     private readonly ConfigurationService _configurationService;

@@ -7,7 +7,7 @@ namespace Hammer.Commands.Rules;
 ///     Represents a class which implements the <c>rules</c> command.
 /// </summary>
 [SlashCommandGroup("rules", "Manage rules.", false)]
-internal sealed partial class RulesCommand : ApplicationCommandModule
+internal sealed partial class RulesCommand
 {
     private readonly ConfigurationService _configurationService;
     private readonly RuleService _ruleService;

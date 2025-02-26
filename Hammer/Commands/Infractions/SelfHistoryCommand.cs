@@ -9,7 +9,7 @@ namespace Hammer.Commands.Infractions;
 /// <summary>
 ///     Represents a class which implements the <c>selfhistory</c> command.
 /// </summary>
-internal sealed class SelfHistoryCommand : ApplicationCommandModule
+internal sealed class SelfHistoryCommand
 {
     private readonly InfractionService _infractionService;
 

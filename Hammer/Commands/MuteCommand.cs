@@ -16,7 +16,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a class which implements the <c>mute</c> command.
 /// </summary>
-internal sealed class MuteCommand : ApplicationCommandModule
+internal sealed class MuteCommand
 {
     private readonly ILogger<MuteCommand> _logger;
     private readonly ConfigurationService _configurationService;

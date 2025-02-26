@@ -11,7 +11,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>unmute</c> command.
 /// </summary>
-internal sealed class UnmuteCommand : ApplicationCommandModule
+internal sealed class UnmuteCommand
 {
     private readonly ILogger<UnmuteCommand> _logger;
     private readonly MuteService _muteService;

@@ -7,7 +7,7 @@ namespace Hammer.Commands.Infractions;
 ///     Represents a module which implements infraction commands.
 /// </summary>
 [SlashCommandGroup("infraction", "Manage infractions.", false)]
-internal sealed partial class InfractionCommand : ApplicationCommandModule
+internal sealed partial class InfractionCommand
 {
     private readonly ConfigurationService _configurationService;
     private readonly InfractionService _infractionService;

@@ -67,7 +67,7 @@ internal sealed class MessageCommand
                 embed.WithAuthor(user);
                 embed.WithTitle("Message not sent");
                 embed.WithDescription($"An empty message cannot be sent to {user.Mention}");
-                await context.FollowUpAsync(builder.AddEmbed(embed));
+                await context.FollowupAsync(builder.AddEmbed(embed));
                 return;
             }
 
@@ -79,7 +79,7 @@ internal sealed class MessageCommand
                 embed.WithAuthor(user);
                 embed.WithTitle("Message Sent");
                 embed.AddField("Content", content);
-                await context.FollowUpAsync(builder.AddEmbed(embed));
+                await context.FollowupAsync(builder.AddEmbed(embed));
             }
             else
             {
@@ -89,7 +89,7 @@ internal sealed class MessageCommand
                 embed.WithDescription($"The message could not be sent to {user.Mention}. " +
                                       "This is likely due to DMs being disabled for this user.");
                 embed.AddField("Content", content);
-                await context.FollowUpAsync(builder.AddEmbed(embed));
+                await context.FollowupAsync(builder.AddEmbed(embed));
             }
         }
     }

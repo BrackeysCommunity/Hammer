@@ -51,7 +51,7 @@ internal sealed partial class RulesCommand
 
             var webhook = new DiscordWebhookBuilder();
             webhook.AddEmbed(embed);
-            await context.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed));
+            await context.FollowupAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed));
         }
     }
 }

@@ -109,7 +109,7 @@ internal sealed class BadMessageCommand
 
         var response = new DiscordFollowupMessageBuilder();
         response.AsEphemeral();
-        await context.FollowUpAsync(response.AddEmbed(builder));
+        await context.FollowupAsync(response.AddEmbed(builder));
     }
 
     private bool TryGetRule(DiscordGuild guild, string? query, out Rule? rule)

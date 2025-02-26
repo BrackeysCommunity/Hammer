@@ -1,11 +1,8 @@
-using System.Runtime.CompilerServices;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
-using Hammer.Extensions;
 using Hammer.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Hammer.AutocompleteProviders;
 

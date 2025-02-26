@@ -1,4 +1,3 @@
-using DSharpPlus;
 using DSharpPlus.Entities;
 using Hammer.Resources;
 using SmartFormat;

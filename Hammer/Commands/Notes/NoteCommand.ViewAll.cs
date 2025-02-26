@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Text;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;

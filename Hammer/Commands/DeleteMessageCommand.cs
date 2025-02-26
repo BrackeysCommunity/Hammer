@@ -1,4 +1,3 @@
-using DSharpPlus;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using Hammer.Services;

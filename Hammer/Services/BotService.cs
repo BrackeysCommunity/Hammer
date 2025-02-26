@@ -3,7 +3,6 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.SlashCommands.EventArgs;
 using Hammer.Commands;
 using Hammer.Commands.Infractions;
 using Hammer.Commands.Notes;

@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Hammer.Data;
 using Hammer.Services;
 using Microsoft.Extensions.DependencyInjection;

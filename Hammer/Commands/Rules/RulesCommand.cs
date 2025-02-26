@@ -1,4 +1,3 @@
-using DSharpPlus.SlashCommands;
 using Hammer.Services;
 
 namespace Hammer.Commands.Rules;

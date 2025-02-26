@@ -1,6 +1,5 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Hammer.Resources;
 using SmartFormat;
 

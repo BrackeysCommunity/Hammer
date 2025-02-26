@@ -1,8 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Services;
 
 namespace Hammer.Commands;

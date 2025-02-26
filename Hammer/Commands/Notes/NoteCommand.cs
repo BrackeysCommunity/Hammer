@@ -1,4 +1,3 @@
-using DSharpPlus.SlashCommands;
 using Hammer.Services;
 using Microsoft.Extensions.Logging;
 

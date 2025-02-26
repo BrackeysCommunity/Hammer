@@ -84,7 +84,7 @@ internal sealed class UserInfoCommand : ApplicationCommandModule
         }
 
         // ReSharper disable ConditionIsAlwaysTrueOrFalse
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(member?.Color ?? DiscordColor.Gray);
         embed.WithTitle("User Information");
         embed.WithThumbnail(user.AvatarUrl);

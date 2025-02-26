@@ -65,7 +65,7 @@ internal sealed class MailmanService
         string? description = infraction.Type.GetEmbedMessage();
         string reason = infraction.Reason.WithWhiteSpaceAlternative(Formatter.Italic("No reason given."));
         var embed = new DiscordEmbedBuilder();
-        string iconUrl = guild.GetIconUrl(ImageFormat.Png);
+        string iconUrl = guild.GetIconUrl(MediaFormat.Png);
 
         embed.WithColor(0xFF0000);
         embed.WithTitle(infraction.Type.Humanize());

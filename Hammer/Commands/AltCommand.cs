@@ -36,7 +36,7 @@ internal sealed class AltCommand : ApplicationCommandModule
         DiscordUser olderAccount = user.CreationTimestamp > alt.CreationTimestamp ? alt : user;
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(DiscordColor.Green);
         embed.WithTitle("Alt account registered");
         embed.WithDescription("The following users have been registered as alts of each other.");
@@ -58,7 +58,7 @@ internal sealed class AltCommand : ApplicationCommandModule
         _altAccountService.RemoveAlt(user, alt, context.Member);
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(DiscordColor.Orange);
         embed.WithTitle("Alt account unregistered");
         embed.WithDescription("The following users have been registered as alts of each other.");
@@ -78,7 +78,7 @@ internal sealed class AltCommand : ApplicationCommandModule
         IReadOnlyCollection<ulong> altAccounts = _altAccountService.GetAltsFor(user.Id);
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(DiscordColor.Blurple);
         embed.WithTitle("Known alt accounts");
 

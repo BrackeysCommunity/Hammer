@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
 using Hammer.Services;
 
 namespace Hammer.Commands.Rules;
@@ -5,7 +7,8 @@ namespace Hammer.Commands.Rules;
 /// <summary>
 ///     Represents a class which implements the <c>rules</c> command.
 /// </summary>
-[SlashCommandGroup("rules", "Manage rules.", false)]
+[Command("rules")]
+[Description("Manage rules.")]
 internal sealed partial class RulesCommand
 {
     private readonly ConfigurationService _configurationService;

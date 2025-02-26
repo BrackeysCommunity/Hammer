@@ -9,7 +9,8 @@ using Hammer.Services;
 
 namespace Hammer.Commands;
 
-[SlashCommandGroup("alt", "Commands for managing alt accounts.", false)]
+[Command("alt")]
+[Description("Commands for managing alt accounts.")]
 internal sealed class AltCommand
 {
     private readonly AltAccountService _altAccountService;

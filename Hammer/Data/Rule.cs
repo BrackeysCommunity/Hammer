@@ -1,4 +1,4 @@
-﻿namespace Hammer.Data;
+namespace Hammer.Data;
 
 /// <summary>
 ///     Represents a guild rule.
@@ -40,7 +40,7 @@ internal sealed class Rule : IEquatable<Rule>
     /// </returns>
     public static bool operator ==(Rule? left, Rule? right)
     {
-        return (bool)left?.Equals(right);
+        return left?.Equals(right) ?? ReferenceEquals(right, null);
     }
 
     /// <summary>

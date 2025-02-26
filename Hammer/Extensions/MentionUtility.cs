@@ -30,7 +30,6 @@ public static class MentionUtility
     /// </summary>
     /// <param name="id">The ID of the channel to mention.</param>
     /// <returns>A channel mention string in the format <c>&lt;#123&gt;</c>.</returns>
-    [CLSCompliant(false)]
     public static string MentionChannel(ulong id)
     {
         return $"<#{id}>";
@@ -51,7 +50,6 @@ public static class MentionUtility
     /// </summary>
     /// <param name="id">The ID of the role to mention.</param>
     /// <returns>A role mention string in the format <c>&lt;@&amp;123&gt;</c>.</returns>
-    [CLSCompliant(false)]
     public static string MentionRole(ulong id)
     {
         return $"<@&{id}>";
@@ -62,7 +60,6 @@ public static class MentionUtility
     /// </summary>
     /// <param name="id">The ID of the user to mention.</param>
     /// <returns>A user mention string in the format <c>&lt;@123&gt;</c>.</returns>
-    [CLSCompliant(false)]
     public static string MentionUser(decimal id)
     {
         return MentionUser(id, false);
@@ -79,7 +76,6 @@ public static class MentionUtility
     ///     A user mention string in the format <c>&lt;@!123&gt;</c> if <paramref name="nickname" /> is <see langword="true" />,
     ///     or in the format <c>&lt;@123&gt;</c> if <paramref name="nickname" /> is <see langword="false" />.
     /// </returns>
-    [CLSCompliant(false)]
     public static string MentionUser(decimal id, bool nickname)
     {
         return nickname ? $"<@!{id:N0}>" : $"<@{id:N0}>";
@@ -90,7 +86,6 @@ public static class MentionUtility
     /// </summary>
     /// <param name="id">The ID of the user to mention.</param>
     /// <returns>A user mention string in the format <c>&lt;@123&gt;</c>.</returns>
-    [CLSCompliant(false)]
     public static string MentionUser(ulong id)
     {
         return MentionUser(id, false);
@@ -107,7 +102,6 @@ public static class MentionUtility
     ///     A user mention string in the format <c>&lt;@!123&gt;</c> if <paramref name="nickname" /> is <see langword="true" />,
     ///     or in the format <c>&lt;@123&gt;</c> if <paramref name="nickname" /> is <see langword="false" />.
     /// </returns>
-    [CLSCompliant(false)]
     public static string MentionUser(ulong id, bool nickname)
     {
         return nickname ? $"<@!{id}>" : $"<@{id}>";
@@ -176,7 +170,6 @@ public static class MentionUtility
     ///     format, or represents a number less than <see cref="ulong.MinValue" /> or greater than <see cref="ulong.MaxValue" />.
     /// </param>
     /// <returns><see langword="true" /> if the parse was successful; otherwise, <see langword="false" />.</returns>
-    [CLSCompliant(false)]
     public static bool TryParseChannel(string? value, out ulong result)
     {
         result = 0;
@@ -241,7 +234,6 @@ public static class MentionUtility
     ///     format, or represents a number less than <see cref="ulong.MinValue" /> or greater than <see cref="ulong.MaxValue" />.
     /// </param>
     /// <returns><see langword="true" /> if the parse was successful; otherwise, <see langword="false" />.</returns>
-    [CLSCompliant(false)]
     public static bool TryParseRole(string? value, out ulong result)
     {
         result = 0;
@@ -318,7 +310,6 @@ public static class MentionUtility
     ///     format, or represents a number less than <see cref="ulong.MinValue" /> or greater than <see cref="ulong.MaxValue" />.
     /// </param>
     /// <returns><see langword="true" /> if the parse was successful; otherwise, <see langword="false" />.</returns>
-    [CLSCompliant(false)]
     public static bool TryParseUser(string? value, out ulong result)
     {
         result = 0;

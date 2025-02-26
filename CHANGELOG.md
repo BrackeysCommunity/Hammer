@@ -23,6 +23,16 @@ modification.
 ### Removed
 - Removed `/migrate` command.
 
+## [5.10.0] - 2025-02-24
+
+### Changed
+- Upgraded DSharpPlus to 4.5.0
+
+## [5.9.2] - 2025-02-04
+
+### Fixed
+- Fixed mention feature in `/rule` command.
+
 ## [5.9.1] - 2025-02-03
 
 ### Added
@@ -479,7 +489,10 @@ No substantial changes. Commit 3b8259a6cfb82ec0f5f51804c1ac7f1f5880d014 fixed an
 
 - Hammer is released.
 
+[5.10.0]: https://github.com/BrackeysBot/Hammer/releases/tag/v5.10.0
+[5.9.2]: https://github.com/BrackeysBot/Hammer/releases/tag/v5.9.2
 [5.9.1]: https://github.com/BrackeysBot/Hammer/releases/tag/v5.9.1
+[5.8.2]: https://github.com/BrackeysBot/Hammer/releases/tag/v5.8.2
 [5.8.1]: https://github.com/BrackeysBot/Hammer/releases/tag/v5.8.1
 [5.8.0]: https://github.com/BrackeysBot/Hammer/releases/tag/v5.8.0
 [5.7.0]: https://github.com/BrackeysBot/Hammer/releases/tag/v5.7.0

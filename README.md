@@ -2,10 +2,10 @@
 <p align="center"><img src="icon.png" width="128"></p>
 <p align="center"><i>A Discord bot for managing infractions against misbehaving users.</i></p>
 <p align="center">
-<a href="https://github.com/BrackeysBot/Hammer/releases"><img src="https://img.shields.io/github/v/release/BrackeysBot/Hammer?include_prereleases&style=flat-square"></a>
-<a href="https://github.com/BrackeysBot/Hammer/actions/workflows/dotnet.yml"><img src="https://img.shields.io/github/actions/workflow/status/BrackeysBot/Hammer/dotnet.yml?branch=main&style=flat-square" alt="GitHub Workflow Status" title="GitHub Workflow Status"></a>
-<a href="https://github.com/BrackeysBot/Hammer/issues"><img src="https://img.shields.io/github/issues/BrackeysBot/Hammer?style=flat-square" alt="GitHub Issues" title="GitHub Issues"></a>
-<a href="https://github.com/BrackeysBot/Hammer/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/BrackeysBot/Hammer?style=flat-square" alt="MIT License" title="MIT License"></a>
+<a href="https://github.com/BrackeysCommunity/Hammer/releases"><img src="https://img.shields.io/github/v/release/BrackeysCommunity/Hammer?include_prereleases&style=flat-square"></a>
+<a href="https://github.com/BrackeysCommunity/Hammer/actions/workflows/dotnet.yml"><img src="https://img.shields.io/github/actions/workflow/status/BrackeysCommunity/Hammer/dotnet.yml?branch=main&style=flat-square" alt="GitHub Workflow Status" title="GitHub Workflow Status"></a>
+<a href="https://github.com/BrackeysCommunity/Hammer/issues"><img src="https://img.shields.io/github/issues/BrackeysCommunity/Hammer?style=flat-square" alt="GitHub Issues" title="GitHub Issues"></a>
+<a href="https://github.com/BrackeysCommunity/Hammer/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/BrackeysCommunity/Hammer?style=flat-square" alt="MIT License" title="MIT License"></a>
 </p>
 
 ## About
@@ -17,7 +17,7 @@ Hammer runs in a Docker container, and there is a [docker-compose.yaml](docker-c
 ### Clone the repository
 To start off, clone the repository into your desired directory:
 ```bash
-git clone https://github.com/BrackeysBot/Hammer.git
+git clone https://github.com/BrackeysCommunity/Hammer.git
 ```
 Step into the Hammer directory using `cd Hammer`, and continue with the steps below.
 

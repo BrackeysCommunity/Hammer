@@ -95,7 +95,8 @@ internal sealed class UserInfoCommand : ApplicationCommandModule
         embed.AddField("Created", Formatter.Timestamp(user.CreationTimestamp), true);
 
         embed.AddFieldIf(member is not null, "Joined", () => Formatter.Timestamp(member!.JoinedAt), true);
-        embed.AddFieldIf(member is not null, "Permission Level", () => member!.GetPermissionLevel(configuration), true);
+        embed.AddFieldIf(member is not null && configuration is not null, "Permission Level",
+            () => member!.GetPermissionLevel(configuration!), true);
 
         if (staffRequested)
         {

@@ -35,7 +35,7 @@ internal sealed class RuleCommand
     [Description("Displays a rule.")]
     [RequireGuild]
     public async Task RuleAsync(CommandContext context,
-        [Parameter("rule"), Description("The rule to display."), Autocomplete(typeof(RuleAutocompleteProvider))] string search,
+        [Parameter("rule"), Description("The rule to display."), Autocomplete(typeof(RuleAutoCompleteProvider))] string search,
         [Parameter("mention"), Description("The user to mention.")] DiscordUser? mentionUser = null)
     {
         DiscordGuild guild = context.Guild;

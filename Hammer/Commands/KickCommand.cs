@@ -54,7 +54,7 @@ internal sealed class KickCommand
         DiscordUser user,
         [Parameter("reason"), Description("The reason for the kick.")]
         string? reason = null,
-        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutoCompleteProvider))]
         string? ruleSearch = null,
         [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)

@@ -17,7 +17,7 @@ internal sealed partial class NoteCommand
     [Description("Views a note.")]
     [RequireGuild]
     public async Task ViewAsync(CommandContext context,
-        [Autocomplete(typeof(NoteAutocompleteProvider))] [Parameter("note"), Description("The note to view.")]
+        [Autocomplete(typeof(NoteAutoCompleteProvider))] [Parameter("note"), Description("The note to view.")]
         long noteId)
     {
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))

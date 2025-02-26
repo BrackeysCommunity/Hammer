@@ -14,7 +14,7 @@ internal sealed partial class NoteCommand
     [Description("Edits the content of a note.")]
     [RequireGuild]
     public async Task EditContentAsync(CommandContext context,
-        [Autocomplete(typeof(NoteAutocompleteProvider))] [Parameter("note"), Description("The note to edit.")]
+        [Autocomplete(typeof(NoteAutoCompleteProvider))] [Parameter("note"), Description("The note to edit.")]
         long noteId,
         [Parameter("content"), Description("The new content of the note.")]
         string content)

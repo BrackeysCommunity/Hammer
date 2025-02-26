@@ -57,7 +57,7 @@ internal sealed class BanCommand
         string? reason = null,
         [Parameter("duration"), Description("The duration of the ban.")]
         string? durationRaw = null,
-        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutoCompleteProvider))]
         string? ruleSearch = null,
         [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)

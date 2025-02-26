@@ -1,3 +1,4 @@
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Services;
@@ -8,7 +9,7 @@ namespace Hammer.AutocompleteProviders;
 /// <summary>
 ///     Provides autocomplete suggestions for rules.
 /// </summary>
-internal sealed class RuleAutocompleteProvider : IAutocompleteProvider
+internal sealed class RuleAutoCompleteProvider : IAutoCompleteProvider
 {
     /// <inheritdoc />
     public Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext context)

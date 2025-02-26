@@ -1,17 +1,17 @@
 using DSharpPlus;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Hammer.AutocompleteProviders;
 
 /// <summary>
 ///     Provides autocomplete suggestions for infractions.
 /// </summary>
-internal sealed class InfractionAutocompleteProvider : IAutocompleteProvider
+internal sealed class InfractionAutoCompleteProvider : IAutoCompleteProvider
 {
     /// <inheritdoc />
     public Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext context)

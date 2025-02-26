@@ -18,7 +18,7 @@ internal sealed partial class InfractionCommand
         long infractionId,
         [Parameter("reason"), Description("The new reason for the infraction. To remove the reason, enter a single hyphen ( - ).")]
         string? reason = null,
-        [Autocomplete(typeof(RuleAutocompleteProvider))]
+        [Autocomplete(typeof(RuleAutoCompleteProvider))]
         [Parameter("rule"), Description("The new rule which was broken. To remove the rule, enter 0.")]
         long? ruleId = null
     )

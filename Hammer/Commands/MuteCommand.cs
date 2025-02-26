@@ -62,7 +62,7 @@ internal sealed class MuteCommand
         string? reason = null,
         [Parameter("duration"), Description("The duration of the mute.")]
         string? durationRaw = null,
-        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutoCompleteProvider))]
         string? ruleSearch = null)
     {
         await context.DeferAsync(true);

@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -11,7 +12,7 @@ namespace Hammer.AutocompleteProviders;
 /// <summary>
 ///     Provides autocomplete suggestions for notes.
 /// </summary>
-internal sealed class NoteAutocompleteProvider : IAutocompleteProvider
+internal sealed class NoteAutoCompleteProvider : IAutoCompleteProvider
 {
     /// <inheritdoc />
     public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext context)

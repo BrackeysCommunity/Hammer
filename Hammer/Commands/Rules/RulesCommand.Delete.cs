@@ -14,7 +14,7 @@ internal sealed partial class RulesCommand
     [Description("Deletes a rule.")]
     [RequireGuild]
     public async Task DeleteAsync(CommandContext context,
-        [Autocomplete(typeof(RuleAutocompleteProvider))] [Parameter("rule"), Description("The rule to modify")]
+        [Autocomplete(typeof(RuleAutoCompleteProvider))] [Parameter("rule"), Description("The rule to modify")]
         long ruleId)
     {
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))

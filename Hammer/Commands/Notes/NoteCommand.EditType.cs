@@ -14,7 +14,7 @@ internal sealed partial class NoteCommand
     [Description("Edits the type of a note.")]
     [RequireGuild]
     public async Task EditTypeAsync(CommandContext context,
-        [Autocomplete(typeof(NoteAutocompleteProvider))] [Parameter("note"), Description("The note to edit.")]
+        [Autocomplete(typeof(NoteAutoCompleteProvider))] [Parameter("note"), Description("The note to edit.")]
         long noteId,
         [Parameter("type"), Description("The new type of the note.")]
         MemberNoteType type)

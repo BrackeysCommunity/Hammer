@@ -53,7 +53,7 @@ internal sealed class WarnCommand
         DiscordUser user,
         [Parameter("reason"), Description("The reason for the warning.")]
         string reason,
-        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutoCompleteProvider))]
         string? ruleSearch = null)
     {
         await context.DeferAsync(true);

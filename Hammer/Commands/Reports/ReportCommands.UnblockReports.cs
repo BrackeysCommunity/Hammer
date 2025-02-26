@@ -14,7 +14,7 @@ internal sealed partial class ReportCommands
     public async Task UnblockReportsAsync(CommandContext context,
         [Parameter("user"), Description("The user to unblock.")] DiscordUser user)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         DiscordGuild guild = context.Guild;
 

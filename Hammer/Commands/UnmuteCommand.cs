@@ -37,7 +37,7 @@ internal sealed class UnmuteCommand
         [Parameter("reason"), Description("The reason for the mute revocation.")]
         string? reason = null)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         var embed = new DiscordEmbedBuilder();
         try

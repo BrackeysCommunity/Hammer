@@ -65,7 +65,7 @@ internal sealed class MuteCommand
         [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutoCompleteProvider))]
         string? ruleSearch = null)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         if (_cooldownService.IsCooldownActive(user, context.Member) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))

@@ -36,7 +36,7 @@ internal sealed class UnbanCommand
         [Parameter("reason"), Description("The reason for the ban revocation.")]
         string? reason = null)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         var embed = new DiscordEmbedBuilder();
         try

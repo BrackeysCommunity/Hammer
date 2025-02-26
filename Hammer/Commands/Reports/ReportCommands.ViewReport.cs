@@ -17,7 +17,7 @@ internal sealed partial class ReportCommands
     public async Task ViewReportAsync(CommandContext context,
         [Parameter("id"), Description("The ID of the report to view.")] long id)
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
 
         var embed = new DiscordEmbedBuilder();
 

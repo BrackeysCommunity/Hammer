@@ -32,7 +32,7 @@ internal sealed class AltCommand
         [Parameter("alt"), Description("The alt account to add.")]
         DiscordUser alt)
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
         _altAccountService.AddAlt(user, alt, context.Member);
 
         DiscordUser olderAccount = user.CreationTimestamp > alt.CreationTimestamp ? alt : user;
@@ -57,7 +57,7 @@ internal sealed class AltCommand
         [Parameter("alt"), Description("The alt account to remove.")]
         DiscordUser alt)
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
         _altAccountService.RemoveAlt(user, alt, context.Member);
 
         var embed = new DiscordEmbedBuilder();
@@ -78,7 +78,7 @@ internal sealed class AltCommand
         [Parameter("user"), Description("The user to add an alt account to.")]
         DiscordUser user)
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
         IReadOnlyCollection<ulong> altAccounts = _altAccountService.GetAltsFor(user.Id);
 
         var embed = new DiscordEmbedBuilder();

@@ -31,7 +31,7 @@ internal sealed class ViewInfractionCommand
         long infractionId
     )
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
 
         Infraction? infraction = _infractionService.GetInfraction(infractionId);

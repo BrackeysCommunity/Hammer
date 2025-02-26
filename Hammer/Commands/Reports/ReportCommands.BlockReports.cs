@@ -14,7 +14,7 @@ internal sealed partial class ReportCommands
     public async Task BlockReportsAsync(CommandContext context,
         [Parameter("user"), Description("The user to block.")] DiscordUser user)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
         DiscordGuild guild = context.Guild;
 
         var embed = new DiscordEmbedBuilder();

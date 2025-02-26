@@ -28,7 +28,7 @@ internal sealed class SelfHistoryCommand
     [RequireGuild]
     public async Task SelfHistoryAsync(CommandContext context)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         var builder = new DiscordWebhookBuilder();
         var response = new InfractionHistoryResponse(_infractionService, context.User, context.User, context.Guild, false);

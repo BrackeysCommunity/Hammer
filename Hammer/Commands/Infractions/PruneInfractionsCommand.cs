@@ -31,7 +31,7 @@ internal sealed class PruneInfractionsCommand
     [RequireGuild]
     public async Task PruneAsync(CommandContext context)
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(DiscordColor.Orange);

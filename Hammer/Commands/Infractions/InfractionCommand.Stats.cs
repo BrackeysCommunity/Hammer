@@ -33,7 +33,7 @@ internal sealed partial class InfractionCommand
             return;
         }
 
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
         DiscordEmbed result = await _infractionStatisticsService.CreateStatisticsEmbedAsync(context.Guild);
 
         var builder = new DiscordWebhookBuilder();

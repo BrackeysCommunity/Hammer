@@ -21,7 +21,7 @@ internal sealed partial class ReportCommands
         DiscordUser user
     )
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
 
         var list = new List<string>();
 

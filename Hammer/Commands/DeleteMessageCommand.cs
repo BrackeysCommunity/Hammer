@@ -25,7 +25,7 @@ internal sealed class DeleteMessageCommand
     [RequireGuild]
     public async Task DeleteMessageAsync(ContextMenuContext context)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
         var builder = new DiscordWebhookBuilder();
         var embed = new DiscordEmbedBuilder();
 

@@ -23,7 +23,7 @@ internal sealed partial class RulesCommand
             return;
         }
 
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
 
         DiscordGuild guild = context.Guild;
         var builder = new DiscordWebhookBuilder();

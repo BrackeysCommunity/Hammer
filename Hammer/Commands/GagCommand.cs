@@ -45,7 +45,7 @@ internal sealed class GagCommand
             return;
         }
 
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         try
         {
@@ -91,7 +91,7 @@ internal sealed class GagCommand
             return;
         }
 
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         try
         {

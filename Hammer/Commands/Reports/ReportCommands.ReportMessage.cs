@@ -10,7 +10,7 @@ internal sealed partial class ReportCommands
     [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Report Message")]
     public async Task ReportMessageAsync(ContextMenuContext context)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         DiscordUser user = context.User;
         DiscordMessage message = context.Interaction.Data.Resolved.Messages.First().Value;

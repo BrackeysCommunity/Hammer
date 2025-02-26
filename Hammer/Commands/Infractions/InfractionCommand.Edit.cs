@@ -23,7 +23,7 @@ internal sealed partial class InfractionCommand
         long? ruleId = null
     )
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
         var builder = new DiscordWebhookBuilder();
 

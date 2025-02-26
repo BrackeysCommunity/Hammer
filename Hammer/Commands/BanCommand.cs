@@ -62,7 +62,7 @@ internal sealed class BanCommand
         [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         if (_cooldownService.IsCooldownActive(user, context.Member) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))

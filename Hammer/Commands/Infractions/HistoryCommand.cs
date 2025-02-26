@@ -35,7 +35,7 @@ internal sealed class HistoryCommand
     {
         DiscordUser user = context.Interaction.Data.Resolved.Users.First().Value;
 
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         var builder = new DiscordWebhookBuilder();
         var response = new InfractionHistoryResponse(_infractionService, user, context.User, context.Guild, true);
@@ -120,7 +120,7 @@ internal sealed class HistoryCommand
             Type = type
         };
 
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
 
         var builder = new DiscordWebhookBuilder();
         var response = new InfractionHistoryResponse(_infractionService, user, context.User, context.Guild, true, searchOptions);

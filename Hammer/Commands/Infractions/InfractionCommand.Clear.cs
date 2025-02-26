@@ -17,7 +17,7 @@ internal sealed partial class InfractionCommand
         [Parameter("user"), Description("The user whose infractions to clear.")]
         DiscordUser user)
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
 
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(user, context.Guild);
         _infractionService.RemoveInfractions(infractions);

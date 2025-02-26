@@ -53,7 +53,7 @@ internal sealed class UserInfoCommand : ApplicationCommandModule
         await context.CreateResponseAsync(embed);
     }
 
-    [ContextMenu(ApplicationCommandType.UserContextMenu, "User Information")]
+    [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "User Information")]
     [SlashRequireGuild]
     public async Task UserInfoAsync(ContextMenuContext context)
     {

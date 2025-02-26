@@ -28,7 +28,7 @@ internal sealed class GagCommand : ApplicationCommandModule
         _infractionService = infractionService;
     }
 
-    [ContextMenu(ApplicationCommandType.UserContextMenu, "Gag", false)]
+    [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Gag", false)]
     [SlashRequireGuild]
     public async Task GagAsync(ContextMenuContext context)
     {

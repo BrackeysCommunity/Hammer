@@ -22,7 +22,7 @@ internal sealed class DeleteMessageCommand : ApplicationCommandModule
         _deletionService = deletionService;
     }
 
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Delete Message", false)]
+    [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Delete Message", false)]
     [SlashRequireGuild]
     public async Task DeleteMessageAsync(ContextMenuContext context)
     {

@@ -8,7 +8,7 @@ namespace Hammer.Commands.Reports;
 
 internal sealed partial class ReportCommands
 {
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Report Message")]
+    [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Report Message")]
     public async Task ReportMessageAsync(ContextMenuContext context)
     {
         await context.DeferAsync(true);

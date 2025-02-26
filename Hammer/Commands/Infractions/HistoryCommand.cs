@@ -28,7 +28,7 @@ internal sealed class HistoryCommand : ApplicationCommandModule
         _infractionService = infractionService;
     }
 
-    [ContextMenu(ApplicationCommandType.UserContextMenu, "View Infraction History", false)]
+    [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "View Infraction History", false)]
     [SlashRequireGuild]
     public async Task HistoryAsync(ContextMenuContext context)
     {

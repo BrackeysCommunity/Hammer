@@ -46,7 +46,7 @@ internal sealed class BadMessageCommand : ApplicationCommandModule
         _warningService = warningService;
     }
 
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Warn For This", false)]
+    [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Warn For This", false)]
     [SlashRequireGuild]
     public async Task BadMessageAsync(ContextMenuContext context)
     {

@@ -31,7 +31,7 @@ internal sealed class MessageCommand
     [RequireGuild]
     public async Task MessageAsync(
         CommandContext context,
-        [Option("member", "The member to message.")]
+        [Parameter("member"), Description("The member to message.")]
         DiscordUser user
     )
     {

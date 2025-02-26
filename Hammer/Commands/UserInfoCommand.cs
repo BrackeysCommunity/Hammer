@@ -39,7 +39,7 @@ internal sealed class UserInfoCommand
     [Description("Displays information about a user.")]
     [RequireGuild]
     public async Task UserInfoAsync(CommandContext context,
-        [Option("user", "The user whose information to view.", true)]
+        [Parameter("user"), Description("The user whose information to view.")]
         DiscordUser user)
     {
         DiscordGuild guild = context.Guild;

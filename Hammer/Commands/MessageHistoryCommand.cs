@@ -30,7 +30,7 @@ internal sealed class MessageHistoryCommand
     [Description("Views the message history for a user.")]
     public async Task MessageHistoryAsync(
         CommandContext context,
-        [Option("user", "The user whose message history to view.")]
+        [Parameter("user"), Description("The user whose message history to view.")]
         DiscordUser user
     )
     {

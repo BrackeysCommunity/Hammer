@@ -33,7 +33,7 @@ internal sealed class StaffHistoryCommand
     [Description("Searches a staff member's history.")]
     [RequireGuild]
     public async Task StaffHistoryAsync(CommandContext context,
-        [Option("staffMember", "The staff member whose infractions to search.")]
+        [Parameter("staffMember"), Description("The staff member whose infractions to search.")]
         DiscordUser user)
     {
         IEnumerable<Infraction> infractions =

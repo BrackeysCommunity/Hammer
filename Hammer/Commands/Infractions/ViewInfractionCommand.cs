@@ -29,7 +29,7 @@ internal sealed class ViewInfractionCommand
     [Description("Views an infraction.")]
     [RequireGuild]
     public async Task ViewInfractionAsync(CommandContext context,
-        [Option("infraction", "The infraction to view.")]
+        [Parameter("infraction"), Description("The infraction to view.")]
         long infractionId
     )
     {

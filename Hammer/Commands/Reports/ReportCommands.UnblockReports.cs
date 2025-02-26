@@ -13,7 +13,8 @@ internal sealed partial class ReportCommands
     [Command("unblockreports")]
     [Description("Unblocks a user, allowing them to report messages.")]
     [RequireGuild]
-    public async Task UnblockReportsAsync(CommandContext context, [Option("user", "The user to unblock.")] DiscordUser user)
+    public async Task UnblockReportsAsync(CommandContext context,
+        [Parameter("user"), Description("The user to unblock.")] DiscordUser user)
     {
         await context.DeferAsync(true);
 

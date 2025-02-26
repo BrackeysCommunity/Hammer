@@ -34,9 +34,9 @@ internal sealed class UnmuteCommand
     [Description("Unmutes a user.")]
     [RequireGuild]
     public async Task UnmuteAsync(CommandContext context,
-        [Option("user", "The user to unmute.")]
+        [Parameter("user"), Description("The user to unmute.")]
         DiscordUser user,
-        [Option("reason", "The reason for the mute revocation.")]
+        [Parameter("reason"), Description("The reason for the mute revocation.")]
         string? reason = null)
     {
         await context.DeferAsync(true);

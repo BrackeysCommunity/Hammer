@@ -52,13 +52,13 @@ internal sealed class KickCommand
     [Description("Kicks a member")]
     [RequireGuild]
     public async Task KickAsync(CommandContext context,
-        [Option("member", "The member to kick.")]
+        [Parameter("member"), Description("The member to kick.")]
         DiscordUser user,
-        [Option("reason", "The reason for the kick.")]
+        [Parameter("reason"), Description("The reason for the kick.")]
         string? reason = null,
-        [Option("rule", "The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
         string? ruleSearch = null,
-        [Option("clearMessageHistory", "Clear the user's recent messages in text channels.")]
+        [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)
     {
         await context.DeferAsync(true);

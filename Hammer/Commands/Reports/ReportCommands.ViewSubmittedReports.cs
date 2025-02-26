@@ -19,7 +19,7 @@ internal sealed partial class ReportCommands
     [RequireGuild]
     public async Task ViewSubmittedReportsAsync(
         CommandContext context,
-        [Option("user", "The user whose submitted reports to view.")]
+        [Parameter("user"), Description("The user whose submitted reports to view.")]
         DiscordUser user
     )
     {

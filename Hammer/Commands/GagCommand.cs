@@ -77,8 +77,9 @@ internal sealed class GagCommand
     [RequireGuild]
     public async Task GagAsync(
         CommandContext context,
-        [Option("user", "The user to gag.")] DiscordUser user,
-        [Option("duration", "The duration of the gag. Defaults to 5 minutes")]
+        [Parameter("user"), Description("The user to gag.")]
+        DiscordUser user,
+        [Parameter("duration"), Description("The duration of the gag. Defaults to 5 minutes.")]
         string? duration = null
     )
     {

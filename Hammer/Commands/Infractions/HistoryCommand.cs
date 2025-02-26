@@ -55,13 +55,13 @@ internal sealed class HistoryCommand
     [Description("Views the infraction history for a user.")]
     [RequireGuild]
     public async Task HistoryAsync(CommandContext context,
-        [Option("user", "The user whose history to view.")]
+        [Parameter("user"), Description("The user whose history to view.")]
         DiscordUser user,
-        [Option("before", "If set, limits to infractions before the specified date.")]
+        [Parameter("before"), Description("If set, limits to infractions before the specified date.")]
         string? beforeRaw = null,
-        [Option("after", "If set, limits to infractions after the specified date.")]
+        [Parameter("after"), Description("If set, limits to infractions after the specified date.")]
         string? afterRaw = null,
-        [Option("type", "If set, limits to infractions of the specified type.")]
+        [Parameter("type"), Description("If set, limits to infractions of the specified type.")]
         InfractionType? type = null
     )
     {

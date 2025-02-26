@@ -16,12 +16,12 @@ internal sealed partial class InfractionCommand
     [Description("Edits an infraction.")]
     [RequireGuild]
     public async Task EditAsync(CommandContext context,
-        [Option("infraction", "The infraction to modify.")]
+        [Parameter("infraction"), Description("The infraction to modify.")]
         long infractionId,
-        [Option("reason", "The new reason for the infraction. To remove the reason, enter a single hyphen ( - ).")]
+        [Parameter("reason"), Description("The new reason for the infraction. To remove the reason, enter a single hyphen ( - ).")]
         string? reason = null,
         [Autocomplete(typeof(RuleAutocompleteProvider))]
-        [Option("rule", "The new rule which was broken. To remove the rule, enter 0.")]
+        [Parameter("rule"), Description("The new rule which was broken. To remove the rule, enter 0.")]
         long? ruleId = null
     )
     {

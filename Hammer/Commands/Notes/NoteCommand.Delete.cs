@@ -16,7 +16,7 @@ internal sealed partial class NoteCommand
     [Description("Deletes a note.")]
     [RequireGuild]
     public async Task DeleteAsync(CommandContext context,
-        [Autocomplete(typeof(NoteAutocompleteProvider))] [Option("note", "The note to delete.")]
+        [Autocomplete(typeof(NoteAutocompleteProvider))] [Parameter("note"), Description("The note to delete.")]
         long noteId)
     {
         var embed = new DiscordEmbedBuilder();

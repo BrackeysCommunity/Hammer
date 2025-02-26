@@ -36,7 +36,7 @@ internal sealed class ViewMessageCommand
     [Description("Views a staff message, or deleted message, by its ID.")]
     public async Task ViewMessageAsync(
         CommandContext context,
-        [Option("id", "The ID of the message to retrieve.")]
+        [Parameter("id"), Description("The ID of the message to retrieve.")]
         string rawId
     )
     {

@@ -19,7 +19,7 @@ internal sealed partial class NoteCommand
     [Description("Views all notes for a given user.")]
     [RequireGuild]
     public async Task ViewAllAsync(CommandContext context,
-        [Option("user", "The user whose notes to view.")]
+        [Parameter("user"), Description("The user whose notes to view.")]
         DiscordUser user)
     {
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))

@@ -17,7 +17,7 @@ internal sealed partial class RulesCommand
     [Description("Sends the rule embed.")]
     [RequireGuild]
     public async Task UpdateAsync(CommandContext context,
-        [Option("messageLink", "The link to the message to edit.")]
+        [Parameter("messageLink"), Description("The link to the message to edit.")]
         string messageLink)
     {
         Match match = MessageLinkRegex.Match(messageLink);

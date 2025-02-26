@@ -16,9 +16,9 @@ internal sealed partial class NoteCommand
     [Description("Edits the type of a note.")]
     [RequireGuild]
     public async Task EditTypeAsync(CommandContext context,
-        [Autocomplete(typeof(NoteAutocompleteProvider))] [Option("note", "The note to edit.")]
+        [Autocomplete(typeof(NoteAutocompleteProvider))] [Parameter("note"), Description("The note to edit.")]
         long noteId,
-        [Option("type", "The new type of the note.")]
+        [Parameter("type"), Description("The new type of the note.")]
         MemberNoteType type)
     {
         var embed = new DiscordEmbedBuilder();

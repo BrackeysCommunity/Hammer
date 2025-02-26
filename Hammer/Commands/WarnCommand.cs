@@ -51,10 +51,11 @@ internal sealed class WarnCommand
     [Description("Issues a warning to a user.")]
     [RequireGuild]
     public async Task WarnAsync(CommandContext context,
-        [Option("user", "The user to warn.")] DiscordUser user,
-        [Option("reason", "The reason for the warning.")]
+        [Parameter("user"), Description("The user to warn.")]
+        DiscordUser user,
+        [Parameter("reason"), Description("The reason for the warning.")]
         string reason,
-        [Option("rule", "The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
         string? ruleSearch = null)
     {
         await context.DeferAsync(true);

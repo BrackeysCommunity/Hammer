@@ -58,12 +58,13 @@ internal sealed class MuteCommand
     [Description("Temporarily or permanently mutes a user.")]
     [RequireGuild]
     public async Task MuteAsync(CommandContext context,
-        [Option("user", "The user to mute")] DiscordUser user,
-        [Option("reason", "The reason for the mute")]
+        [Parameter("user"), Description("The user to mute.")]
+        DiscordUser user,
+        [Parameter("reason"), Description("The reason for the mute.")]
         string? reason = null,
-        [Option("duration", "The duration of the mute")]
+        [Parameter("duration"), Description("The duration of the mute.")]
         string? durationRaw = null,
-        [Option("rule", "The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
         string? ruleSearch = null)
     {
         await context.DeferAsync(true);

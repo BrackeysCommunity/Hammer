@@ -13,7 +13,8 @@ internal sealed partial class ReportCommands
     [Command("blockreports")]
     [Description("Blocks a user from reporting messages.")]
     [RequireGuild]
-    public async Task BlockReportsAsync(CommandContext context, [Option("user", "The user to block.")] DiscordUser user)
+    public async Task BlockReportsAsync(CommandContext context,
+        [Parameter("user"), Description("The user to block.")] DiscordUser user)
     {
         await context.DeferAsync(true);
         DiscordGuild guild = context.Guild;

@@ -16,7 +16,7 @@ internal sealed partial class InfractionCommand
     [Description("Clears all infractions from the specified user.")]
     [RequireGuild]
     public async Task ClearAsync(CommandContext context,
-        [Option("user", "The user whose infractions to clear")]
+        [Parameter("user"), Description("The user whose infractions to clear.")]
         DiscordUser user)
     {
         await context.DeferAsync();

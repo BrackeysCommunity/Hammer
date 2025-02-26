@@ -15,9 +15,9 @@ internal sealed partial class InfractionCommand
     [Description("Copies all infractions from one user to another.")]
     [RequireGuild]
     public async Task CopyAsync(CommandContext context,
-        [Option("source", "The user whose infractions to copy.")]
+        [Parameter("source"), Description("The user whose infractions to copy.")]
         DiscordUser source,
-        [Option("destination", "The user who will acquire the copied infractions.")]
+        [Parameter("destination"), Description("The user who will acquire the copied infractions.")]
         DiscordUser destination)
     {
         if (source == destination)

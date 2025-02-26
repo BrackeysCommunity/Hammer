@@ -16,7 +16,8 @@ internal sealed partial class ReportCommands
     [Command("viewreport")]
     [Description("Views all reports made against this user.")]
     [RequireGuild]
-    public async Task ViewReportAsync(CommandContext context, [Option("id", "The ID of the report to view.")] long id)
+    public async Task ViewReportAsync(CommandContext context,
+        [Parameter("id"), Description("The ID of the report to view.")] long id)
     {
         await context.DeferAsync();
 

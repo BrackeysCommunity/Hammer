@@ -29,9 +29,9 @@ internal sealed class AltCommand
     [Description("Adds an alt account to a user.")]
     [RequireGuild]
     public async Task AddAltAsync(CommandContext context,
-        [Option("user", "The user to add an alt account to.")]
+        [Parameter("user"), Description("The user to add an alt account to.")]
         DiscordUser user,
-        [Option("alt", "The alt account to add.")]
+        [Parameter("alt"), Description("The alt account to add.")]
         DiscordUser alt)
     {
         await context.DeferAsync();
@@ -54,9 +54,9 @@ internal sealed class AltCommand
     [Description("Removes an alt account from a user.")]
     [RequireGuild]
     public async Task RemoveAltAsync(CommandContext context,
-        [Option("user", "The user to remove an alt account from.")]
+        [Parameter("user"), Description("The user to remove an alt account from.")]
         DiscordUser user,
-        [Option("alt", "The alt account to remove.")]
+        [Parameter("alt"), Description("The alt account to remove.")]
         DiscordUser alt)
     {
         await context.DeferAsync();
@@ -77,7 +77,7 @@ internal sealed class AltCommand
     [Description("Views the alt accounts for a user.")]
     [RequireGuild]
     public async Task ViewAltsAsync(CommandContext context,
-        [Option("user", "The user to add an alt account to.")]
+        [Parameter("user"), Description("The user to add an alt account to.")]
         DiscordUser user)
     {
         await context.DeferAsync();

@@ -16,9 +16,9 @@ internal sealed partial class NoteCommand
     [Description("Edits the content of a note.")]
     [RequireGuild]
     public async Task EditContentAsync(CommandContext context,
-        [Autocomplete(typeof(NoteAutocompleteProvider))] [Option("note", "The note to edit.")]
+        [Autocomplete(typeof(NoteAutocompleteProvider))] [Parameter("note"), Description("The note to edit.")]
         long noteId,
-        [Option("content", "The new content of the note.")]
+        [Parameter("content"), Description("The new content of the note.")]
         string content)
     {
         var embed = new DiscordEmbedBuilder();

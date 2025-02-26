@@ -20,7 +20,7 @@ internal sealed partial class RulesCommand
     [Description("Edits a rule.")]
     [RequireGuild]
     public async Task EditAsync(CommandContext context,
-        [Autocomplete(typeof(RuleAutocompleteProvider))] [Option("rule", "The rule to modify")]
+        [Autocomplete(typeof(RuleAutocompleteProvider))] [Parameter("rule"), Description("The rule to modify.")]
         long ruleId)
     {
         DiscordGuild guild = context.Guild;

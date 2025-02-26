@@ -53,14 +53,15 @@ internal sealed class BanCommand
     [Description("Temporarily or permanently bans a user.")]
     [RequireGuild]
     public async Task BanAsync(CommandContext context,
-        [Option("user", "The user to ban.")] DiscordUser user,
-        [Option("reason", "The reason for the ban.")]
+        [Parameter("user"), Description("The user to ban.")]
+        DiscordUser user,
+        [Parameter("reason"), Description("The reason for the ban.")]
         string? reason = null,
-        [Option("duration", "The duration of the ban.")]
+        [Parameter("duration"), Description("The duration of the ban.")]
         string? durationRaw = null,
-        [Option("rule", "The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
         string? ruleSearch = null,
-        [Option("clearMessageHistory", "Clear the user's recent messages in text channels.")]
+        [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)
     {
         await context.DeferAsync(true);

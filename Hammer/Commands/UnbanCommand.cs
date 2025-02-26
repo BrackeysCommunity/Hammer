@@ -34,8 +34,8 @@ internal sealed class UnbanCommand
     [Description("Unbans a user.")]
     [RequireGuild]
     public async Task UnbanAsync(CommandContext context,
-        [Option("user", "The user to unban.")] DiscordUser user,
-        [Option("reason", "The reason for the ban revocation.")]
+        [Parameter("user"), Description("The user to unban.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the ban revocation.")]
         string? reason = null)
     {
         await context.DeferAsync(true);

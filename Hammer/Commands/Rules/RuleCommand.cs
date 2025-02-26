@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -35,8 +37,8 @@ internal sealed class RuleCommand
     [Description("Displays a rule.")]
     [RequireGuild]
     public async Task RuleAsync(CommandContext context,
-        [Option("rule", "The rule to display.", true), Autocomplete(typeof(RuleAutocompleteProvider))] string search,
-        [Option("mention", "The user to mention.")] DiscordUser? mentionUser = null)
+        [Parameter("rule"), Description("The rule to display."), Autocomplete(typeof(RuleAutocompleteProvider))] string search,
+        [Parameter("mention"), Description("The user to mention.")] DiscordUser? mentionUser = null)
     {
         DiscordGuild guild = context.Guild;
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))

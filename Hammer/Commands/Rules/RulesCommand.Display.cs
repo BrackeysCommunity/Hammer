@@ -13,7 +13,7 @@ internal sealed partial class RulesCommand
     [Description("Displays 1 or more embeds with the guild rules.")]
     [RequireGuild]
     public async Task DisplayAsync(CommandContext context,
-        [Option("channel", "The channel in which to display the rules. Defaults to the current channel.")]
+        [Parameter("channel"), Description("The channel in which to display the rules. Defaults to the current channel.")]
         DiscordChannel? channel = null)
     {
         channel ??= context.Channel;

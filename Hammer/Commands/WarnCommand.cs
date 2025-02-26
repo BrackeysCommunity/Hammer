@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -46,8 +47,8 @@ internal sealed class WarnCommand
         _warningService = warningService;
     }
 
-    [SlashCommand("warn", "Issues a warning to a user.", false)]
-    [SlashRequireGuild]
+    [Command("warn")]
+    [Description("Issues a warning to a user.")]
     [RequireGuild]
     public async Task WarnAsync(CommandContext context,
         [Option("user", "The user to warn.")] DiscordUser user,

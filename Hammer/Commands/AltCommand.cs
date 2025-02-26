@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text;
 using DSharpPlus;
 using DSharpPlus.Commands;
@@ -24,7 +25,8 @@ internal sealed class AltCommand
         _altAccountService = altAccountService;
     }
 
-    [SlashCommand("add", "Adds an alt account to a user.", false)]
+    [Command("add")]
+    [Description("Adds an alt account to a user.")]
     [RequireGuild]
     public async Task AddAltAsync(CommandContext context,
         [Option("user", "The user to add an alt account to.")]
@@ -48,7 +50,8 @@ internal sealed class AltCommand
         await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
     }
 
-    [SlashCommand("remove", "Removes an alt account from a user.", false)]
+    [Command("remove")]
+    [Description("Removes an alt account from a user.")]
     [RequireGuild]
     public async Task RemoveAltAsync(CommandContext context,
         [Option("user", "The user to remove an alt account from.")]
@@ -70,7 +73,8 @@ internal sealed class AltCommand
         await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
     }
 
-    [SlashCommand("view", "Views the alt accounts for a user.", false)]
+    [Command("view")]
+    [Description("Views the alt accounts for a user.")]
     [RequireGuild]
     public async Task ViewAltsAsync(CommandContext context,
         [Option("user", "The user to add an alt account to.")]

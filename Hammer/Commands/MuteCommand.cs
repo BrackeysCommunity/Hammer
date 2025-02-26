@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -53,7 +54,8 @@ internal sealed class MuteCommand
         _ruleService = ruleService;
     }
 
-    [SlashCommand("mute", "Temporarily or permanently mutes a user", false)]
+    [Command("mute")]
+    [Description("Temporarily or permanently mutes a user.")]
     [RequireGuild]
     public async Task MuteAsync(CommandContext context,
         [Option("user", "The user to mute")] DiscordUser user,

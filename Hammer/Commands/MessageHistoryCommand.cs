@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Entities;
@@ -25,7 +26,8 @@ internal sealed class MessageHistoryCommand
         _messageDeletionService = messageDeletionService;
     }
 
-    [SlashCommand("messagehistory", "Views the message history for a user.", false)]
+    [Command("messagehistory")]
+    [Description("Views the message history for a user.")]
     public async Task MessageHistoryAsync(
         CommandContext context,
         [Option("user", "The user whose message history to view.")]

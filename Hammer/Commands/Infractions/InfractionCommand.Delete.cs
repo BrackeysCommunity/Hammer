@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -10,7 +11,8 @@ namespace Hammer.Commands.Infractions;
 
 internal sealed partial class InfractionCommand
 {
-    [SlashCommand("delete", "Deletes an infraction.", false)]
+    [Command("delete")]
+    [Description("Deletes an infraction.")]
     [RequireGuild]
     public async Task DeleteAsync(CommandContext context,
         [Option("infraction", "The infraction to delete.")]

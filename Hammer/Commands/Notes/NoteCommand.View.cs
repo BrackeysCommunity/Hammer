@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
@@ -14,7 +15,8 @@ namespace Hammer.Commands.Notes;
 
 internal sealed partial class NoteCommand
 {
-    [SlashCommand("view", "Views a note.", false)]
+    [Command("view")]
+    [Description("Views a note.")]
     [RequireGuild]
     public async Task ViewAsync(CommandContext context,
         [Autocomplete(typeof(NoteAutocompleteProvider))] [Option("note", "The note to view.")]

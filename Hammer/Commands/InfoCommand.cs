@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text;
 using DSharpPlus;
 using DSharpPlus.Commands;
@@ -31,7 +32,8 @@ internal sealed class InfoCommand
         _configurationService = configurationService;
     }
 
-    [SlashCommand("info", "Displays information about the bot.")]
+    [Command("info")]
+    [Description("Displays information about the bot.")]
     [RequireGuild]
     public async Task InfoAsync(CommandContext context)
     {

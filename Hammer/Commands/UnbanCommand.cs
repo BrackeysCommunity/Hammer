@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -29,7 +30,8 @@ internal sealed class UnbanCommand
         _banService = banService;
     }
 
-    [SlashCommand("unban", "Unbans a user.", false)]
+    [Command("unban")]
+    [Description("Unbans a user.")]
     [RequireGuild]
     public async Task UnbanAsync(CommandContext context,
         [Option("user", "The user to unban.")] DiscordUser user,

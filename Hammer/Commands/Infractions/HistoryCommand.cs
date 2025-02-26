@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
@@ -50,7 +51,8 @@ internal sealed class HistoryCommand
         await context.EditResponseAsync(builder);
     }
 
-    [SlashCommand("history", "Views the infraction history for a user.", false)]
+    [Command("history")]
+    [Description("Views the infraction history for a user.")]
     [RequireGuild]
     public async Task HistoryAsync(CommandContext context,
         [Option("user", "The user whose history to view.")]

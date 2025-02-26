@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -11,7 +12,8 @@ namespace Hammer.Commands.Notes;
 
 internal sealed partial class NoteCommand
 {
-    [SlashCommand("edittype", "Edits the type of a note.", false)]
+    [Command("edittype")]
+    [Description("Edits the type of a note.")]
     [RequireGuild]
     public async Task EditTypeAsync(CommandContext context,
         [Autocomplete(typeof(NoteAutocompleteProvider))] [Option("note", "The note to edit.")]

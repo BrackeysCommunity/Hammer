@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Entities;
@@ -31,7 +32,8 @@ internal sealed class ViewMessageCommand
         _messageDeletionService = messageDeletionService;
     }
 
-    [SlashCommand("viewmessage", "Views a staff message, or deleted message, by its ID.", false)]
+    [Command("viewmessage")]
+    [Description("Views a staff message, or deleted message, by its ID.")]
     public async Task ViewMessageAsync(
         CommandContext context,
         [Option("id", "The ID of the message to retrieve.")]

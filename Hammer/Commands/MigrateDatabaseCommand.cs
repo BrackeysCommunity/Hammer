@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
@@ -25,7 +26,8 @@ internal sealed class MigrateDatabaseCommand
         _databaseService = databaseService;
     }
 
-    [SlashCommand("migratedb", "Migrates the SQLite database to MySQL/MariaDB.", false)]
+    [Command("migratedb")]
+    [Description("Migrates the SQLite database to MySQL/MariaDB.")]
     [RequireGuild]
     public async Task MigrateDatabaseAsync(CommandContext context)
     {

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 using DSharpPlus.Commands;
@@ -14,7 +15,8 @@ namespace Hammer.Commands.Notes;
 
 internal sealed partial class NoteCommand
 {
-    [SlashCommand("viewall", "Views all notes for a given user.", false)]
+    [Command("viewall")]
+    [Description("Views all notes for a given user.")]
     [RequireGuild]
     public async Task ViewAllAsync(CommandContext context,
         [Option("user", "The user whose notes to view.")]

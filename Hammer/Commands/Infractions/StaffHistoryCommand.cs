@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text;
 using DSharpPlus;
 using DSharpPlus.Commands;
@@ -28,7 +29,8 @@ internal sealed class StaffHistoryCommand
         _infractionService = infractionService;
     }
 
-    [SlashCommand("staffhistory", "Searches a staff member's history.", false)]
+    [Command("staffhistory")]
+    [Description("Searches a staff member's history.")]
     [RequireGuild]
     public async Task StaffHistoryAsync(CommandContext context,
         [Option("staffMember", "The staff member whose infractions to search.")]

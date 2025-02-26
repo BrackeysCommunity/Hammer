@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -29,7 +30,8 @@ internal sealed class UnmuteCommand
         _muteService = muteService;
     }
 
-    [SlashCommand("unmute", "Unmutes a user.", false)]
+    [Command("unmute")]
+    [Description("Unmutes a user.")]
     [RequireGuild]
     public async Task UnmuteAsync(CommandContext context,
         [Option("user", "The user to unmute.")]

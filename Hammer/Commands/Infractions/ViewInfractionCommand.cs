@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
@@ -24,7 +25,8 @@ internal sealed class ViewInfractionCommand
         _infractionService = infractionService;
     }
 
-    [SlashCommand("viewinfraction", "Views an infraction.", false)]
+    [Command("viewinfraction")]
+    [Description("Views an infraction.")]
     [RequireGuild]
     public async Task ViewInfractionAsync(CommandContext context,
         [Option("infraction", "The infraction to view.")]

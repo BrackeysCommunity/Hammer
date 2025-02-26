@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
@@ -13,7 +14,8 @@ namespace Hammer.Commands.Reports;
 
 internal sealed partial class ReportCommands
 {
-    [SlashCommand("viewsubmittedreports", "Views all reports submitted by a user.", false)]
+    [Command("viewsubmittedreports")]
+    [Description("Views all reports submitted by a user.")]
     [RequireGuild]
     public async Task ViewSubmittedReportsAsync(
         CommandContext context,

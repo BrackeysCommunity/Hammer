@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -48,7 +49,8 @@ internal sealed class BanCommand
         _ruleService = ruleService;
     }
 
-    [SlashCommand("ban", "Temporarily or permanently bans a user.", false)]
+    [Command("ban")]
+    [Description("Temporarily or permanently bans a user.")]
     [RequireGuild]
     public async Task BanAsync(CommandContext context,
         [Option("user", "The user to ban.")] DiscordUser user,

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -11,7 +12,8 @@ namespace Hammer.Commands.Infractions;
 
 internal sealed partial class InfractionCommand
 {
-    [SlashCommand("edit", "Edits an infraction.", false)]
+    [Command("edit")]
+    [Description("Edits an infraction.")]
     [RequireGuild]
     public async Task EditAsync(CommandContext context,
         [Option("infraction", "The infraction to modify.")]

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
@@ -27,7 +28,8 @@ internal sealed class PruneInfractionsCommand
         _infractionService = infractionService;
     }
 
-    [SlashCommand("pruneinfractions", "Prune all stale infractions for invalid users.", false)]
+    [Command("pruneinfractions")]
+    [Description("Prune all stale infractions for invalid users.")]
     [RequireGuild]
     public async Task PruneAsync(CommandContext context)
     {

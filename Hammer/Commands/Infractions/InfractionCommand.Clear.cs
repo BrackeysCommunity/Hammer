@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -11,7 +12,8 @@ namespace Hammer.Commands.Infractions;
 
 internal sealed partial class InfractionCommand
 {
-    [SlashCommand("clear", "Clears all infractions from the specified user.", false)]
+    [Command("clear")]
+    [Description("Clears all infractions from the specified user.")]
     [RequireGuild]
     public async Task ClearAsync(CommandContext context,
         [Option("user", "The user whose infractions to clear")]

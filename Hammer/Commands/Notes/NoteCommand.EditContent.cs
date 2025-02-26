@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -11,7 +12,8 @@ namespace Hammer.Commands.Notes;
 
 internal sealed partial class NoteCommand
 {
-    [SlashCommand("editcontent", "Edits the content of a note.", false)]
+    [Command("editcontent")]
+    [Description("Edits the content of a note.")]
     [RequireGuild]
     public async Task EditContentAsync(CommandContext context,
         [Autocomplete(typeof(NoteAutocompleteProvider))] [Option("note", "The note to edit.")]

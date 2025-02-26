@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
@@ -71,7 +72,8 @@ internal sealed class GagCommand
         await context.EditResponseAsync(message);
     }
 
-    [SlashCommand("gag", "Temporarily gags a user, so that a more final infraction can be issued.", false)]
+    [Command("gag")]
+    [Description("Temporarily gags a user, so that a more final infraction can be issued.")]
     [RequireGuild]
     public async Task GagAsync(
         CommandContext context,

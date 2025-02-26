@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
@@ -13,7 +14,8 @@ namespace Hammer.Commands.Rules;
 
 internal sealed partial class RulesCommand
 {
-    [SlashCommand("add", "Add a rule.", false)]
+    [Command("add")]
+    [Description("Add a rule.")]
     [RequireGuild]
     public async Task AddAsync(CommandContext context)
     {

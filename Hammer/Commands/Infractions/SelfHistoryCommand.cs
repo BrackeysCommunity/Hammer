@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -24,7 +25,8 @@ internal sealed class SelfHistoryCommand
         _infractionService = infractionService;
     }
 
-    [SlashCommand("selfhistory", "View your own infraction history.")]
+    [Command("selfhistory")]
+    [Description("View your own infraction history.")]
     [RequireGuild]
     public async Task SelfHistoryAsync(CommandContext context)
     {

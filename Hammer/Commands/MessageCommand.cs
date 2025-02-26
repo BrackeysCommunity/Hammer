@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
@@ -25,7 +26,8 @@ internal sealed class MessageCommand
         _messageService = messageService;
     }
 
-    [SlashCommand("message", "Sends a private staff message to a member.", false)]
+    [Command("message")]
+    [Description("Sends a private staff message to a member.")]
     [RequireGuild]
     public async Task MessageAsync(
         CommandContext context,

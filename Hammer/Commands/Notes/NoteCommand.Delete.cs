@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -11,7 +12,8 @@ namespace Hammer.Commands.Notes;
 
 internal sealed partial class NoteCommand
 {
-    [SlashCommand("delete", "Deletes a note.", false)]
+    [Command("delete")]
+    [Description("Deletes a note.")]
     [RequireGuild]
     public async Task DeleteAsync(CommandContext context,
         [Autocomplete(typeof(NoteAutocompleteProvider))] [Option("note", "The note to delete.")]

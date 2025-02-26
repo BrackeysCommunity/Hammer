@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -47,7 +48,8 @@ internal sealed class KickCommand
         _ruleService = ruleService;
     }
 
-    [SlashCommand("kick", "Kicks a member", false)]
+    [Command("kick")]
+    [Description("Kicks a member")]
     [RequireGuild]
     public async Task KickAsync(CommandContext context,
         [Option("member", "The member to kick.")]

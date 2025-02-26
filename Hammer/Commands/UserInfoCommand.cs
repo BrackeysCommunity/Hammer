@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
@@ -34,7 +35,8 @@ internal sealed class UserInfoCommand
         _infractionService = infractionService;
     }
 
-    [SlashCommand("userinfo", "Displays information about a user.")]
+    [Command("userinfo")]
+    [Description("Displays information about a user.")]
     [RequireGuild]
     public async Task UserInfoAsync(CommandContext context,
         [Option("user", "The user whose information to view.", true)]

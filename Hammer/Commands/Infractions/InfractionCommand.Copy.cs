@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -10,7 +11,8 @@ namespace Hammer.Commands.Infractions;
 
 internal sealed partial class InfractionCommand
 {
-    [SlashCommand("copy", "Copies all infractions from one user to another.", false)]
+    [Command("copy")]
+    [Description("Copies all infractions from one user to another.")]
     [RequireGuild]
     public async Task CopyAsync(CommandContext context,
         [Option("source", "The user whose infractions to copy.")]

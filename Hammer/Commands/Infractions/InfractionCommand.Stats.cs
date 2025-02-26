@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -10,7 +11,8 @@ namespace Hammer.Commands.Infractions;
 
 internal sealed partial class InfractionCommand
 {
-    [SlashCommand("stats", "View infraction stats.", false)]
+    [Command("stats")]
+    [Description("View infraction stats.")]
     [RequireGuild]
     public async Task StatsAsync(CommandContext context)
     {

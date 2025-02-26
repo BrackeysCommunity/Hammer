@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -30,7 +31,8 @@ internal sealed class RuleCommand
         _ruleService = ruleService;
     }
 
-    [SlashCommand("rule", "Displays a rule.")]
+    [Command("rule")]
+    [Description("Displays a rule.")]
     [RequireGuild]
     public async Task RuleAsync(CommandContext context,
         [Option("rule", "The rule to display.", true), Autocomplete(typeof(RuleAutocompleteProvider))] string search,
@@ -72,7 +74,7 @@ internal sealed class RuleCommand
 
         var response  = new DiscordInteractionResponseBuilder();
         response.AddEmbed(embed);
-        
+
         if (mentionUser is not null)
         {
             response.WithContent(mentionUser.Mention);

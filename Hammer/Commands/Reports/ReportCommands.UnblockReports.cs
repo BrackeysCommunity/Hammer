@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
@@ -9,7 +10,8 @@ namespace Hammer.Commands.Reports;
 
 internal sealed partial class ReportCommands
 {
-    [SlashCommand("unblockreports", "Unblocks a user, allowing them to report messages.", false)]
+    [Command("unblockreports")]
+    [Description("Unblocks a user, allowing them to report messages.")]
     [RequireGuild]
     public async Task UnblockReportsAsync(CommandContext context, [Option("user", "The user to unblock.")] DiscordUser user)
     {

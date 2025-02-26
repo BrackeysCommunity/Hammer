@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -15,7 +16,7 @@ namespace Hammer.Commands.Rules;
 internal sealed partial class RulesCommand
 {
     [SlashCommand("edit", "Edits a rule.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task EditAsync(CommandContext context,
         [Autocomplete(typeof(RuleAutocompleteProvider))] [Option("rule", "The rule to modify")]
         long ruleId)

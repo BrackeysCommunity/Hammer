@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -30,7 +31,7 @@ internal sealed class GagCommand
     }
 
     [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Gag", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task GagAsync(ContextMenuContext context)
     {
         var builder = new DiscordEmbedBuilder();
@@ -71,7 +72,7 @@ internal sealed class GagCommand
     }
 
     [SlashCommand("gag", "Temporarily gags a user, so that a more final infraction can be issued.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task GagAsync(
         CommandContext context,
         [Option("user", "The user to gag.")] DiscordUser user,

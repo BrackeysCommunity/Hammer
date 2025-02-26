@@ -1,6 +1,7 @@
 using System.Text;
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -31,7 +32,7 @@ internal sealed class InfoCommand
     }
 
     [SlashCommand("info", "Displays information about the bot.")]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task InfoAsync(CommandContext context)
     {
         DiscordGuild guild = context.Guild;

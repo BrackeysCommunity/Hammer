@@ -1,4 +1,5 @@
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -9,7 +10,7 @@ namespace Hammer.Commands.Reports;
 internal sealed partial class ReportCommands
 {
     [SlashCommand("unblockreports", "Unblocks a user, allowing them to report messages.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task UnblockReportsAsync(CommandContext context, [Option("user", "The user to unblock.")] DiscordUser user)
     {
         await context.DeferAsync(true);

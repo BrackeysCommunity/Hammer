@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
@@ -12,7 +13,7 @@ internal sealed partial class RulesCommand
     private static readonly Regex MessageLinkRegex = GetMessageLinkRegex();
 
     [SlashCommand("update", "Sends the rule embed", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task UpdateAsync(CommandContext context,
         [Option("messageLink", "The link to the message to edit.")]
         string messageLink)

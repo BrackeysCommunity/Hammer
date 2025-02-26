@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -23,7 +24,7 @@ internal sealed class DeleteMessageCommand
     }
 
     [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Delete Message", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task DeleteMessageAsync(ContextMenuContext context)
     {
         await context.DeferAsync(true);

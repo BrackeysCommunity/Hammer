@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
@@ -27,7 +28,7 @@ internal sealed class PruneInfractionsCommand
     }
 
     [SlashCommand("pruneinfractions", "Prune all stale infractions for invalid users.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task PruneAsync(CommandContext context)
     {
         await context.DeferAsync();

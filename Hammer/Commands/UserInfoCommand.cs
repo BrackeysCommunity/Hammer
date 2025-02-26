@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -34,7 +35,7 @@ internal sealed class UserInfoCommand
     }
 
     [SlashCommand("userinfo", "Displays information about a user.")]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task UserInfoAsync(CommandContext context,
         [Option("user", "The user whose information to view.", true)]
         DiscordUser user)
@@ -55,7 +56,7 @@ internal sealed class UserInfoCommand
     }
 
     [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "User Information")]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task UserInfoAsync(ContextMenuContext context)
     {
         DiscordGuild guild = context.Guild;

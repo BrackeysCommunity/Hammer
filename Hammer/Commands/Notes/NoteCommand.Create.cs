@@ -1,4 +1,5 @@
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -12,7 +13,7 @@ namespace Hammer.Commands.Notes;
 internal sealed partial class NoteCommand
 {
     [SlashCommand("create", "Creates a new note", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task CreateAsync(CommandContext context,
         [Option("user", "The user for whom to create a note.")]
         DiscordUser user,

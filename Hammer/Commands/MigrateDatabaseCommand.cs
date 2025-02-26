@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -25,7 +26,7 @@ internal sealed class MigrateDatabaseCommand
     }
 
     [SlashCommand("migratedb", "Migrates the SQLite database to MySQL/MariaDB.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task MigrateDatabaseAsync(CommandContext context)
     {
         var embed = new DiscordEmbedBuilder();

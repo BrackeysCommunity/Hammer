@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -47,7 +48,7 @@ internal sealed class BadMessageCommand
     }
 
     [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Warn For This", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task BadMessageAsync(ContextMenuContext context)
     {
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? configuration))

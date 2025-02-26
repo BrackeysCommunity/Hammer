@@ -1,4 +1,5 @@
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
@@ -47,7 +48,7 @@ internal sealed class KickCommand
     }
 
     [SlashCommand("kick", "Kicks a member", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task KickAsync(CommandContext context,
         [Option("member", "The member to kick.")]
         DiscordUser user,

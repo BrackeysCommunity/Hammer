@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -30,7 +31,7 @@ internal sealed class HistoryCommand
     }
 
     [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "View Infraction History", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task HistoryAsync(ContextMenuContext context)
     {
         DiscordUser user = context.Interaction.Data.Resolved.Users.First().Value;
@@ -50,7 +51,7 @@ internal sealed class HistoryCommand
     }
 
     [SlashCommand("history", "Views the infraction history for a user.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task HistoryAsync(CommandContext context,
         [Option("user", "The user whose history to view.")]
         DiscordUser user,

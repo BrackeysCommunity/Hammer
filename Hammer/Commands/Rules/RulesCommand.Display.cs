@@ -1,4 +1,5 @@
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -8,7 +9,7 @@ namespace Hammer.Commands.Rules;
 internal sealed partial class RulesCommand
 {
     [SlashCommand("display", "Displays 1 or more embeds with the guild rules.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task DisplayAsync(CommandContext context,
         [Option("channel", "The channel in which to display the rules. Defaults to the current channel.")]
         DiscordChannel? channel = null)

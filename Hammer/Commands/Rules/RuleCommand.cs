@@ -1,4 +1,5 @@
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -30,7 +31,7 @@ internal sealed class RuleCommand
     }
 
     [SlashCommand("rule", "Displays a rule.")]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task RuleAsync(CommandContext context,
         [Option("rule", "The rule to display.", true), Autocomplete(typeof(RuleAutocompleteProvider))] string search,
         [Option("mention", "The user to mention.")] DiscordUser? mentionUser = null)

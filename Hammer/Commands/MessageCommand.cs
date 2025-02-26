@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -25,7 +26,7 @@ internal sealed class MessageCommand
     }
 
     [SlashCommand("message", "Sends a private staff message to a member.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task MessageAsync(
         CommandContext context,
         [Option("member", "The member to message.")]

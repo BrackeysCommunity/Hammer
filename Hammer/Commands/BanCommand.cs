@@ -1,4 +1,5 @@
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -48,7 +49,7 @@ internal sealed class BanCommand
     }
 
     [SlashCommand("ban", "Temporarily or permanently bans a user.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task BanAsync(CommandContext context,
         [Option("user", "The user to ban.")] DiscordUser user,
         [Option("reason", "The reason for the ban.")]

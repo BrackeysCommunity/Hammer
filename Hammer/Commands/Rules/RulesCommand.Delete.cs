@@ -1,4 +1,5 @@
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -11,7 +12,7 @@ namespace Hammer.Commands.Rules;
 internal sealed partial class RulesCommand
 {
     [SlashCommand("delete", "Deletes a rule.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task DeleteAsync(CommandContext context,
         [Autocomplete(typeof(RuleAutocompleteProvider))] [Option("rule", "The rule to modify")]
         long ruleId)

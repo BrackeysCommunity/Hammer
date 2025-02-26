@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -13,7 +14,7 @@ namespace Hammer.Commands.Rules;
 internal sealed partial class RulesCommand
 {
     [SlashCommand("add", "Add a rule.", false)]
-    [SlashRequireGuild]
+    [RequireGuild]
     public async Task AddAsync(CommandContext context)
     {
         DiscordGuild guild = context.Guild;

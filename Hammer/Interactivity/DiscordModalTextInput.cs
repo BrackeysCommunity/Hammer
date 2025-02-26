@@ -7,7 +7,7 @@ namespace Hammer.Interactivity;
 /// </summary>
 public sealed class DiscordModalTextInput
 {
-    internal DiscordModalTextInput(TextInputComponent component)
+    internal DiscordModalTextInput(DiscordTextInputComponent component)
     {
         InputComponent = component;
 
@@ -35,7 +35,7 @@ public sealed class DiscordModalTextInput
 
     internal string CustomId { get; }
 
-    internal TextInputComponent InputComponent { get; }
+    internal DiscordTextInputComponent InputComponent { get; }
 
     internal DiscordModal? Modal { get; set; }
 }

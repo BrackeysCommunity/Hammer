@@ -46,7 +46,7 @@ internal sealed class MessageCommand : ApplicationCommandModule
         {
             var modal = new DiscordModalBuilder(context.Client);
             modal.WithTitle("Send Message");
-            DiscordModalTextInput message = modal.AddInput("Message", isRequired: true, inputStyle: TextInputStyle.Paragraph);
+            DiscordModalTextInput message = modal.AddInput("Message", isRequired: true, inputStyle: DiscordTextInputStyle.Paragraph);
 
             DiscordModalResponse response =
                 await modal.Build().RespondToAsync(context.Interaction, TimeSpan.FromMinutes(5));

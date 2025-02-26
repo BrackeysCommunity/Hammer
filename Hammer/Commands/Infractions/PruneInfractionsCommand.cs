@@ -40,8 +40,8 @@ internal sealed class PruneInfractionsCommand : ApplicationCommandModule
         var builder = new DiscordWebhookBuilder();
         builder.AddEmbed(embed);
 
-        var yes = new DiscordButtonComponent(ButtonStyle.Success, "prune-confirm", "Yes");
-        var no = new DiscordButtonComponent(ButtonStyle.Danger, "prune-cancel", "No");
+        var yes = new DiscordButtonComponent(DiscordButtonStyle.Success, "prune-confirm", "Yes");
+        var no = new DiscordButtonComponent(DiscordButtonStyle.Danger, "prune-cancel", "No");
         builder.AddComponents(yes, no);
 
         DiscordMessage message = await context.EditResponseAsync(builder);

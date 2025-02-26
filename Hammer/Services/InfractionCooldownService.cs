@@ -80,8 +80,8 @@ internal sealed class InfractionCooldownService : BackgroundService
         builder.WithContent(content);
         builder.AddEmbed(infractionEmbed);
 
-        var proceed = new DiscordButtonComponent(ButtonStyle.Success, "infr-proceed", "Proceed");
-        var cancel = new DiscordButtonComponent(ButtonStyle.Danger, "infr-cancel", "Cancel");
+        var proceed = new DiscordButtonComponent(DiscordButtonStyle.Success, "infr-proceed", "Proceed");
+        var cancel = new DiscordButtonComponent(DiscordButtonStyle.Danger, "infr-cancel", "Cancel");
         builder.AddComponents(proceed, cancel);
 
         DiscordMessage message = await context.EditResponseAsync(builder);

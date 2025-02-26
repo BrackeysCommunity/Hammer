@@ -48,7 +48,7 @@ internal sealed partial class RulesCommand
             "e.g. Please treat other members with respect. Refrain from verbal insults and attacks.",
             initialValue: rule.Description.AsNullIfWhiteSpace(),
             isRequired: true,
-            inputStyle: TextInputStyle.Paragraph);
+            inputStyle: DiscordTextInputStyle.Paragraph);
 
         DiscordModalResponse response =
             await modal.Build().RespondToAsync(context.Interaction, TimeSpan.FromMinutes(5));

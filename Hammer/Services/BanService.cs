@@ -277,7 +277,7 @@ internal sealed class BanService : BackgroundService
             {
                 IEnumerable<DiscordChannel> channels = guild.Channels.Values
                     .Concat(guild.Threads.Values)
-                    .Where(c => c.Type is ChannelType.Text or ChannelType.PublicThread or ChannelType.PrivateThread);
+                    .Where(c => c.Type is DiscordChannelType.Text or DiscordChannelType.PublicThread or DiscordChannelType.PrivateThread);
 
                 var tasks = new List<Task>();
 
@@ -417,7 +417,7 @@ internal sealed class BanService : BackgroundService
             {
                 IEnumerable<DiscordChannel> channels = guild.Channels.Values
                     .Concat(guild.Threads.Values)
-                    .Where(c => c.Type is ChannelType.Text or ChannelType.PublicThread or ChannelType.PrivateThread);
+                    .Where(c => c.Type is DiscordChannelType.Text or DiscordChannelType.PublicThread or DiscordChannelType.PrivateThread);
 
                 var tasks = new List<Task>();
 

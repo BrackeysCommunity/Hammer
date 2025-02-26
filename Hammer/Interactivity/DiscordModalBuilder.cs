@@ -51,10 +51,10 @@ public sealed class DiscordModalBuilder
     /// <param name="maxLength">The maximum length of the input.</param>
     /// <returns>The <see cref="DiscordModalTextInput" /> which was created.</returns>
     public DiscordModalTextInput AddInput(string label, string? placeholder = null, string? initialValue = null,
-        bool isRequired = true, TextInputStyle inputStyle = TextInputStyle.Short, int minLength = 0, int? maxLength = null)
+        bool isRequired = true, DiscordTextInputStyle inputStyle = DiscordTextInputStyle.Short, int minLength = 0, int? maxLength = null)
     {
         var customId = Guid.NewGuid().ToString("N");
-        var input = new DiscordModalTextInput(new TextInputComponent(label, customId, placeholder, initialValue, isRequired,
+        var input = new DiscordModalTextInput(new DiscordTextInputComponent(label, customId, placeholder, initialValue, isRequired,
             inputStyle, minLength, maxLength));
         _inputs.Add(input);
         return input;

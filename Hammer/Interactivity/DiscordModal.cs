@@ -74,14 +74,14 @@ public sealed class DiscordModal
         _discordClient.ModalSubmitted -= OnModalSubmitted;
 
         IEnumerable<DiscordActionRowComponent> components = e.Interaction.Data.Components.OfType<DiscordActionRowComponent>();
-        IEnumerable<TextInputComponent> inputComponents = components.SelectMany(a => a.Components).OfType<TextInputComponent>();
-        foreach (TextInputComponent inputComponent in inputComponents)
+        IEnumerable<DiscordTextInputComponent> inputComponents = components.SelectMany(a => a.Components).OfType<DiscordTextInputComponent>();
+        foreach (DiscordTextInputComponent inputComponent in inputComponents)
         {
             if (_inputs.TryGetValue(inputComponent.CustomId, out DiscordModalTextInput? input))
                 input.Value = inputComponent.Value;
         }
 
         _taskCompletionSource.TrySetResult();
-        return e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+        return e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
     }
 }

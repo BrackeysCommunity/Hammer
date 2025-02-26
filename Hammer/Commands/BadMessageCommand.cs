@@ -70,7 +70,7 @@ internal sealed class BadMessageCommand : ApplicationCommandModule
         DiscordModalTextInput reasonInput = modal.AddInput("Reason", "The reason for the warning.",
             defaultReason,
             false,
-            TextInputStyle.Paragraph,
+            DiscordTextInputStyle.Paragraph,
             maxLength: 250);
 
         DiscordModalResponse modalResponse =

@@ -31,7 +31,7 @@ internal sealed partial class RulesCommand
         DiscordModalTextInput description = modal.AddInput("Description",
             "e.g. Please treat other members with respect. Refrain from verbal insults and attacks.",
             isRequired: true,
-            inputStyle: TextInputStyle.Paragraph);
+            inputStyle: DiscordTextInputStyle.Paragraph);
 
         DiscordModalResponse response =
             await modal.Build().RespondToAsync(context.Interaction, TimeSpan.FromMinutes(5));

@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.RegularExpressions;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;

@@ -73,7 +73,8 @@ public sealed class DiscordModal
 
         _discordClient.ModalSubmitted -= OnModalSubmitted;
 
-        IEnumerable<DiscordComponent> components = e.Interaction.Data.Components.SelectMany(c => c.Components);
+        IEnumerable<DiscordActionRowComponent> rows = e.Interaction.Data.Components.OfType<DiscordActionRowComponent>();
+        IEnumerable<DiscordComponent> components = rows.SelectMany(c => c.Components);
         IEnumerable<TextInputComponent> inputComponents = components.OfType<TextInputComponent>();
         foreach (TextInputComponent inputComponent in inputComponents)
         {

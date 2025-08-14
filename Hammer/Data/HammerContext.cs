@@ -1,9 +1,5 @@
-using Hammer.Configuration;
 using Hammer.Data.EntityConfigurations;
-using Hammer.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using MySqlConnector;
 using MuteConfiguration = Hammer.Data.EntityConfigurations.MuteConfiguration;
 
 namespace Hammer.Data;
@@ -13,25 +9,13 @@ namespace Hammer.Data;
 /// </summary>
 internal sealed class HammerContext : DbContext
 {
-    private readonly ILogger<HammerContext> _logger;
-    private readonly ConfigurationService _configurationService;
-
     /// <summary>
     ///     Initializes a new instance of the <see cref="HammerContext" /> class.
     /// </summary>
-    /// <param name="logger">The logger.</param>
-    /// <param name="configurationService">The configuration service.</param>
-    public HammerContext(ILogger<HammerContext> logger, ConfigurationService configurationService)
+    /// <param name="options">The options for this context.</param>
+    public HammerContext(DbContextOptions<HammerContext> options) : base(options)
     {
-        _logger = logger;
-        _configurationService = configurationService;
     }
-
-    /// <summary>
-    ///     Gets a value indicating whether this instance is using MySQL as its database provider.
-    /// </summary>
-    /// <value><see langword="true" /> if MySQL is being used; otherwise, <see langword="false" />.</value>
-    public bool IsMySql { get; private set; }
 
     /// <summary>
     ///     Gets the set of alt accounts.
@@ -100,54 +84,21 @@ internal sealed class HammerContext : DbContext
     public DbSet<TrackedMessage> TrackedMessages { get; private set; } = null!;
 
     /// <inheritdoc />
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-
-        DatabaseConfiguration databaseConfiguration = _configurationService.BotConfiguration.Database;
-        switch (databaseConfiguration.Provider)
-        {
-            case "mysql":
-                IsMySql = true;
-                _logger.LogTrace("Using MySQL/MariaDB database provider");
-                var connectionStringBuilder = new MySqlConnectionStringBuilder
-                {
-                    Server = databaseConfiguration.Host,
-                    Port = (uint)(databaseConfiguration.Port ?? 3306),
-                    Database = databaseConfiguration.Database,
-                    UserID = databaseConfiguration.Username,
-                    Password = databaseConfiguration.Password
-                };
-
-                var connectionString = connectionStringBuilder.ToString();
-                ServerVersion version = ServerVersion.AutoDetect(connectionString);
-
-                _logger.LogTrace("Server version is {Version}", version);
-                optionsBuilder.UseMySql(connectionString, version);
-                break;
-
-            default:
-                _logger.LogTrace("Using SQLite database provider");
-                optionsBuilder.UseSqlite("Data Source='data/hammer.db'");
-                break;
-        }
-    }
-
-    /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.ApplyConfiguration(new AltAccountConfiguration(IsMySql));
-        modelBuilder.ApplyConfiguration(new BlockedReporterConfiguration(IsMySql));
-        modelBuilder.ApplyConfiguration(new DeletedMessageConfiguration(IsMySql));
-        modelBuilder.ApplyConfiguration(new InfractionConfiguration(IsMySql));
-        modelBuilder.ApplyConfiguration(new MemberNoteConfiguration(IsMySql));
-        modelBuilder.ApplyConfiguration(new MuteConfiguration(IsMySql));
+        bool isMySql = Database.IsMySql();
+        modelBuilder.ApplyConfiguration(new AltAccountConfiguration(isMySql));
+        modelBuilder.ApplyConfiguration(new BlockedReporterConfiguration(isMySql));
+        modelBuilder.ApplyConfiguration(new DeletedMessageConfiguration(isMySql));
+        modelBuilder.ApplyConfiguration(new InfractionConfiguration(isMySql));
+        modelBuilder.ApplyConfiguration(new MemberNoteConfiguration(isMySql));
+        modelBuilder.ApplyConfiguration(new MuteConfiguration(isMySql));
         modelBuilder.ApplyConfiguration(new StaffMessageConfiguration());
         modelBuilder.ApplyConfiguration(new ReportedMessageConfiguration());
-        modelBuilder.ApplyConfiguration(new TemporaryBanConfiguration(IsMySql));
-        modelBuilder.ApplyConfiguration(new TrackedMessageConfiguration(IsMySql));
+        modelBuilder.ApplyConfiguration(new TemporaryBanConfiguration(isMySql));
+        modelBuilder.ApplyConfiguration(new TrackedMessageConfiguration(isMySql));
         modelBuilder.ApplyConfiguration(new RuleConfiguration());
     }
 }

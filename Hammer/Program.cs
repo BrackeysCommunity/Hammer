@@ -1,10 +1,13 @@
 using DSharpPlus;
+using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MySqlConnector;
 using Serilog;
 using Serilog.Extensions.Logging;
 using X10D.Hosting.DependencyInjection;
@@ -32,8 +35,38 @@ builder.Services.AddSingleton(new DiscordClient(new DiscordConfiguration
     Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers | DiscordIntents.MessageContents
 }));
 
-builder.Services.AddDbContextFactory<HammerContext>();
-builder.Services.AddDbContextFactory<MigrationContext>();
+builder.Services.AddDbContextFactory<HammerContext>((services, optionsBuilder) =>
+{
+    ILogger<HammerContext> logger = services.GetRequiredService<ILogger<HammerContext>>();
+    ConfigurationService configurationService = services.GetRequiredService<ConfigurationService>();
+    DatabaseConfiguration databaseConfiguration = configurationService.BotConfiguration.Database;
+    switch (databaseConfiguration.Provider)
+    {
+        case "mysql":
+            logger.LogTrace("Using MySQL/MariaDB database provider");
+            var connectionStringBuilder = new MySqlConnectionStringBuilder
+            {
+                Server = databaseConfiguration.Host,
+                Port = (uint)(databaseConfiguration.Port ?? 3306),
+                Database = databaseConfiguration.Database,
+                UserID = databaseConfiguration.Username,
+                Password = databaseConfiguration.Password
+            };
+
+            var connectionString = connectionStringBuilder.ToString();
+            var version = ServerVersion.AutoDetect(connectionString);
+
+            logger.LogTrace("Server version is {Version}", version);
+            optionsBuilder.UseMySql(connectionString, version);
+            break;
+
+        default:
+            logger.LogTrace("Using SQLite database provider");
+            optionsBuilder.UseSqlite("Data Source='data/hammer.db'");
+            break;
+    }
+});
+
 builder.Services.AddHostedSingleton<DatabaseService>();
 
 builder.Services.AddSingleton<HttpClient>();

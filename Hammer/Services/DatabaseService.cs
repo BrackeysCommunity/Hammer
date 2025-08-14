@@ -12,7 +12,6 @@ internal sealed class DatabaseService : BackgroundService
 {
     private readonly ILogger<DatabaseService> _logger;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
-    private readonly IDbContextFactory<MigrationContext> _migrationContextFactory;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="DatabaseService" /> class.
@@ -21,65 +20,102 @@ internal sealed class DatabaseService : BackgroundService
     /// <param name="dbContextFactory">The <see cref="HammerContext" /> factory.</param>
     /// <param name="migrationContextFactory">The <see cref="MigrationContext" /> factory.</param>
     public DatabaseService(ILogger<DatabaseService> logger,
-        IDbContextFactory<HammerContext> dbContextFactory,
-        IDbContextFactory<MigrationContext> migrationContextFactory)
+        IDbContextFactory<HammerContext> dbContextFactory)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
-        _migrationContextFactory = migrationContextFactory;
     }
 
     /// <summary>
     ///     Migrates the database from one source to another.
     /// </summary>
-    public async Task<int> MigrateAsync()
+    public async Task<int> MigrateAsync(int batchSize = 1000, bool disableFkChecks = true)
     {
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-        await context.Database.EnsureCreatedAsync();
+        await context.Database.MigrateAsync();
 
-        if (!context.IsMySql)
+        if (!context.Database.IsMySql())
         {
             _logger.LogWarning("Cannot migrate from SQLite to SQLite. This operation will be skipped");
             return 0;
         }
 
-        await using MigrationContext migration = await _migrationContextFactory.CreateDbContextAsync();
+        await using var migration = new HammerContext(
+            new DbContextOptionsBuilder<HammerContext>()
+                .UseSqlite("Data Source=hammer.db")
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                .Options);
 
-        _logger.LogInformation("Migrating database");
-        context.AltAccounts.AddRange(migration.AltAccounts);
-        context.BlockedReporters.AddRange(migration.BlockedReporters);
-        context.DeletedMessages.AddRange(migration.DeletedMessages);
-        context.Infractions.AddRange(migration.Infractions);
-        context.MemberNotes.AddRange(migration.MemberNotes);
-        context.Mutes.AddRange(migration.Mutes);
-        context.ReportedMessages.AddRange(migration.ReportedMessages);
-        context.Rules.AddRange(migration.Rules);
-        context.StaffMessages.AddRange(migration.StaffMessages);
-        context.TemporaryBans.AddRange(migration.TemporaryBans);
-        context.TrackedMessages.AddRange(migration.TrackedMessages);
+        context.ChangeTracker.AutoDetectChangesEnabled = false;
 
-        _logger.LogDebug("Saving database");
-        await context.SaveChangesAsync();
+        if (disableFkChecks)
+        {
+            await context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS=0;");
+        }
 
-        int count = 0;
-        count += context.AltAccounts.Count();
-        count += context.BlockedReporters.Count();
-        count += context.DeletedMessages.Count();
-        count += context.Infractions.Count();
-        count += context.MemberNotes.Count();
-        count += context.Mutes.Count();
-        count += context.ReportedMessages.Count();
-        count += context.Rules.Count();
-        count += context.StaffMessages.Count();
-        count += context.TemporaryBans.Count();
-        count += context.TrackedMessages.Count();
-        return count;
+        var totalInserted = 0;
+
+        // Copy order: parents -> children (adjust to your model)
+        totalInserted += await CopyAsync(migration.AltAccounts.AsNoTracking(), context.AltAccounts, context, batchSize);
+        totalInserted += await CopyAsync(migration.BlockedReporters.AsNoTracking(), context.BlockedReporters, context, batchSize);
+        totalInserted += await CopyAsync(migration.Rules.AsNoTracking(), context.Rules, context, batchSize);
+        totalInserted += await CopyAsync(migration.MemberNotes.AsNoTracking(), context.MemberNotes, context, batchSize);
+        totalInserted += await CopyAsync(migration.Mutes.AsNoTracking(), context.Mutes, context, batchSize);
+        totalInserted += await CopyAsync(migration.TemporaryBans.AsNoTracking(), context.TemporaryBans, context, batchSize);
+        totalInserted += await CopyAsync(migration.StaffMessages.AsNoTracking(), context.StaffMessages, context, batchSize);
+        totalInserted += await CopyAsync(migration.ReportedMessages.AsNoTracking(), context.ReportedMessages, context, batchSize);
+        totalInserted += await CopyAsync(migration.DeletedMessages.AsNoTracking(), context.DeletedMessages, context, batchSize);
+        totalInserted += await CopyAsync(migration.Infractions.AsNoTracking(), context.Infractions, context, batchSize);
+        totalInserted += await CopyAsync(migration.TrackedMessages.AsNoTracking(), context.TrackedMessages, context, batchSize);
+
+        if (disableFkChecks)
+        {
+            await context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS=1;");
+        }
+
+        _logger.LogInformation("Migration complete. Inserted {Count} rows.", totalInserted);
+        return totalInserted;
     }
 
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await CreateDatabaseAsync();
+    }
+
+    private static async Task<int> CopyAsync<T>(
+        IQueryable<T> source,
+        DbSet<T> dest,
+        DbContext destCtx,
+        int batchSize)
+        where T : class
+    {
+        var inserted = 0;
+        var buffer = new List<T>(batchSize);
+
+        await foreach (T row in source.AsAsyncEnumerable())
+        {
+            buffer.Add(row);
+            if (buffer.Count >= batchSize)
+            {
+                await dest.AddRangeAsync(buffer);
+                inserted += buffer.Count;
+                await destCtx.SaveChangesAsync();
+                destCtx.ChangeTracker.Clear();
+                buffer.Clear();
+            }
+        }
+
+        if (buffer.Count > 0)
+        {
+            await dest.AddRangeAsync(buffer);
+            inserted += buffer.Count;
+            await destCtx.SaveChangesAsync();
+            destCtx.ChangeTracker.Clear();
+            buffer.Clear();
+        }
+
+        return inserted;
     }
 
     private async Task CreateDatabaseAsync()

@@ -8,6 +8,12 @@ namespace Hammer.Data;
 internal sealed class DeletedMessage : IEquatable<DeletedMessage>
 {
     /// <summary>
+    ///     Gets the name of the bot that added this message to the database.
+    /// </summary>
+    /// <value>The name of the bot that added this message.</value>
+    public string AddedByBot { get; internal set; } = "Hammer";
+
+    /// <summary>
     ///     Gets the attachments of the deleted message.
     /// </summary>
     /// <value>The attachments.</value>

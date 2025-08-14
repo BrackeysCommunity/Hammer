@@ -41,11 +41,13 @@ internal sealed class DeletedMessageConfiguration : IEntityTypeConfiguration<Del
         {
             builder.Property(e => e.CreationTimestamp).HasColumnType("DATETIME(6)");
             builder.Property(e => e.DeletionTimestamp).HasColumnType("DATETIME(6)");
+            builder.Property(e => e.AddedByBot).HasMaxLength(50);
         }
         else
         {
             builder.Property(e => e.CreationTimestamp).HasConversion<DateTimeOffsetToBytesConverter>();
             builder.Property(e => e.DeletionTimestamp).HasConversion<DateTimeOffsetToBytesConverter>();
+            builder.Ignore(e => e.AddedByBot);
         }
     }
 }

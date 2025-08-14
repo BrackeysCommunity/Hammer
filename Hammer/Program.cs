@@ -20,7 +20,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-builder.Configuration.AddJsonFile("data/config.json", true, true);
+builder.Configuration.AddYamlFile("data/config.yaml", true, true);
 
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog();

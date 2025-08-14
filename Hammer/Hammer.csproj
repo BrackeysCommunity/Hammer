@@ -28,6 +28,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Alexinea.Extensions.Configuration.Yaml" Version="7.0.0"/>
         <PackageReference Include="DSharpPlus" Version="4.5.1"/>
         <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.1"/>
         <PackageReference Include="DSharpPlus.SlashCommands" Version="4.5.1"/>

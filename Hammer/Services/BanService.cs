@@ -19,7 +19,7 @@ namespace Hammer.Services;
 internal sealed class BanService : BackgroundService
 {
     private static readonly TimeSpan QueryInterval = TimeSpan.FromSeconds(30);
-    private readonly List<TemporaryBan> _temporaryBans = new();
+    private readonly List<TemporaryBan> _temporaryBans = [];
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly DiscordClient _discordClient;
     private readonly DiscordLogService _logService;

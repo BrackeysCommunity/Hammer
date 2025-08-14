@@ -20,12 +20,12 @@ internal sealed class MessageReportService : BackgroundService
 {
     private readonly ILogger<MessageReportService> _logger;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
-    private readonly List<BlockedReporter> _blockedReporters = new();
+    private readonly List<BlockedReporter> _blockedReporters = [];
     private readonly ConfigurationService _configurationService;
     private readonly DiscordLogService _logService;
     private readonly DiscordClient _discordClient;
     private readonly MessageTrackingService _messageTrackingService;
-    private readonly List<ReportedMessage> _reportedMessages = new();
+    private readonly List<ReportedMessage> _reportedMessages = [];
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="MessageReportService" /> class.

@@ -9,7 +9,7 @@ namespace Hammer.Interactivity;
 public sealed class DiscordModalBuilder
 {
     private readonly DiscordClient _discordClient;
-    private readonly List<DiscordModalTextInput> _inputs = new();
+    private readonly List<DiscordModalTextInput> _inputs = [];
     private string _title = string.Empty;
 
     /// <summary>

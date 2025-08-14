@@ -104,7 +104,7 @@ internal sealed class InfractionService : BackgroundService
             context.SaveChanges();
         }
 
-        List<Infraction> infractions = _infractionCache.AddOrUpdate(guild.Id, _ => new List<Infraction>(), (_, list) => list);
+        List<Infraction> infractions = _infractionCache.AddOrUpdate(guild.Id, _ => [], (_, list) => list);
         infractions.Add(infraction);
         return infraction;
     }
@@ -121,7 +121,7 @@ internal sealed class InfractionService : BackgroundService
         foreach (IGrouping<ulong, Infraction> group in infractions.GroupBy(i => i.GuildId))
         {
             ulong guildId = group.Key;
-            List<Infraction> cache = _infractionCache.AddOrUpdate(guildId, _ => new List<Infraction>(), (_, list) => list);
+            List<Infraction> cache = _infractionCache.AddOrUpdate(guildId, _ => [], (_, list) => list);
             cache.AddRange(group);
         }
 
@@ -828,7 +828,7 @@ internal sealed class InfractionService : BackgroundService
     {
         if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
         {
-            cache = new List<Infraction>();
+            cache = [];
             _infractionCache.AddOrUpdate(guild.Id, cache, (_, _) => cache);
         }
 

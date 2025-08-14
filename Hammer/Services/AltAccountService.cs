@@ -50,12 +50,12 @@ internal sealed class AltAccountService : BackgroundService
         context.AltAccounts.Add(record with { UserId = alt.Id, AltId = user.Id });
         context.SaveChanges();
 
-        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, new HashSet<ulong>());
+        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, []);
         cache.Add(alt.Id);
 
         foreach (ulong altId in cache)
         {
-            HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altId, new HashSet<ulong>());
+            HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altId, []);
             altCache.Add(user.Id);
         }
 
@@ -112,8 +112,8 @@ internal sealed class AltAccountService : BackgroundService
         AltAccount[] altAccounts = context.AltAccounts.Where(a => a.AltId == user.Id).ToArray();
         if (altAccounts.Length > 0) context.AltAccounts.RemoveRange(altAccounts);
 
-        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, new HashSet<ulong>());
-        HashSet<ulong>? altCache = _altAccountCache.GetOrAdd(alt.Id, new HashSet<ulong>());
+        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, []);
+        HashSet<ulong>? altCache = _altAccountCache.GetOrAdd(alt.Id, []);
         cache.Remove(alt.Id);
         altCache.Remove(user.Id);
 
@@ -153,10 +153,10 @@ internal sealed class AltAccountService : BackgroundService
         using HammerContext context = _dbContextFactory.CreateDbContext();
         foreach (IGrouping<ulong, AltAccount> group in context.AltAccounts.GroupBy(u => u.UserId))
         {
-            HashSet<ulong> cache = _altAccountCache.GetOrAdd(group.Key, new HashSet<ulong>());
+            HashSet<ulong> cache = _altAccountCache.GetOrAdd(group.Key, []);
             foreach (AltAccount altAccount in group)
             {
-                HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altAccount.AltId, new HashSet<ulong>());
+                HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altAccount.AltId, []);
                 cache.Add(altAccount.AltId);
                 altCache.Add(group.Key);
             }

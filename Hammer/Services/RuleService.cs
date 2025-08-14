@@ -39,7 +39,7 @@ internal sealed class RuleService : BackgroundService
         ArgumentNullException.ThrowIfNull(guild);
 
         if (string.IsNullOrWhiteSpace(description)) throw new ArgumentNullException(nameof(description));
-        if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules)) _guildRules.Add(guild.Id, rules = new List<Rule>());
+        if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules)) _guildRules.Add(guild.Id, rules = []);
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
 
@@ -409,7 +409,7 @@ internal sealed class RuleService : BackgroundService
         foreach (IGrouping<ulong, Rule> guildRules in context.Rules.AsEnumerable().GroupBy(r => r.GuildId))
         {
             if (!_guildRules.TryGetValue(guildRules.Key, out List<Rule>? rules))
-                _guildRules.Add(guildRules.Key, rules = new List<Rule>());
+                _guildRules.Add(guildRules.Key, rules = []);
 
             rules.AddRange(guildRules.OrderBy(r => r.Id));
         }

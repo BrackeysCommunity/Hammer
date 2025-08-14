@@ -18,7 +18,7 @@ internal sealed class MessageTrackingService : BackgroundService
     private readonly ILogger<MessageTrackingService> _logger;
     private readonly DiscordClient _discordClient;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
-    private readonly List<TrackedMessage> _trackedMessages = new();
+    private readonly List<TrackedMessage> _trackedMessages = [];
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="MessageReportService" /> class.

@@ -27,7 +27,7 @@ internal sealed class MuteService : BackgroundService
 {
     private static readonly TimeSpan QueryInterval = TimeSpan.FromSeconds(30);
     private readonly ConcurrentDictionary<DiscordGuild, DiscordRole> _mutedRoles = new();
-    private readonly List<Mute> _mutes = new();
+    private readonly List<Mute> _mutes = [];
     private readonly ILogger<MuteService> _logger;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly ConfigurationService _configurationService;

@@ -1,6 +1,5 @@
 using Hammer.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Hammer.Services;
@@ -8,7 +7,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which connects to the Hammer database.
 /// </summary>
-internal sealed class DatabaseService : BackgroundService
+internal sealed class DatabaseService
 {
     private readonly ILogger<DatabaseService> _logger;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
@@ -77,12 +76,6 @@ internal sealed class DatabaseService : BackgroundService
         return totalInserted;
     }
 
-    /// <inheritdoc />
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        await CreateDatabaseAsync();
-    }
-
     private static async Task<int> CopyAsync<T>(
         IQueryable<T> source,
         DbSet<T> dest,
@@ -116,19 +109,5 @@ internal sealed class DatabaseService : BackgroundService
         }
 
         return inserted;
-    }
-
-    private async Task CreateDatabaseAsync()
-    {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-
-        if (Environment.GetEnvironmentVariable("USE_MYSQL") != "1")
-        {
-            _logger.LogInformation("Creating database");
-            await context.Database.EnsureCreatedAsync();
-        }
-
-        _logger.LogInformation("Applying migrations");
-        await context.Database.MigrateAsync();
     }
 }

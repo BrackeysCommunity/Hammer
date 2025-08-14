@@ -5,7 +5,6 @@ using Hammer.Extensions;
 using Hammer.Resources;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Hosting;
 using SmartFormat;
 using PermissionLevel = Hammer.Data.PermissionLevel;
 
@@ -14,7 +13,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which manages staff/guru-written notes on users.
 /// </summary>
-internal sealed class MemberNoteService : BackgroundService
+internal sealed class MemberNoteService
 {
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly ConfigurationService _configurationService;
@@ -298,12 +297,5 @@ internal sealed class MemberNoteService : BackgroundService
         foreach (MemberNote note in
                  context.MemberNotes.Where(n => n.UserId == user.Id && n.GuildId == guild.Id && n.Type == type))
             yield return note;
-    }
-
-    /// <inheritdoc />
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync(stoppingToken);
-        await context.Database.EnsureCreatedAsync(stoppingToken);
     }
 }

@@ -425,8 +425,7 @@ internal sealed class MessageReportService : BackgroundService
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-        await context.Database.EnsureCreatedAsync(stoppingToken);
+        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync(stoppingToken);
 
         _blockedReporters.Clear();
         _blockedReporters.AddRange(context.BlockedReporters);

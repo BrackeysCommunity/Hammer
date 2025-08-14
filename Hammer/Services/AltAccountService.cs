@@ -142,15 +142,14 @@ internal sealed class AltAccountService : BackgroundService
     }
 
     /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        UpdateFromDatabase();
-        return Task.CompletedTask;
+        await UpdateFromDatabase();
     }
 
-    private void UpdateFromDatabase()
+    private async Task UpdateFromDatabase()
     {
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         foreach (IGrouping<ulong, AltAccount> group in context.AltAccounts.GroupBy(u => u.UserId))
         {
             HashSet<ulong> cache = _altAccountCache.GetOrAdd(group.Key, []);

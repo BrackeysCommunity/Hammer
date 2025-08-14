@@ -53,9 +53,9 @@ internal sealed class InfoCommand : ApplicationCommandModule
         embed.WithColor(embedColor);
         embed.WithThumbnail(member.AvatarUrl);
         embed.WithTitle($"Hammer v{hammerVersion}");
-        embed.AddField("Ping", client.Ping, true);
+        embed.AddField("Ping", $"{client.Ping} ms", true);
         embed.AddField("Uptime", (DateTimeOffset.UtcNow - _botService.StartedAt).Humanize(), true);
-        embed.AddField("View Source", "[View on GitHub](https://github.com/BrackeysBot/Hammer/)", true);
+        embed.AddField("Source", "[View on GitHub](https://github.com/BrackeysCommunity/Hammer)", true);
 
         var builder = new StringBuilder();
         builder.AppendLine($"Hammer: {hammerVersion}");

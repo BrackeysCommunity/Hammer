@@ -41,7 +41,7 @@ internal sealed class DatabaseService
 
         await using var migration = new HammerContext(
             new DbContextOptionsBuilder<HammerContext>()
-                .UseSqlite("Data Source=hammer.db")
+                .UseSqlite("Data Source=data/hammer.db")
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
                 .Options);
 

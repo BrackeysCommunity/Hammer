@@ -1,0 +1,12 @@
+﻿<Solution>
+    <Folder Name="/Solution Items/">
+        <File Path="CONTRIBUTING.md"/>
+        <File Path="LICENSE.md"/>
+        <File Path="README.md"/>
+        <File Path="USAGE.md"/>
+        <File Path="CHANGELOG.md"/>
+        <File Path="global.json"/>
+        <File Path="config.example.yaml"/>
+    </Folder>
+    <Project Path="Hammer\Hammer.csproj" Type="Classic C#"/>
+</Solution>

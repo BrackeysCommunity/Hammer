@@ -48,7 +48,6 @@ GUILD_ID:
     gagReaction: # The fallback reaction to gag users, in Discord format. Defautls to 🔇 (:mute:)
     historyReaction: # The fallback reaction to view infraction history, in Discord format. Defaults to 🕓 (:clock4:)
     reportReaction: # The fallback reaction to report messages, in Discord format. Defaults to 🚩 (:triangular_flag_on_post:)
-    trackReaction: # The fallback reaction to track messages, in Discord format. Defaults to 🔍 (:mag:)
   roles:
     administratorRoleId: # The ID of the Admin role
     guruRoleId: # The ID of the Guru role

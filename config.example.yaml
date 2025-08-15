@@ -12,7 +12,6 @@ GUILD_ID:
     gagReaction: ":mute:"
     historyReaction: ":clock4:"
     reportReaction: ":triangular_flag_on_post:"
-    trackReaction: ":mag:"
   roles:
     administratorRoleId: 0
     guruRoleId: 0

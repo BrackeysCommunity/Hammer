@@ -29,23 +29,23 @@ internal sealed class TrackedMessageConfiguration : IEntityTypeConfiguration<Tra
         builder.ToTable("TrackedMessages");
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.Id);
-        builder.Property(e => e.GuildId);
-        builder.Property(e => e.ChannelId);
-        builder.Property(e => e.AuthorId);
-        builder.Property(e => e.IsDeleted);
-        builder.Property(e => e.Content);
-        builder.Property(e => e.Attachments).HasConversion<UriListToBytesConverter>();
+        builder.Property(e => e.Id).HasColumnOrder(1);
+        builder.Property(e => e.GuildId).HasColumnOrder(2);
+        builder.Property(e => e.ChannelId).HasColumnOrder(3);
+        builder.Property(e => e.AuthorId).HasColumnOrder(4);
+        builder.Property(e => e.IsDeleted).HasColumnOrder(5);
+        builder.Property(e => e.Content).HasColumnOrder(6);
+        builder.Property(e => e.Attachments).HasColumnOrder(7).HasConversion<UriListToBytesConverter>();
 
         if (_isMySql)
         {
-            builder.Property(e => e.CreationTimestamp).HasColumnType("DATETIME(6)");
-            builder.Property(e => e.DeletionTimestamp).HasColumnType("DATETIME(6)");
+            builder.Property(e => e.CreationTimestamp).HasColumnOrder(8).HasColumnType("DATETIME(6)");
+            builder.Property(e => e.DeletionTimestamp).HasColumnOrder(9).HasColumnType("DATETIME(6)");
         }
         else
         {
-            builder.Property(e => e.CreationTimestamp).HasConversion<DateTimeOffsetToBytesConverter>();
-            builder.Property(e => e.DeletionTimestamp).HasConversion<DateTimeOffsetToBytesConverter>();
+            builder.Property(e => e.CreationTimestamp).HasColumnOrder(8).HasConversion<DateTimeOffsetToBytesConverter>();
+            builder.Property(e => e.DeletionTimestamp).HasColumnOrder(9).HasConversion<DateTimeOffsetToBytesConverter>();
         }
     }
 }

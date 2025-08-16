@@ -28,24 +28,24 @@ internal sealed class InfractionConfiguration : IEntityTypeConfiguration<Infract
         builder.ToTable("Infraction");
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.Id);
-        builder.Property(e => e.GuildId);
-        builder.Property(e => e.UserId);
-        builder.Property(e => e.StaffMemberId);
-        builder.Property(e => e.Type);
+        builder.Property(e => e.Id).HasColumnOrder(1);
+        builder.Property(e => e.GuildId).HasColumnOrder(2);
+        builder.Property(e => e.UserId).HasColumnOrder(3);
+        builder.Property(e => e.StaffMemberId).HasColumnOrder(4);
+        builder.Property(e => e.Type).HasColumnOrder(5);
 
         if (_isMySql)
         {
-            builder.Property(e => e.IssuedAt).HasColumnType("DATETIME(6)");
+            builder.Property(e => e.IssuedAt).HasColumnOrder(6).HasColumnType("DATETIME(6)");
         }
         else
         {
-            builder.Property(e => e.IssuedAt).HasConversion<DateTimeOffsetToBytesConverter>();
+            builder.Property(e => e.IssuedAt).HasColumnOrder(7).HasConversion<DateTimeOffsetToBytesConverter>();
         }
 
-        builder.Property(e => e.Reason);
-        builder.Property(e => e.AdditionalInformation);
-        builder.Property(e => e.RuleId);
-        builder.Property(e => e.RuleText);
+        builder.Property(e => e.Reason).HasColumnOrder(8);
+        builder.Property(e => e.AdditionalInformation).HasColumnOrder(9);
+        builder.Property(e => e.RuleId).HasColumnOrder(10);
+        builder.Property(e => e.RuleText).HasColumnOrder(11);
     }
 }

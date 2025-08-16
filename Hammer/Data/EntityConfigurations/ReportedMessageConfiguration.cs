@@ -22,13 +22,13 @@ internal class ReportedMessageConfiguration : IEntityTypeConfiguration<ReportedM
         builder.ToTable("ReportedMessage");
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.Id);
-        builder.Property(e => e.GuildId);
-        builder.Property(e => e.ChannelId);
-        builder.Property(e => e.MessageId);
-        builder.Property(e => e.AuthorId);
-        builder.Property(e => e.ReporterId);
-        builder.Property(e => e.Content);
-        builder.Property(e => e.Attachments).HasConversion<UriListToBytesConverter>();
+        builder.Property(e => e.Id).HasColumnOrder(1);
+        builder.Property(e => e.GuildId).HasColumnOrder(2);
+        builder.Property(e => e.ChannelId).HasColumnOrder(3);
+        builder.Property(e => e.MessageId).HasColumnOrder(4);
+        builder.Property(e => e.AuthorId).HasColumnOrder(5);
+        builder.Property(e => e.ReporterId).HasColumnOrder(6);
+        builder.Property(e => e.Content).HasColumnOrder(7);
+        builder.Property(e => e.Attachments).HasColumnOrder(8).HasConversion<UriListToBytesConverter>();
     }
 }

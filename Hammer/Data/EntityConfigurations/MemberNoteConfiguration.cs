@@ -28,21 +28,21 @@ internal sealed class MemberNoteConfiguration : IEntityTypeConfiguration<MemberN
         builder.ToTable("MemberNote");
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.Id);
-        builder.Property(e => e.Type);
-        builder.Property(e => e.UserId);
-        builder.Property(e => e.GuildId);
-        builder.Property(e => e.AuthorId);
+        builder.Property(e => e.Id).HasColumnOrder(1);
+        builder.Property(e => e.Type).HasColumnOrder(2);
+        builder.Property(e => e.UserId).HasColumnOrder(3);
+        builder.Property(e => e.GuildId).HasColumnOrder(4);
+        builder.Property(e => e.AuthorId).HasColumnOrder(5);
 
         if (_isMySql)
         {
-            builder.Property(e => e.CreationTimestamp).HasColumnType("DATETIME(6)");
+            builder.Property(e => e.CreationTimestamp).HasColumnOrder(6).HasColumnType("DATETIME(6)");
         }
         else
         {
-            builder.Property(e => e.CreationTimestamp).HasConversion<DateTimeOffsetToBytesConverter>();
+            builder.Property(e => e.CreationTimestamp).HasColumnOrder(6).HasConversion<DateTimeOffsetToBytesConverter>();
         }
 
-        builder.Property(e => e.Content);
+        builder.Property(e => e.Content).HasColumnOrder(7);
     }
 }

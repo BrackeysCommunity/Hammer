@@ -79,6 +79,7 @@ internal sealed partial class InfractionCommand
         var newRuleId = (int?)ruleId;
 
         embed.WithColor(DiscordColor.Green);
+        // ReSharper disable AccessToModifiedClosure
         _infractionService.ModifyInfraction(infraction, i =>
         {
             if (newRuleId is not null)
@@ -94,6 +95,7 @@ internal sealed partial class InfractionCommand
                 embed.AddField("New Reason", reason);
             }
         });
+        // ReSharper restore AccessToModifiedClosure
 
         builder.Clear();
         builder.AddEmbed(embed);

@@ -41,8 +41,15 @@ internal sealed class RuleService : BackgroundService
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (string.IsNullOrWhiteSpace(description)) throw new ArgumentNullException(nameof(description));
-        if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules)) _guildRules.Add(guild.Id, rules = []);
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            throw new ArgumentNullException(nameof(description));
+        }
+
+        if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules))
+        {
+            _guildRules.Add(guild.Id, rules = []);
+        }
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
 
@@ -93,8 +100,15 @@ internal sealed class RuleService : BackgroundService
     /// </exception>
     public void DeleteRule(DiscordGuild guild, int id)
     {
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
-        if (!GuildHasRule(guild, id)) return;
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (!GuildHasRule(guild, id))
+        {
+            return;
+        }
 
         Rule ruleToDelete = GetRuleById(guild, id)!;
         _guildRules[guild.Id].Remove(ruleToDelete);
@@ -123,7 +137,10 @@ internal sealed class RuleService : BackgroundService
     /// <exception cref="RuleNotFoundException">No rule with the specified ID was found.</exception>
     public Rule GetRuleById(ulong guildId, int id)
     {
-        if (!GuildHasRule(guildId, id)) throw new RuleNotFoundException(id);
+        if (!GuildHasRule(guildId, id))
+        {
+            throw new RuleNotFoundException(id);
+        }
 
         return _guildRules[guildId].First(r => r.Id == id);
     }
@@ -138,8 +155,15 @@ internal sealed class RuleService : BackgroundService
     /// <exception cref="RuleNotFoundException">No rule with the specified ID was found.</exception>
     public Rule GetRuleById(DiscordGuild guild, int id)
     {
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
-        if (!GuildHasRule(guild, id)) throw new RuleNotFoundException(id);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (!GuildHasRule(guild, id))
+        {
+            throw new RuleNotFoundException(id);
+        }
 
         return _guildRules[guild.Id].First(r => r.Id == id);
     }
@@ -152,9 +176,15 @@ internal sealed class RuleService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public IReadOnlyList<Rule> GetGuildRules(DiscordGuild guild)
     {
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
         if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules))
+        {
             return ArraySegment<Rule>.Empty;
+        }
 
         return rules.OrderBy(r => r.Id).ToArray();
     }
@@ -170,10 +200,15 @@ internal sealed class RuleService : BackgroundService
     /// </returns>
     public bool GuildHasRule(ulong guildId, int id)
     {
-        if (id < 1) return false;
+        if (id < 1)
+        {
+            return false;
+        }
 
         if (!_guildRules.TryGetValue(guildId, out List<Rule>? rules))
+        {
             return false;
+        }
 
         return id <= rules.Count && rules.Exists(r => r.Id == id);
     }
@@ -190,11 +225,20 @@ internal sealed class RuleService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public bool GuildHasRule(DiscordGuild guild, int id)
     {
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
-        if (id < 1) return false;
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (id < 1)
+        {
+            return false;
+        }
 
         if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules))
+        {
             return false;
+        }
 
         return id <= rules.Count && rules.Exists(r => r.Id == id);
     }
@@ -212,7 +256,9 @@ internal sealed class RuleService : BackgroundService
         var index = 0;
 
         if (_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             color = guildConfiguration.PrimaryColor;
+        }
 
         foreach (Rule[] ruleChunk in rules.Chunk(25)) // embeds cannot have more than 25 fields
         {
@@ -223,9 +269,11 @@ internal sealed class RuleService : BackgroundService
             embed.WithColor(color);
 
             if (index == 0)
+            {
                 embed.WithDescription($"Welcome to {channel.Guild.Name}!\n\n" +
                                       "To ensure that every one of us here are all happy, please take note and follow these " +
                                       "rules:");
+            }
 
             foreach (Rule rule in ruleChunk)
             {
@@ -259,14 +307,18 @@ internal sealed class RuleService : BackgroundService
                 foreach (string word in rule.Brief.Split())
                 {
                     if (word.StartsWith(term, StringComparison.OrdinalIgnoreCase))
+                    {
                         return true;
+                    }
                 }
             }
 
             foreach (string word in rule.Description.Split())
             {
                 if (word.StartsWith(term, StringComparison.OrdinalIgnoreCase))
+                {
                     return true;
+                }
             }
         }
 
@@ -284,9 +336,20 @@ internal sealed class RuleService : BackgroundService
     /// </exception>
     public Rule? SearchForRule(DiscordGuild guild, string searchQuery)
     {
-        if (guild == null) throw new ArgumentNullException(nameof(guild));
-        if (searchQuery == null) throw new ArgumentNullException(nameof(searchQuery));
-        if (string.IsNullOrWhiteSpace(searchQuery)) return null;
+        if (guild == null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (searchQuery == null)
+        {
+            throw new ArgumentNullException(nameof(searchQuery));
+        }
+
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            return null;
+        }
 
         string[] searchTerms = searchQuery.Split();
         var matches = new List<Rule>();
@@ -295,7 +358,9 @@ internal sealed class RuleService : BackgroundService
         foreach (Rule item in rules)
         {
             if (RuleMatches(item, searchTerms))
+            {
                 matches.Add(item);
+            }
         }
 
         return matches.Count > 0 ? matches[0] : null;
@@ -309,7 +374,11 @@ internal sealed class RuleService : BackgroundService
     /// <param name="brief">The new rule brief.</param>
     public void SetRuleBrief(DiscordGuild guild, int ruleId, string? brief)
     {
-        if (!GuildHasRule(guild, ruleId)) return;
+        if (!GuildHasRule(guild, ruleId))
+        {
+            return;
+        }
+
         Rule rule = GetRuleById(guild, ruleId)!;
         SetRuleBrief(rule, brief);
     }
@@ -337,7 +406,11 @@ internal sealed class RuleService : BackgroundService
     /// <param name="content">The new rule content.</param>
     public void SetRuleContent(DiscordGuild guild, int ruleId, string content)
     {
-        if (!GuildHasRule(guild, ruleId)) return;
+        if (!GuildHasRule(guild, ruleId))
+        {
+            return;
+        }
+
         Rule rule = GetRuleById(guild, ruleId)!;
         SetRuleContent(rule, content);
     }
@@ -369,7 +442,9 @@ internal sealed class RuleService : BackgroundService
         var index = 0;
 
         if (_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             color = guildConfiguration.PrimaryColor;
+        }
 
         foreach (Rule[] ruleChunk in rules.Chunk(25)) // embeds cannot have more than 25 fields
         {
@@ -380,9 +455,11 @@ internal sealed class RuleService : BackgroundService
             embed.WithColor(color);
 
             if (index == 0)
+            {
                 embed.WithDescription($"Welcome to {channel.Guild.Name}!\n\n" +
                                       "To ensure that every one of us here are all happy, please take note and follow these " +
                                       "rules:");
+            }
 
             foreach (Rule rule in ruleChunk)
             {
@@ -412,7 +489,9 @@ internal sealed class RuleService : BackgroundService
         foreach (IGrouping<ulong, Rule> guildRules in context.Rules.AsEnumerable().GroupBy(r => r.GuildId))
         {
             if (!_guildRules.TryGetValue(guildRules.Key, out List<Rule>? rules))
+            {
                 _guildRules.Add(guildRules.Key, rules = []);
+            }
 
             rules.AddRange(guildRules.OrderBy(r => r.Id));
         }

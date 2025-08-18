@@ -34,8 +34,16 @@ internal sealed class BlockedReporter : IEquatable<BlockedReporter>
     /// <inheritdoc />
     public bool Equals(BlockedReporter? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return GuildId == other.GuildId && UserId == other.UserId;
     }
 

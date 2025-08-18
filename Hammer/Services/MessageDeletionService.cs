@@ -75,8 +75,15 @@ internal sealed class MessageDeletionService
     /// </exception>
     public async Task DeleteMessageAsync(DiscordMessage message, DiscordMember staffMember, bool notifyAuthor = true)
     {
-        if (message is null) throw new ArgumentNullException(nameof(message));
-        if (staffMember is null) throw new ArgumentNullException(nameof(staffMember));
+        if (message is null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         _logger.LogInformation("{Message} in channel {Channel} is requested to be deleted by {StaffMember}",
             message, message.Channel, staffMember);
@@ -85,13 +92,19 @@ internal sealed class MessageDeletionService
         DiscordGuild guild = message.Channel.Guild;
 
         if (guild is null)
+        {
             throw new InvalidOperationException(ExceptionMessages.CannotDeleteNonGuildMessage);
+        }
 
         if (guild != staffMember.Guild)
+        {
             throw new ArgumentException(ExceptionMessages.MessageStaffMemberGuildMismatch);
+        }
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
+        }
 
         DiscordUser user = message.Author;
         DiscordMember? member = await user.GetAsMemberOfAsync(guild);
@@ -172,7 +185,9 @@ internal sealed class MessageDeletionService
     {
         DiscordUser author = message.Author;
         if (message.Interaction is not null)
+        {
             author = message.Interaction.User;
+        }
 
         var formatObject = new { user = author, channel = message.Channel };
         string description = EmbedMessages.MessageDeletionDescription.FormatSmart(formatObject);

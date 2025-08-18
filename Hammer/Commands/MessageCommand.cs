@@ -52,7 +52,9 @@ internal sealed class MessageCommand : ApplicationCommandModule
                 await modal.Build().RespondToAsync(context.Interaction, TimeSpan.FromMinutes(5));
 
             if (response != DiscordModalResponse.Success)
+            {
                 return;
+            }
 
             string content = MentionUtility.ReplaceChannelMentions(guild, message.Value?.Trim() ?? string.Empty);
             var builder = new DiscordFollowupMessageBuilder();

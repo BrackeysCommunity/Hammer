@@ -61,10 +61,15 @@ internal sealed class MemberNoteService
         }
 
         string? trimmedContent = content?.Trim();
-        if (string.IsNullOrWhiteSpace(trimmedContent)) throw new ArgumentNullException(nameof(content));
+        if (string.IsNullOrWhiteSpace(trimmedContent))
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
 
         if (!_configurationService.TryGetGuildConfiguration(author.Guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException("No guild configuration found for the guild.");
+        }
 
         DiscordGuild guild = author.Guild;
         PermissionLevel permissionLevel = author.GetPermissionLevel(guildConfiguration);
@@ -73,7 +78,9 @@ internal sealed class MemberNoteService
         if (permissionLevel < PermissionLevel.Moderator)
         {
             if (permissionLevel < PermissionLevel.Guru)
+            {
                 throw new InvalidOperationException();
+            }
 
             noteType = MemberNoteType.Guru;
         }
@@ -111,7 +118,9 @@ internal sealed class MemberNoteService
 
         MemberNote? note = await context.MemberNotes.FirstOrDefaultAsync(n => n.Id == id);
         if (note is null)
+        {
             throw new ArgumentException(ExceptionMessages.NoSuchNote.FormatSmart(new { id }), nameof(id));
+        }
 
         context.Remove(note);
         await context.SaveChangesAsync();
@@ -127,19 +136,27 @@ internal sealed class MemberNoteService
     public async Task EditNoteAsync(long id, string? content = null, MemberNoteType? type = null)
     {
         if (string.IsNullOrWhiteSpace(content) && type is null)
+        {
             return;
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
         MemberNote? note = await context.MemberNotes.FirstOrDefaultAsync(n => n.Id == id);
         if (note is null)
+        {
             throw new ArgumentException(ExceptionMessages.NoSuchNote.FormatSmart(new { id }), nameof(id));
+        }
 
         if (!string.IsNullOrWhiteSpace(content))
+        {
             note.Content = content;
+        }
 
         if (type is not null)
+        {
             note.Type = type.Value;
+        }
 
         context.Update(note);
         await context.SaveChangesAsync();
@@ -216,7 +233,10 @@ internal sealed class MemberNoteService
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
+        if (!Enum.IsDefined(type))
+        {
+            throw new ArgumentOutOfRangeException(nameof(type));
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         return await context.MemberNotes.CountAsync(n => n.UserId == user.Id && n.GuildId == guild.Id && n.Type == type);
@@ -241,7 +261,9 @@ internal sealed class MemberNoteService
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
         foreach (MemberNote note in context.MemberNotes.Where(n => n.GuildId == guild.Id))
+        {
             yield return note;
+        }
     }
 
     /// <summary>
@@ -264,12 +286,17 @@ internal sealed class MemberNoteService
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
+        if (!Enum.IsDefined(type))
+        {
+            throw new ArgumentOutOfRangeException(nameof(type));
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
         foreach (MemberNote note in context.MemberNotes.Where(n => n.GuildId == guild.Id && n.Type == type))
+        {
             yield return note;
+        }
     }
 
     /// <summary>
@@ -301,7 +328,9 @@ internal sealed class MemberNoteService
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
         foreach (MemberNote note in context.MemberNotes.Where(n => n.UserId == user.Id && n.GuildId == guild.Id))
+        {
             yield return note;
+        }
     }
 
     /// <summary>
@@ -334,12 +363,17 @@ internal sealed class MemberNoteService
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
+        if (!Enum.IsDefined(type))
+        {
+            throw new ArgumentOutOfRangeException(nameof(type));
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
         foreach (MemberNote note in
                  context.MemberNotes.Where(n => n.UserId == user.Id && n.GuildId == guild.Id && n.Type == type))
+        {
             yield return note;
+        }
     }
 }

@@ -37,12 +37,18 @@ internal sealed partial class NoteCommand
 
             await foreach (MemberNote note in notes)
             {
-                if (note.GuildId != context.Guild.Id) continue;
+                if (note.GuildId != context.Guild.Id)
+                {
+                    continue;
+                }
+
                 builder.AppendLine($"\u2022 [{note.Id}] [{note.Type:G}] {note.Content}");
             }
 
             if (builder.Length == 0)
+            {
                 builder.AppendLine($"No notes saved for {user.Mention}");
+            }
 
             embed.WithAuthor(user);
             embed.WithTitle("Saved Notes");

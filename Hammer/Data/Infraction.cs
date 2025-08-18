@@ -19,7 +19,10 @@ internal sealed class Infraction : IEquatable<Infraction>, IComparable<Infractio
     /// <exception cref="ArgumentNullException"><paramref name="other" /> is <see langword="null" />.</exception>
     public Infraction(Infraction other)
     {
-        if (other is null) throw new ArgumentNullException(nameof(other));
+        if (other is null)
+        {
+            throw new ArgumentNullException(nameof(other));
+        }
 
         AdditionalInformation = other.AdditionalInformation;
         GuildId = other.GuildId;
@@ -210,8 +213,16 @@ internal sealed class Infraction : IEquatable<Infraction>, IComparable<Infractio
     /// </returns>
     public int CompareTo(Infraction? other)
     {
-        if (ReferenceEquals(this, other)) return 0;
-        if (ReferenceEquals(null, other)) return 1;
+        if (ReferenceEquals(this, other))
+        {
+            return 0;
+        }
+
+        if (ReferenceEquals(null, other))
+        {
+            return 1;
+        }
+
         return IssuedAt.CompareTo(other.IssuedAt);
     }
 
@@ -249,10 +260,20 @@ internal sealed class Infraction : IEquatable<Infraction>, IComparable<Infractio
     /// <exception cref="ArgumentException"><paramref name="obj" /> is not of type <see cref="Infraction" />.</exception>
     public int CompareTo(object? obj)
     {
-        if (ReferenceEquals(null, obj)) return 1;
-        if (ReferenceEquals(this, obj)) return 0;
+        if (ReferenceEquals(null, obj))
+        {
+            return 1;
+        }
+
+        if (ReferenceEquals(this, obj))
+        {
+            return 0;
+        }
+
         if (obj is not Infraction other)
+        {
             throw new ArgumentException($"Object must be of type {nameof(Infraction)}");
+        }
 
         return CompareTo(other);
     }
@@ -266,8 +287,16 @@ internal sealed class Infraction : IEquatable<Infraction>, IComparable<Infractio
     /// </returns>
     public bool Equals(Infraction? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return Id == other.Id;
     }
 

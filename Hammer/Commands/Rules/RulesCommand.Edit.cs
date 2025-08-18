@@ -60,10 +60,14 @@ internal sealed partial class RulesCommand
             var changed = false;
 
             if (!string.Equals(oldBrief, newBrief) && (changed = true))
+            {
                 _ruleService.SetRuleBrief(rule, newBrief);
+            }
 
             if (!string.Equals(oldDescription, newDescription) && (changed = true))
+            {
                 _ruleService.SetRuleContent(rule, newDescription!);
+            }
 
             DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
 
@@ -80,9 +84,13 @@ internal sealed partial class RulesCommand
             }
 
             if (string.IsNullOrWhiteSpace(brief.Value))
+            {
                 embed.WithDescription(rule.Description);
+            }
             else
+            {
                 embed.AddField(rule.Brief, rule.Description);
+            }
 
             var webhook = new DiscordWebhookBuilder();
             webhook.AddEmbed(embed);

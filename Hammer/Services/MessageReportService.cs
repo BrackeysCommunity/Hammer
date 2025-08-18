@@ -69,7 +69,10 @@ internal sealed class MessageReportService : BackgroundService
             throw new ArgumentNullException(nameof(staffMember));
         }
 
-        if (IsUserBlocked(user, staffMember.Guild)) return;
+        if (IsUserBlocked(user, staffMember.Guild))
+        {
+            return;
+        }
 
         var blockedReporter = new BlockedReporter
         {
@@ -147,7 +150,9 @@ internal sealed class MessageReportService : BackgroundService
         foreach (ReportedMessage reportedMessage in _reportedMessages)
         {
             if (reportedMessage.AuthorId == user.Id && reportedMessage.GuildId == guild.Id)
+            {
                 yield return reportedMessage;
+            }
         }
     }
 
@@ -182,7 +187,9 @@ internal sealed class MessageReportService : BackgroundService
         foreach (ReportedMessage reportedMessage in _reportedMessages)
         {
             if (reportedMessage.ReporterId == user.Id && reportedMessage.GuildId == guild.Id)
+            {
                 yield return reportedMessage;
+            }
         }
     }
 
@@ -244,7 +251,9 @@ internal sealed class MessageReportService : BackgroundService
         var list = new List<ReportedMessage>();
 
         foreach (ReportedMessage reportedMessage in EnumerateReports(user, guild))
+        {
             list.Add(reportedMessage);
+        }
 
         return list.AsReadOnly();
     }
@@ -291,7 +300,9 @@ internal sealed class MessageReportService : BackgroundService
         var list = new List<ReportedMessage>();
 
         foreach (ReportedMessage reportedMessage in EnumerateSubmittedReports(user, guild))
+        {
             list.Add(reportedMessage);
+        }
 
         return list.AsReadOnly();
     }
@@ -385,7 +396,9 @@ internal sealed class MessageReportService : BackgroundService
         DiscordUser author = message.Author;
         DiscordChannel channel = message.Channel;
         if (author is null)
+        {
             message = await channel.GetMessageAsync(message.Id);
+        }
 
         MessageTrackState trackState = _messageTrackingService.GetMessageTrackState(message);
         if ((trackState & MessageTrackState.Deleted) != 0)
@@ -410,7 +423,9 @@ internal sealed class MessageReportService : BackgroundService
         await CreateNewMessageReportAsync(message, reporter);
 
         if (!_configurationService.TryGetGuildConfiguration(channel.Guild, out GuildConfiguration? guildConfiguration))
+        {
             return false;
+        }
 
         int urgentReportThreshold = guildConfiguration.UrgentReportThreshold;
         int reportCount = GetReportCount(message);
@@ -418,9 +433,13 @@ internal sealed class MessageReportService : BackgroundService
         StaffNotificationOptions notificationOptions;
 
         if (reportCount >= urgentReportThreshold)
+        {
             notificationOptions = StaffNotificationOptions.Administrator | StaffNotificationOptions.Moderator;
+        }
         else
+        {
             notificationOptions = StaffNotificationOptions.Here;
+        }
 
         await _logService.LogAsync(reporter.Guild, CreateStaffReportEmbed(message, reporter), notificationOptions);
         return true;
@@ -470,7 +489,10 @@ internal sealed class MessageReportService : BackgroundService
             throw new ArgumentNullException(nameof(staffMember));
         }
 
-        if (!IsUserBlocked(user, staffMember.Guild)) return;
+        if (!IsUserBlocked(user, staffMember.Guild))
+        {
+            return;
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
@@ -478,7 +500,9 @@ internal sealed class MessageReportService : BackgroundService
             await context.BlockedReporters.FirstOrDefaultAsync(r => r.UserId == user.Id && r.GuildId == staffMember.Guild.Id);
 
         if (blockedReporter is null)
+        {
             _logger.LogWarning("Could not unblock {User}: was allegedly blocked, but didn't find BlockedReporter entity!", user);
+        }
         else
         {
             _blockedReporters.Remove(blockedReporter);

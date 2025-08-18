@@ -22,11 +22,20 @@ internal sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<
     /// </exception>
     public ReportedMessage(DiscordMessage message, DiscordMember reporter)
     {
-        if (message is null) throw new ArgumentNullException(nameof(message));
-        if (reporter is null) throw new ArgumentNullException(nameof(reporter));
+        if (message is null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        if (reporter is null)
+        {
+            throw new ArgumentNullException(nameof(reporter));
+        }
 
         if (message.Channel.Guild != reporter.Guild)
+        {
             throw new ArgumentException("Message and reporter must be in the same guild.");
+        }
 
         Attachments = message.Attachments.Select(a => new Uri(a.Url)).ToArray();
         AuthorId = message.Author.Id;
@@ -92,15 +101,27 @@ internal sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<
     /// <inheritdoc />
     public bool Equals(DiscordMessage? other)
     {
-        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
         return MessageId == other.Id;
     }
 
     /// <inheritdoc />
     public bool Equals(ReportedMessage? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return Id == other.Id;
     }
 

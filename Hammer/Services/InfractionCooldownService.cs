@@ -57,7 +57,9 @@ internal sealed class InfractionCooldownService : BackgroundService
             foreach ((Infraction infraction, _) in _hotInfractions.OrderByDescending(p => p.Value))
             {
                 if (infraction.UserId == user.Id)
+                {
                     return infraction.StaffMemberId != staffMember.Id;
+                }
             }
         }
 
@@ -139,12 +141,16 @@ internal sealed class InfractionCooldownService : BackgroundService
         lock (_hotInfractions)
         {
             if (_hotInfractions.ContainsKey(infraction))
+            {
                 throw new InvalidOperationException("Infraction is already on cooldown.");
+            }
 
             foreach (Infraction current in _hotInfractions.Keys.ToArray())
             {
                 if (current.UserId == infraction.UserId)
+                {
                     _hotInfractions.Remove(current);
+                }
             }
 
             _hotInfractions.Add(infraction, DateTimeOffset.Now);
@@ -171,7 +177,9 @@ internal sealed class InfractionCooldownService : BackgroundService
             foreach (Infraction infraction in _hotInfractions.Keys.ToArray())
             {
                 if (infraction.UserId == userId)
+                {
                     _hotInfractions.Remove(infraction);
+                }
             }
         }
     }
@@ -193,7 +201,9 @@ internal sealed class InfractionCooldownService : BackgroundService
             foreach (Infraction infraction in _hotInfractions.Keys.ToArray())
             {
                 if (infraction.UserId == user.Id)
+                {
                     _hotInfractions.Remove(infraction);
+                }
             }
         }
     }
@@ -214,7 +224,10 @@ internal sealed class InfractionCooldownService : BackgroundService
         infraction = null;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (user is null) return false;
+        if (user is null)
+        {
+            return false;
+        }
 
         lock (_hotInfractions)
         {

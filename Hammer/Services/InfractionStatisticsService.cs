@@ -54,7 +54,9 @@ internal sealed class InfractionStatisticsService
         }
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException("Guild is not configured");
+        }
 
         (int totalBanCount, int tempBanCount, int permBanCount) = GetTotalBanCount(guild);
         (int totalMuteCount, int tempMuteCount, int permMuteCount) = GetTotalMuteCount(guild);
@@ -129,10 +131,14 @@ internal sealed class InfractionStatisticsService
         var users = new HashSet<ulong>();
 
         for (var index = 0; index < bans.Count; index++)
+        {
             users.Add(bans[index].UserId);
+        }
 
         for (var index = 0; index < temporaryBans.Count; index++)
+        {
             users.Add(temporaryBans[index].UserId);
+        }
 
         return users.Count;
     }
@@ -155,7 +161,9 @@ internal sealed class InfractionStatisticsService
         var users = new HashSet<ulong>();
 
         for (var index = 0; index < infractions.Count; index++)
+        {
             users.Add(infractions[index].UserId);
+        }
 
         return users.Count;
     }
@@ -178,7 +186,9 @@ internal sealed class InfractionStatisticsService
         var users = new HashSet<ulong>();
 
         for (var index = 0; index < infractions.Count; index++)
+        {
             users.Add(infractions[index].UserId);
+        }
 
         return users.Count;
     }
@@ -206,10 +216,14 @@ internal sealed class InfractionStatisticsService
         var users = new HashSet<ulong>();
 
         for (var index = 0; index < mutes.Count; index++)
+        {
             users.Add(mutes[index].UserId);
+        }
 
         for (var index = 0; index < temporaryMutes.Count; index++)
+        {
             users.Add(temporaryMutes[index].UserId);
+        }
 
         return users.Count;
     }
@@ -232,7 +246,9 @@ internal sealed class InfractionStatisticsService
         var users = new HashSet<ulong>();
 
         for (var index = 0; index < infractions.Count; index++)
+        {
             users.Add(infractions[index].UserId);
+        }
 
         return users.Count;
     }
@@ -253,7 +269,9 @@ internal sealed class InfractionStatisticsService
         TimeSpan total = TimeSpan.Zero;
 
         for (var index = 0; index < bans.Count; index++)
+        {
             total += bans[index].ExpiresAt - DateTimeOffset.UtcNow;
+        }
 
         return total;
     }
@@ -276,7 +294,9 @@ internal sealed class InfractionStatisticsService
         for (var index = 0; index < mutes.Count; index++)
         {
             if (mutes[index].ExpiresAt is { } expiresAt)
+            {
                 total += expiresAt - DateTimeOffset.UtcNow;
+            }
         }
 
         return total;
@@ -351,7 +371,9 @@ internal sealed class InfractionStatisticsService
         var users = new HashSet<ulong>();
 
         for (var index = 0; index < infractions.Count; index++)
+        {
             users.Add(infractions[index].UserId);
+        }
 
         return users.Count;
     }
@@ -436,9 +458,13 @@ internal sealed class InfractionStatisticsService
         while (a != 0 && b != 0)
         {
             if (a > b)
+            {
                 a %= b;
+            }
             else
+            {
                 b %= a;
+            }
         }
 
         return a == 0 ? b : a;

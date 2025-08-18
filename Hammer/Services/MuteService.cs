@@ -81,17 +81,23 @@ internal sealed class MuteService : BackgroundService
         {
             existingMute = _mutes.Find(m => m.UserId == mute.UserId && m.GuildId == mute.GuildId);
             if (existingMute is not null)
+            {
                 return existingMute;
+            }
         }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
         existingMute = await context.Mutes.FindAsync(mute.UserId, mute.GuildId);
         if (existingMute is not null)
+        {
             return existingMute;
+        }
 
         lock (_mutes)
+        {
             _mutes.Add(mute);
+        }
 
         mute = (await context.Mutes.AddAsync(mute)).Entity;
         await context.SaveChangesAsync();
@@ -117,7 +123,9 @@ internal sealed class MuteService : BackgroundService
             foreach (Mute mute in _mutes)
             {
                 if (mute.ExpiresAt.HasValue && mute.GuildId == guild.Id)
+                {
                     result.Add(mute);
+                }
             }
         }
 
@@ -136,7 +144,9 @@ internal sealed class MuteService : BackgroundService
     public bool IsUserMuted(DiscordUser user, DiscordGuild guild)
     {
         lock (_mutes)
+        {
             return _mutes.Exists(x => x.UserId == user.Id && x.GuildId == guild.Id);
+        }
     }
 
     /// <summary>
@@ -157,25 +167,38 @@ internal sealed class MuteService : BackgroundService
     public async Task<(Infraction Infraction, bool DmSuccess)> MuteAsync(DiscordUser user, DiscordMember issuer, string? reason,
         Rule? ruleBroken)
     {
-        if (user is null) throw new ArgumentNullException(nameof(user));
-        if (issuer is null) throw new ArgumentNullException(nameof(issuer));
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (issuer is null)
+        {
+            throw new ArgumentNullException(nameof(issuer));
+        }
 
         DiscordGuild guild = issuer.Guild;
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
+        }
 
         if (issuer.GetPermissionLevel(guildConfiguration) == PermissionLevel.Moderator)
         {
             long? maxModeratorMuteDuration = guildConfiguration.Mute.MaxModeratorMuteDuration;
             if (maxModeratorMuteDuration.HasValue)
+            {
                 throw new InvalidOperationException(ExceptionMessages.ModeratorCannotPermanentlyMute);
+            }
         }
 
         lock (_mutes)
         {
             Mute? mute = _mutes.Find(x => x.UserId == user.Id && x.GuildId == issuer.Guild.Id);
             if (mute is not null)
+            {
                 _mutes.Remove(mute);
+            }
         }
 
         var options = new InfractionOptions
@@ -194,7 +217,9 @@ internal sealed class MuteService : BackgroundService
 
         Rule? rule = null;
         if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        {
             rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+        }
 
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
         reason = $"Muted by {issuer.GetUsernameWithDiscriminator()}: {reason}";
@@ -241,8 +266,15 @@ internal sealed class MuteService : BackgroundService
     /// </exception>
     public async Task RevokeMuteAsync(DiscordUser user, DiscordMember revoker, string? reason)
     {
-        if (user is null) throw new ArgumentNullException(nameof(user));
-        if (revoker is null) throw new ArgumentNullException(nameof(revoker));
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (revoker is null)
+        {
+            throw new ArgumentNullException(nameof(revoker));
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         Mute? mute = await context.Mutes.FirstOrDefaultAsync(b => b.UserId == user.Id && b.GuildId == revoker.Guild.Id);
@@ -250,7 +282,9 @@ internal sealed class MuteService : BackgroundService
         if (mute is not null)
         {
             lock (_mutes)
+            {
                 _mutes.Remove(mute);
+            }
 
             context.Remove(mute);
         }
@@ -308,20 +342,31 @@ internal sealed class MuteService : BackgroundService
         Rule? ruleBroken
     )
     {
-        if (user is null) throw new ArgumentNullException(nameof(user));
-        if (issuer is null) throw new ArgumentNullException(nameof(issuer));
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (issuer is null)
+        {
+            throw new ArgumentNullException(nameof(issuer));
+        }
 
         DiscordGuild guild = issuer.Guild;
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
+        }
 
         if (issuer.GetPermissionLevel(guildConfiguration) == PermissionLevel.Moderator)
         {
             long? maxModeratorMuteDuration = guildConfiguration.Mute.MaxModeratorMuteDuration;
 
             if (maxModeratorMuteDuration > 0 && duration.TotalMilliseconds > maxModeratorMuteDuration)
+            {
                 duration = TimeSpan.FromMilliseconds(maxModeratorMuteDuration.Value);
+            }
         }
 
         var options = new InfractionOptions
@@ -341,7 +386,9 @@ internal sealed class MuteService : BackgroundService
 
         Rule? rule = null;
         if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        {
             rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+        }
 
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
         reason = $"Temp-Muted by {issuer.GetUsernameWithDiscriminator()} ({duration.Humanize()}): {reason}";
@@ -450,7 +497,9 @@ internal sealed class MuteService : BackgroundService
         lock (_mutes)
         {
             if (!_mutes.Any(m => m.UserId == user.Id && m.GuildId == guild.Id))
+            {
                 _mutes.Add(temporaryMute);
+            }
         }
     }
 
@@ -459,12 +508,16 @@ internal sealed class MuteService : BackgroundService
         Mute[] mutes;
 
         lock (_mutes)
+        {
             mutes = _mutes.ToArray();
+        }
 
         foreach (Mute mute in mutes.Where(b => b.ExpiresAt.HasValue && b.ExpiresAt <= DateTimeOffset.UtcNow))
         {
             if (!_discordClient.Guilds.TryGetValue(mute.GuildId, out DiscordGuild? guild))
+            {
                 continue;
+            }
 
             try
             {

@@ -30,12 +30,16 @@ internal sealed partial class NoteCommand
 
         if (note?.GuildId != guild.Id)
             // cannot view notes saved for other guilds
+        {
             note = null;
+        }
 
         if (note?.Type == MemberNoteType.Staff &&
             context.Member.GetPermissionLevel(guildConfiguration) < PermissionLevel.Moderator)
             // non-staff cannot see staff notes
+        {
             note = null;
+        }
 
         if (note is null)
         {

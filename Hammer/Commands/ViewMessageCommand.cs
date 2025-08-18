@@ -41,7 +41,9 @@ internal sealed class ViewMessageCommand : ApplicationCommandModule
         var embed = new DiscordEmbedBuilder();
 
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
+        }
 
         if (long.TryParse(rawId, out long staffMessageId) &&
             await _messageService.GetStaffMessage(staffMessageId) is { } staffMessage &&

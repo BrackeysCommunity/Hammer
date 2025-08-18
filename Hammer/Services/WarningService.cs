@@ -41,7 +41,10 @@ internal sealed class WarningService
     public async Task<(Infraction Infraction, bool DmSuccess)> WarnAsync(DiscordUser user, DiscordMember issuer, string reason,
         Rule? ruleBroken, string? additionalInfo = null)
     {
-        if (string.IsNullOrWhiteSpace(reason)) throw new ArgumentException("The reason cannot be empty", nameof(reason));
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new ArgumentException("The reason cannot be empty", nameof(reason));
+        }
 
         var options = new InfractionOptions
         {
@@ -57,7 +60,9 @@ internal sealed class WarningService
 
         Rule? rule = null;
         if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        {
             rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+        }
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(DiscordColor.Orange);

@@ -31,7 +31,9 @@ public sealed class DiscordModalBuilder
         set
         {
             if (string.IsNullOrWhiteSpace(value))
+            {
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(value));
+            }
 
             _title = value;
         }
@@ -79,7 +81,11 @@ public sealed class DiscordModalBuilder
     /// <exception cref="ArgumentNullException"><paramref name="builder" /> is <see langword="null" />.</exception>
     public static implicit operator DiscordModal(DiscordModalBuilder builder)
     {
-        if (builder is null) throw new ArgumentNullException(nameof(builder));
+        if (builder is null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
+
         return builder.Build();
     }
 
@@ -89,7 +95,11 @@ public sealed class DiscordModalBuilder
     /// <returns>The newly-constructed <see cref="DiscordModal" />.</returns>
     public DiscordModal Build()
     {
-        if (string.IsNullOrWhiteSpace(_title)) throw new InvalidOperationException("Title cannot be null or whitespace.");
+        if (string.IsNullOrWhiteSpace(_title))
+        {
+            throw new InvalidOperationException("Title cannot be null or whitespace.");
+        }
+
         return new DiscordModal(Title, _inputs, _discordClient);
     }
 }

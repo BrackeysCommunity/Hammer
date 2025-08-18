@@ -99,12 +99,17 @@ internal sealed class MessageService
             throw new ArgumentNullException(nameof(staffMember));
         }
 
-        if (string.IsNullOrWhiteSpace(message)) throw new ArgumentException("Message cannot be empty", nameof(message));
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            throw new ArgumentException("Message cannot be empty", nameof(message));
+        }
 
         message = message.Trim();
 
         if (recipient.Guild != staffMember.Guild)
+        {
             throw new ArgumentException(ExceptionMessages.StaffMemberRecipientGuildMismatch, nameof(recipient));
+        }
 
         StaffMessage staffMessage = await CreateStaffMessageAsync(recipient, staffMember, message);
 
@@ -134,7 +139,9 @@ internal sealed class MessageService
         DiscordUser user = await _discordClient.GetUserAsync(message.RecipientId);
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
+        }
 
         DiscordEmbedBuilder embedBuilder = guild.CreateDefaultEmbed(guildConfiguration, false);
 
@@ -152,7 +159,9 @@ internal sealed class MessageService
         DiscordUser user = await _discordClient.GetUserAsync(message.RecipientId);
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
+        }
 
         DiscordEmbedBuilder embedBuilder = guild.CreateDefaultEmbed(guildConfiguration);
 

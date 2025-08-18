@@ -70,17 +70,23 @@ internal sealed class BanService : BackgroundService
         {
             existingBan = _temporaryBans.Find(b => b.UserId == temporaryBan.UserId && b.GuildId == temporaryBan.GuildId);
             if (existingBan is not null)
+            {
                 return existingBan;
+            }
         }
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
 
         existingBan = context.TemporaryBans.Find(temporaryBan.UserId, temporaryBan.GuildId);
         if (existingBan is not null)
+        {
             return existingBan;
+        }
 
         lock (_temporaryBans)
+        {
             _temporaryBans.Add(temporaryBan);
+        }
 
         temporaryBan = context.TemporaryBans.Add(temporaryBan).Entity;
         context.SaveChanges();
@@ -138,7 +144,9 @@ internal sealed class BanService : BackgroundService
 
         Rule? rule = null;
         if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        {
             rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+        }
 
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
         reason = $"Banned by {issuer.GetUsernameWithDiscriminator()}: {reason}";
@@ -164,7 +172,9 @@ internal sealed class BanService : BackgroundService
     public TemporaryBan? GetTemporaryBan(DiscordUser user, DiscordGuild guild)
     {
         lock (_temporaryBans)
+        {
             return _temporaryBans.Find(b => b.UserId == user.Id && b.GuildId == guild.Id);
+        }
     }
 
     /// <summary>
@@ -186,7 +196,9 @@ internal sealed class BanService : BackgroundService
             foreach (TemporaryBan temporaryBan in _temporaryBans)
             {
                 if (temporaryBan.GuildId == guild.Id)
+                {
                     result.Add(temporaryBan);
+                }
             }
         }
 
@@ -207,7 +219,9 @@ internal sealed class BanService : BackgroundService
         lock (_temporaryBans)
         {
             if (_temporaryBans.Exists(x => x.UserId == user.Id && x.GuildId == guild.Id))
+            {
                 return true;
+            }
         }
 
         IReadOnlyList<DiscordBan>? bans = await guild.GetBansAsync();
@@ -255,7 +269,9 @@ internal sealed class BanService : BackgroundService
 
         DiscordGuild guild = staffMember.Guild;
         if (member.Guild != guild)
+        {
             throw new ArgumentException("The member and staff member must be in the same guild.");
+        }
 
         var options = new InfractionOptions
         {
@@ -269,7 +285,9 @@ internal sealed class BanService : BackgroundService
 
         Rule? rule = null;
         if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        {
             rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+        }
 
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
         reason = $"Kicked by {staffMember.GetUsernameWithDiscriminator()}: {reason}";
@@ -308,7 +326,9 @@ internal sealed class BanService : BackgroundService
                     IReadOnlyList<DiscordMessage> messages = await channel.GetMessagesAsync();
                     messagesToDelete.AddRange(messages.Where(m => m.Author.Id == member.Id));
                     if (messagesToDelete.Count > 0)
+                    {
                         tasks.Add(channel.DeleteMessagesAsync(messagesToDelete, "User was kicked"));
+                    }
                 }
 
                 await Task.WhenAll(tasks);
@@ -348,7 +368,9 @@ internal sealed class BanService : BackgroundService
         if (temporaryBan is not null)
         {
             lock (_temporaryBans)
+            {
                 _temporaryBans.Remove(temporaryBan);
+            }
 
             context.Remove(temporaryBan);
         }
@@ -425,7 +447,9 @@ internal sealed class BanService : BackgroundService
 
         Rule? rule = null;
         if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        {
             rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+        }
 
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
         reason = $"Temp-Banned by {issuer.GetUsernameWithDiscriminator()} ({duration.Humanize()}): {reason}";
@@ -462,7 +486,9 @@ internal sealed class BanService : BackgroundService
                     IReadOnlyList<DiscordMessage> messages = await channel.GetMessagesAsync();
                     messagesToDelete.AddRange(messages.Where(m => m.Author.Id == user.Id));
                     if (messagesToDelete.Count > 0)
+                    {
                         tasks.Add(channel.DeleteMessagesAsync(messagesToDelete, "User was temp-banned"));
+                    }
                 }
 
                 await Task.WhenAll(tasks);
@@ -491,7 +517,9 @@ internal sealed class BanService : BackgroundService
         temporaryBan = entry.Entity;
 
         lock (_temporaryBans)
+        {
             _temporaryBans.Add(temporaryBan);
+        }
     }
 
     private async void TimerOnElapsed(object? sender, ElapsedEventArgs e)
@@ -499,12 +527,16 @@ internal sealed class BanService : BackgroundService
         TemporaryBan[] temporaryBans;
 
         lock (_temporaryBans)
+        {
             temporaryBans = _temporaryBans.ToArray();
+        }
 
         foreach (TemporaryBan ban in temporaryBans.Where(b => b.ExpiresAt <= DateTimeOffset.UtcNow))
         {
             if (!_discordClient.Guilds.TryGetValue(ban.GuildId, out DiscordGuild? guild))
+            {
                 continue;
+            }
 
             try
             {

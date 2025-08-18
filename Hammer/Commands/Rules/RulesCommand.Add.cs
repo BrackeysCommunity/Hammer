@@ -43,9 +43,13 @@ internal sealed partial class RulesCommand
             embed.WithColor(DiscordColor.Green);
             embed.WithTitle($"Rule #{rule.Id} added");
             if (string.IsNullOrWhiteSpace(brief.Value))
+            {
                 embed.WithDescription(rule.Description);
+            }
             else
+            {
                 embed.AddField(rule.Brief, rule.Description);
+            }
 
             var webhook = new DiscordWebhookBuilder();
             webhook.AddEmbed(embed);

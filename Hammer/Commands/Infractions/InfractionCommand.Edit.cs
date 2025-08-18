@@ -46,8 +46,15 @@ internal sealed partial class InfractionCommand
             return;
         }
 
-        if (ruleId == 0) ruleId = null;
-        if (reason == "-") reason = null;
+        if (ruleId == 0)
+        {
+            ruleId = null;
+        }
+
+        if (reason == "-")
+        {
+            reason = null;
+        }
 
         Rule? rule = null;
         if (ruleId is not null)

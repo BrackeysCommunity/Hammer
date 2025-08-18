@@ -20,7 +20,9 @@ internal sealed partial class NoteCommand
         var embed = new DiscordEmbedBuilder();
 
         if (string.IsNullOrWhiteSpace(content))
+        {
             return;
+        }
 
         MemberNote? note = await _noteService.GetNoteAsync(noteId);
 

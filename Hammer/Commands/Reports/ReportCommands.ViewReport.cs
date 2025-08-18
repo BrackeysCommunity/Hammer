@@ -41,10 +41,14 @@ internal sealed partial class ReportCommands
             }
 
             if (!string.IsNullOrWhiteSpace(reportedMessage.Content))
+            {
                 embed.AddField("Content", Formatter.BlockCode(Formatter.Sanitize(reportedMessage.Content)));
+            }
 
             if (reportedMessage.Attachments.Count > 0)
+            {
                 embed.AddField("Attachments", string.Join('\n', reportedMessage.Attachments));
+            }
 
             DiscordUser user = await context.Client.GetUserAsync(reportedMessage.AuthorId);
             embed.WithAuthor(user);

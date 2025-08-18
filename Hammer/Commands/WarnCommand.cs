@@ -61,7 +61,10 @@ internal sealed class WarnCommand : ApplicationCommandModule
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
             DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
             bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed);
-            if (!result) return;
+            if (!result)
+            {
+                return;
+            }
         }
 
         var builder = new DiscordEmbedBuilder();
@@ -99,10 +102,14 @@ internal sealed class WarnCommand : ApplicationCommandModule
                 await _warningService.WarnAsync(user, context.Member, reason, rule);
 
             if (!dmSuccess)
+            {
                 importantNotes.Add("The warning was successfully issued, but the user could not be DM'd.");
+            }
 
             if (importantNotes.Count > 0)
+            {
                 builder.AddField("⚠️ Important Notes", string.Join("\n", importantNotes.Select(n => $"• {n}")));
+            }
 
             builder.WithAuthor(user);
             builder.WithColor(DiscordColor.Orange);

@@ -47,7 +47,9 @@ internal sealed class StaffReactionService : BackgroundService
     private async Task DiscordClientOnMessageReactionAdded(DiscordClient sender, MessageReactionAddEventArgs e)
     {
         if (e.Guild is not { } guild || e.User.IsBot)
+        {
             return;
+        }
 
         DiscordMessage message = e.Message;
 
@@ -59,11 +61,15 @@ internal sealed class StaffReactionService : BackgroundService
 
         DiscordUser author = message.Author;
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
+        {
             return;
+        }
 
         var staffMember = (DiscordMember)e.User;
         if (!staffMember.IsStaffMember(configuration))
+        {
             return;
+        }
 
         ReactionConfiguration reactionConfiguration = configuration.Reactions;
         DiscordEmoji emoji = e.Emoji;

@@ -62,7 +62,10 @@ internal sealed class ConfigurationService
         configuration = null;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (guild is null) return false;
+        if (guild is null)
+        {
+            return false;
+        }
 
         configuration = GetGuildConfiguration(guild);
         return configuration is not null;

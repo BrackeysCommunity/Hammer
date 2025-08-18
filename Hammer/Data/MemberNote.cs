@@ -25,8 +25,15 @@ public sealed class MemberNote : IEquatable<MemberNote>
     {
         string? trimmedContent = content?.Trim();
 
-        if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
-        if (string.IsNullOrWhiteSpace(trimmedContent)) throw new ArgumentNullException(nameof(content));
+        if (!Enum.IsDefined(type))
+        {
+            throw new ArgumentOutOfRangeException(nameof(type));
+        }
+
+        if (string.IsNullOrWhiteSpace(trimmedContent))
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
 
         Type = type;
         UserId = targetUserId;
@@ -60,11 +67,30 @@ public sealed class MemberNote : IEquatable<MemberNote>
     {
         string? trimmedContent = content?.Trim();
 
-        if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
-        if (targetUser == null) throw new ArgumentNullException(nameof(targetUser));
-        if (author == null) throw new ArgumentNullException(nameof(author));
-        if (guild == null) throw new ArgumentNullException(nameof(guild));
-        if (string.IsNullOrWhiteSpace(trimmedContent)) throw new ArgumentNullException(nameof(content));
+        if (!Enum.IsDefined(type))
+        {
+            throw new ArgumentOutOfRangeException(nameof(type));
+        }
+
+        if (targetUser == null)
+        {
+            throw new ArgumentNullException(nameof(targetUser));
+        }
+
+        if (author == null)
+        {
+            throw new ArgumentNullException(nameof(author));
+        }
+
+        if (guild == null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (string.IsNullOrWhiteSpace(trimmedContent))
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
 
         Type = type;
         UserId = targetUser.Id;
@@ -123,8 +149,16 @@ public sealed class MemberNote : IEquatable<MemberNote>
     /// <inheritdoc />
     public bool Equals(MemberNote? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return Id == other.Id;
     }
 

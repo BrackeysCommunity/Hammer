@@ -40,9 +40,20 @@ internal sealed class AltAccountService : BackgroundService
     /// </exception>
     public void AddAlt(DiscordUser user, DiscordUser alt, DiscordMember staffMember)
     {
-        if (user is null) throw new ArgumentNullException(nameof(user));
-        if (alt is null) throw new ArgumentNullException(nameof(alt));
-        if (staffMember is null) throw new ArgumentNullException(nameof(staffMember));
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (alt is null)
+        {
+            throw new ArgumentNullException(nameof(alt));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
         var record = new AltAccount { StaffMemberId = staffMember.Id, RegisteredAt = DateTimeOffset.UtcNow };
@@ -100,17 +111,34 @@ internal sealed class AltAccountService : BackgroundService
     /// </exception>
     public void RemoveAlt(DiscordUser user, DiscordUser alt, DiscordMember staffMember)
     {
-        if (user is null) throw new ArgumentNullException(nameof(user));
-        if (alt is null) throw new ArgumentNullException(nameof(alt));
-        if (staffMember is null) throw new ArgumentNullException(nameof(staffMember));
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (alt is null)
+        {
+            throw new ArgumentNullException(nameof(alt));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
 
         AltAccount? altAccount = context.AltAccounts.FirstOrDefault(a => a.UserId == user.Id && a.AltId == alt.Id);
-        if (altAccount is not null) context.AltAccounts.Remove(altAccount);
+        if (altAccount is not null)
+        {
+            context.AltAccounts.Remove(altAccount);
+        }
 
         AltAccount[] altAccounts = context.AltAccounts.Where(a => a.AltId == user.Id).ToArray();
-        if (altAccounts.Length > 0) context.AltAccounts.RemoveRange(altAccounts);
+        if (altAccounts.Length > 0)
+        {
+            context.AltAccounts.RemoveRange(altAccounts);
+        }
 
         HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, []);
         HashSet<ulong>? altCache = _altAccountCache.GetOrAdd(alt.Id, []);
@@ -120,7 +148,11 @@ internal sealed class AltAccountService : BackgroundService
         foreach (ulong altId in GetAltsFor(alt.Id))
         {
             altAccounts = context.AltAccounts.Where(a => a.UserId == user.Id && a.AltId == altId).ToArray();
-            if (altAccounts.Length > 0) context.AltAccounts.RemoveRange(altAccounts);
+            if (altAccounts.Length > 0)
+            {
+                context.AltAccounts.RemoveRange(altAccounts);
+            }
+
             cache.Remove(altId);
             if (_altAccountCache.TryGetValue(altId, out altCache))
             {

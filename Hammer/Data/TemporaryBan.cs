@@ -57,8 +57,16 @@ internal sealed class TemporaryBan : IEquatable<TemporaryBan>
     /// <inheritdoc />
     public bool Equals(TemporaryBan? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return UserId == other.UserId && GuildId == other.GuildId;
     }
 

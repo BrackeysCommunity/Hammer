@@ -21,7 +21,9 @@ public sealed class DiscordModal
         discordClient.ModalSubmitted += OnModalSubmitted;
 
         foreach (DiscordModalTextInput input in inputs)
+        {
             _inputs.Add(input.CustomId, input);
+        }
     }
 
     /// <summary>
@@ -38,14 +40,19 @@ public sealed class DiscordModal
     /// <exception cref="ArgumentNullException"><paramref name="interaction" /> is <see langword="null" />.</exception>
     public async Task<DiscordModalResponse> RespondToAsync(DiscordInteraction interaction, TimeSpan timeout)
     {
-        if (interaction is null) throw new ArgumentNullException(nameof(interaction));
+        if (interaction is null)
+        {
+            throw new ArgumentNullException(nameof(interaction));
+        }
 
         var builder = new DiscordInteractionResponseBuilder();
         builder.WithTitle(Title);
         builder.WithCustomId(_customId);
 
         foreach ((_, DiscordModalTextInput input) in _inputs)
+        {
             builder.AddComponents(input.InputComponent);
+        }
 
         _taskCompletionSource = new TaskCompletionSource();
         await interaction.CreateResponseAsync(InteractionResponseType.Modal, builder);
@@ -53,7 +60,9 @@ public sealed class DiscordModal
         var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Token.Register(() => _taskCompletionSource.TrySetCanceled());
         if (timeout != Timeout.InfiniteTimeSpan)
+        {
             cancellationTokenSource.CancelAfter(timeout);
+        }
 
         try
         {
@@ -69,7 +78,9 @@ public sealed class DiscordModal
     private Task OnModalSubmitted(DiscordClient sender, ModalSubmitEventArgs e)
     {
         if (e.Interaction.Data.CustomId != _customId)
+        {
             return Task.CompletedTask;
+        }
 
         _discordClient.ModalSubmitted -= OnModalSubmitted;
 
@@ -79,7 +90,9 @@ public sealed class DiscordModal
         foreach (TextInputComponent inputComponent in inputComponents)
         {
             if (_inputs.TryGetValue(inputComponent.CustomId, out DiscordModalTextInput? input))
+            {
                 input.Value = inputComponent.Value;
+            }
         }
 
         _taskCompletionSource.TrySetResult();

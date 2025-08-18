@@ -78,8 +78,6 @@ internal sealed class MessageCommand : ApplicationCommandModule
                 embed.WithColor(DiscordColor.Green);
                 embed.WithAuthor(user);
                 embed.WithTitle("Message Sent");
-                embed.AddField("Content", content);
-                await context.FollowUpAsync(builder.AddEmbed(embed));
             }
             else
             {
@@ -88,9 +86,10 @@ internal sealed class MessageCommand : ApplicationCommandModule
                 embed.WithTitle("Failed to send message");
                 embed.WithDescription($"The message could not be sent to {user.Mention}. " +
                                       "This is likely due to DMs being disabled for this user.");
-                embed.AddField("Content", content);
-                await context.FollowUpAsync(builder.AddEmbed(embed));
             }
+
+            embed.AddField("Content", content);
+            await context.FollowUpAsync(builder.AddEmbed(embed));
         }
     }
 }

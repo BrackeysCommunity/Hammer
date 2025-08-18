@@ -28,7 +28,7 @@ internal class ReportedMessageConfiguration : IEntityTypeConfiguration<ReportedM
         builder.Property(e => e.MessageId).HasColumnOrder(4);
         builder.Property(e => e.AuthorId).HasColumnOrder(5);
         builder.Property(e => e.ReporterId).HasColumnOrder(6);
-        builder.Property(e => e.Content).HasColumnOrder(7);
+        builder.Property(e => e.Content).HasColumnOrder(7).HasMaxLength(4000);
         builder.Property(e => e.Attachments).HasColumnOrder(8).HasConversion<UriListToBytesConverter>();
     }
 }

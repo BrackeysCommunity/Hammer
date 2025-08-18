@@ -23,7 +23,7 @@ internal sealed class RuleConfiguration : IEntityTypeConfiguration<Rule>
 
         builder.Property(e => e.Id).HasColumnOrder(1);
         builder.Property(e => e.GuildId).HasColumnOrder(2);
-        builder.Property(e => e.Brief).HasColumnOrder(3);
-        builder.Property(e => e.Description).HasColumnOrder(4);
+        builder.Property(e => e.Brief).HasColumnOrder(3).HasMaxLength(255);
+        builder.Property(e => e.Description).HasColumnOrder(4).HasMaxLength(1024);
     }
 }

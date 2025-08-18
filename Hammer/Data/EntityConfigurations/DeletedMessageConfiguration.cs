@@ -34,7 +34,7 @@ internal sealed class DeletedMessageConfiguration : IEntityTypeConfiguration<Del
         builder.Property(e => e.ChannelId).HasColumnOrder(3);
         builder.Property(e => e.AuthorId).HasColumnOrder(4);
         builder.Property(e => e.StaffMemberId).HasColumnOrder(5);
-        builder.Property(e => e.Content).HasColumnOrder(6);
+        builder.Property(e => e.Content).HasColumnOrder(6).HasMaxLength(1024);
         builder.Property(e => e.Attachments).HasColumnOrder(7).HasConversion<UriListToBytesConverter>();
 
         if (_isMySql)

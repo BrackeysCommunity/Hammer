@@ -43,9 +43,9 @@ internal sealed class InfractionConfiguration : IEntityTypeConfiguration<Infract
             builder.Property(e => e.IssuedAt).HasColumnOrder(7).HasConversion<DateTimeOffsetToBytesConverter>();
         }
 
-        builder.Property(e => e.Reason).HasColumnOrder(8);
-        builder.Property(e => e.AdditionalInformation).HasColumnOrder(9);
+        builder.Property(e => e.Reason).HasColumnOrder(8).HasMaxLength(255);
+        builder.Property(e => e.AdditionalInformation).HasColumnOrder(9).HasMaxLength(255);
         builder.Property(e => e.RuleId).HasColumnOrder(10);
-        builder.Property(e => e.RuleText).HasColumnOrder(11);
+        builder.Property(e => e.RuleText).HasColumnOrder(11).HasMaxLength(255);
     }
 }

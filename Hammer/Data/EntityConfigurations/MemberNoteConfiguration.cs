@@ -43,6 +43,6 @@ internal sealed class MemberNoteConfiguration : IEntityTypeConfiguration<MemberN
             builder.Property(e => e.CreationTimestamp).HasColumnOrder(6).HasConversion<DateTimeOffsetToBytesConverter>();
         }
 
-        builder.Property(e => e.Content).HasColumnOrder(7);
+        builder.Property(e => e.Content).HasColumnOrder(7).HasMaxLength(255);
     }
 }

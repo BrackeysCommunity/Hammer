@@ -34,7 +34,7 @@ internal sealed class TrackedMessageConfiguration : IEntityTypeConfiguration<Tra
         builder.Property(e => e.ChannelId).HasColumnOrder(3);
         builder.Property(e => e.AuthorId).HasColumnOrder(4);
         builder.Property(e => e.IsDeleted).HasColumnOrder(5);
-        builder.Property(e => e.Content).HasColumnOrder(6);
+        builder.Property(e => e.Content).HasColumnOrder(6).HasMaxLength(4000);
         builder.Property(e => e.Attachments).HasColumnOrder(7).HasConversion<UriListToBytesConverter>();
 
         if (_isMySql)

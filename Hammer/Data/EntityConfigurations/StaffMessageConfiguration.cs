@@ -25,6 +25,6 @@ internal sealed class StaffMessageConfiguration : IEntityTypeConfiguration<Staff
         builder.Property(e => e.GuildId).HasColumnOrder(2);
         builder.Property(e => e.StaffMemberId).HasColumnOrder(3);
         builder.Property(e => e.RecipientId).HasColumnOrder(4);
-        builder.Property(e => e.Content).HasColumnOrder(5);
+        builder.Property(e => e.Content).HasColumnOrder(5).HasMaxLength(2000);
     }
 }

@@ -523,7 +523,6 @@ internal sealed class InfractionService : BackgroundService
     public Infraction? GetInfraction(long infractionId)
     {
         return _infractionIdCache.TryGetValue(infractionId, out Infraction? infraction) ? infraction : null;
-        return _infractionCache.Values.SelectMany(i => i).FirstOrDefault(i => i.Id == infractionId);
     }
 
     /// <summary>

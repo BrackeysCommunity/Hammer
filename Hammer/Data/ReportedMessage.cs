@@ -1,4 +1,5 @@
 using DSharpPlus.Entities;
+using JetBrains.Annotations;
 
 namespace Hammer.Data;
 
@@ -46,6 +47,7 @@ internal sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<
         ReporterId = reporter.Id;
     }
 
+    [UsedImplicitly]
     private ReportedMessage()
     {
         Attachments = ArraySegment<Uri>.Empty;
@@ -84,13 +86,13 @@ internal sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<
     ///     Gets or sets the ID of the report.
     /// </summary>
     /// <value>The report ID.</value>
-    public long Id { get; private set; }
+    public long Id { get; [UsedImplicitly] private set; }
 
     /// <summary>
     ///     Gets or sets the ID the message.
     /// </summary>
     /// <value>The message user ID.</value>
-    public ulong MessageId { get; private set; }
+    public ulong MessageId { get; [UsedImplicitly] private set; }
 
     /// <summary>
     ///     Gets or sets the ID of the user which reported the message.

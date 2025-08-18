@@ -1,4 +1,5 @@
 using DSharpPlus.Entities;
+using JetBrains.Annotations;
 
 namespace Hammer.Data;
 
@@ -96,6 +97,7 @@ public sealed class MemberNote : IEquatable<MemberNote>
         CreationTimestamp = DateTimeOffset.UtcNow;
     }
 
+    [UsedImplicitly]
     private MemberNote()
     {
     }
@@ -128,7 +130,7 @@ public sealed class MemberNote : IEquatable<MemberNote>
     ///     Gets the ID of this note.
     /// </summary>
     /// <value>The note ID.</value>
-    public long Id { get; private set; }
+    public long Id { get; [UsedImplicitly] private set; }
 
     /// <summary>
     ///     Gets the type of this note.

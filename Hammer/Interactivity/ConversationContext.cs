@@ -75,8 +75,7 @@ public sealed class ConversationContext
     /// </summary>
     /// <value>The original message, or <see langword="null" /> if no message is associated with this conversation.</value>
     /// <remarks>
-    ///     This property will be the result of <see cref="CommandContext.Message" /> if this context was constructed via
-    ///     <see cref="FromCommandContext" />, or the result of the first entry in
+    ///     This property will be the result of the first entry in
     ///     <see cref="DiscordInteractionResolvedCollection.Messages" /> if this context was constructed via
     ///     <see cref="FromInteractionContext" /> or <see cref="FromContextMenuContext" /> - which may be <see langword="null" />.
     /// </remarks>

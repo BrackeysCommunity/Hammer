@@ -17,7 +17,6 @@ internal sealed class DatabaseService
     /// </summary>
     /// <param name="logger">The logger.</param>
     /// <param name="dbContextFactory">The <see cref="HammerContext" /> factory.</param>
-    /// <param name="migrationContextFactory">The <see cref="MigrationContext" /> factory.</param>
     public DatabaseService(ILogger<DatabaseService> logger,
         IDbContextFactory<HammerContext> dbContextFactory)
     {

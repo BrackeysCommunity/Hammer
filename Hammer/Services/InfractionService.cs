@@ -742,17 +742,17 @@ internal sealed class InfractionService : BackgroundService
     /// <summary>
     ///     Returns all infractions for a user in the specified guild.
     /// </summary>
-    /// <param name="user">The user whose infractions to return.</param>
-    /// <param name="guild">The guild whose infractions to search.</param>
+    /// <param name="userId">The user whose infractions to return.</param>
+    /// <param name="guildId">The guild whose infractions to search.</param>
     /// <param name="searchOptions">A structure containing options to filter the search results.</param>
     /// <returns>
-    ///     A read-only view of the list of <see cref="Infraction" /> objects issued to <paramref name="user" /> in
-    ///     <paramref name="guild" />.
+    ///     A read-only view of the list of <see cref="Infraction" /> objects issued to <paramref name="userId" /> in
+    ///     <paramref name="guildId" />.
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    ///     <para><paramref name="user" /> is <see langword="null" /></para>
+    ///     <para><paramref name="userId" /> is <see langword="null" /></para>
     ///     -or-
-    ///     <para><paramref name="guild" /> is <see langword="null" />.</para>
+    ///     <para><paramref name="guildId" /> is <see langword="null" />.</para>
     /// </exception>
     /// <exception cref="ArgumentException"><paramref name="searchOptions" /> contains invalid property values.</exception>
     public IReadOnlyList<Infraction> GetInfractions(

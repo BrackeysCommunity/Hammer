@@ -17,7 +17,7 @@ internal sealed class MessageHistoryCommand : ApplicationCommandModule
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="MessageHistoryCommand" /> class.
-    /// </summary
+    /// </summary>
     public MessageHistoryCommand(MessageService messageService, MessageDeletionService messageDeletionService)
     {
         _messageService = messageService;

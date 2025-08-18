@@ -101,7 +101,7 @@ internal sealed class MessageService
 
         if (string.IsNullOrWhiteSpace(message))
         {
-            throw new ArgumentException("Message cannot be empty", nameof(message));
+            throw new ArgumentException(ExceptionMessages.MessageCannotBeEmpty, nameof(message));
         }
 
         message = message.Trim();

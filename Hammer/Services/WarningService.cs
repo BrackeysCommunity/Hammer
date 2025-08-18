@@ -1,6 +1,7 @@
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Extensions;
+using Hammer.Resources;
 using X10D.Text;
 
 namespace Hammer.Services;
@@ -43,7 +44,7 @@ internal sealed class WarningService
     {
         if (string.IsNullOrWhiteSpace(reason))
         {
-            throw new ArgumentException("The reason cannot be empty", nameof(reason));
+            throw new ArgumentException(ExceptionMessages.ReasonCannotBeEmpty, nameof(reason));
         }
 
         var options = new InfractionOptions

@@ -27,6 +27,9 @@
     <data name="CannotDeleteNonGuildMessage" xml:space="preserve">
         <value>Cannot delete non-guild message.</value>
     </data>
+    <data name="MessageCannotBeEmpty" xml:space="preserve">
+        <value>Message cannot be empty.</value>
+    </data>
     <data name="MessageStaffMemberGuildMismatch" xml:space="preserve">
         <value>Message does not appear in the same guild as the staff member.</value>
     </data>
@@ -51,10 +54,16 @@
     <data name="NotAStaffMember" xml:space="preserve">
         <value>{user.Username}#{user.Discriminator} is not a staff member of {guild.Name}.</value>
     </data>
+    <data name="ReasonCannotBeEmpty" xml:space="preserve">
+        <value>The reason cannot be empty.</value>
+    </data>
     <data name="StaffIsHigherLevel" xml:space="preserve">
         <value>{higher.Username}#{higher.Discriminator} is a higher permission level than {lower.Username}#{lower.Discriminator}.</value>
     </data>
     <data name="StaffMemberRecipientGuildMismatch" xml:space="preserve">
         <value>The specified staff member and recipient do not belong to the same guild.</value>
+    </data>
+    <data name="ValueCannotBeNullOrWhitespace" xml:space="preserve">
+        <value>The value cannot be null or whitespace.</value>
     </data>
 </root>

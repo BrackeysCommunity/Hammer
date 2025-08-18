@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
+using Hammer.Resources;
 
 namespace Hammer.Interactivity;
 
@@ -32,7 +33,7 @@ public sealed class DiscordModalBuilder
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(value));
+                throw new ArgumentException(ExceptionMessages.ValueCannotBeNullOrWhitespace, nameof(value));
             }
 
             _title = value;

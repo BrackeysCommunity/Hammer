@@ -27,11 +27,13 @@ internal sealed class MessageHistoryCommand : ApplicationCommandModule
     [SlashCommand("messagehistory", "Views the message history for a user.", false)]
     public async Task MessageHistoryAsync(
         InteractionContext context,
-        [Option("user", "The user whose message history to view.")]
-        DiscordUser user
+        [Option("user", "The user whose message history to view.")] DiscordUser user
     )
     {
-        ArgumentNullException.ThrowIfNull(user);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
 
         await context.DeferAsync();
         var embed = new DiscordEmbedBuilder();

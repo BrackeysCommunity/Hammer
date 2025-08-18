@@ -42,8 +42,15 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="user" /> is <see langword="null" />.</exception>
     public bool IsCooldownActive(DiscordUser user, DiscordMember staffMember)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(staffMember);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         lock (_hotInfractions)
         {
@@ -124,7 +131,10 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <exception cref="InvalidOperationException"><paramref name="infraction" /> is already on a cooldown.</exception>
     public void StartCooldown(Infraction infraction)
     {
-        ArgumentNullException.ThrowIfNull(infraction);
+        if (infraction is null)
+        {
+            throw new ArgumentNullException(nameof(infraction));
+        }
 
         lock (_hotInfractions)
         {
@@ -173,7 +183,10 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="user" /> is <see langword="null" />.</exception>
     public void StopCooldown(DiscordUser user)
     {
-        ArgumentNullException.ThrowIfNull(user);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
 
         lock (_hotInfractions)
         {

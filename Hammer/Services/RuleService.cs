@@ -36,7 +36,10 @@ internal sealed class RuleService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public Rule AddRule(DiscordGuild guild, string description, string? brief = null)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         if (string.IsNullOrWhiteSpace(description)) throw new ArgumentNullException(nameof(description));
         if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules)) _guildRules.Add(guild.Id, rules = []);

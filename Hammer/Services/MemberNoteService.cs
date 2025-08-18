@@ -50,8 +50,15 @@ internal sealed class MemberNoteService
     /// </exception>
     public async Task<MemberNote> CreateNoteAsync(DiscordUser user, DiscordMember author, string content)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(author);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (author is null)
+        {
+            throw new ArgumentNullException(nameof(author));
+        }
 
         string? trimmedContent = content?.Trim();
         if (string.IsNullOrWhiteSpace(trimmedContent)) throw new ArgumentNullException(nameof(content));
@@ -165,8 +172,15 @@ internal sealed class MemberNoteService
     /// </exception>
     public async Task<int> GetNoteCountAsync(DiscordUser user, DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         return await context.MemberNotes.CountAsync(n => n.UserId == user.Id && n.GuildId == guild.Id);
@@ -192,8 +206,16 @@ internal sealed class MemberNoteService
     /// </exception>
     public async Task<int> GetNoteCountAsync(DiscordUser user, DiscordGuild guild, MemberNoteType type)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
         if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
@@ -211,7 +233,10 @@ internal sealed class MemberNoteService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public async IAsyncEnumerable<MemberNote> GetNotesAsync(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
@@ -234,7 +259,11 @@ internal sealed class MemberNoteService
     /// </exception>
     public async IAsyncEnumerable<MemberNote> GetNotesAsync(DiscordGuild guild, MemberNoteType type)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
         if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
@@ -259,8 +288,15 @@ internal sealed class MemberNoteService
     /// </exception>
     public async IAsyncEnumerable<MemberNote> GetNotesAsync(DiscordUser user, DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
@@ -288,8 +324,16 @@ internal sealed class MemberNoteService
     /// </exception>
     public async IAsyncEnumerable<MemberNote> GetNotesAsync(DiscordUser user, DiscordGuild guild, MemberNoteType type)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
         if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();

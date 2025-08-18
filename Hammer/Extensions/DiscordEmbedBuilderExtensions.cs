@@ -18,7 +18,10 @@ internal static class DiscordEmbedBuilderExtensions
     /// <exception cref="ArgumentNullException"><paramref name="embedBuilder" /> is <see langword="null" />.</exception>
     public static DiscordEmbedBuilder AddModMailNotice(this DiscordEmbedBuilder embedBuilder)
     {
-        ArgumentNullException.ThrowIfNull(embedBuilder);
+        if (embedBuilder is null)
+        {
+            throw new ArgumentNullException(nameof(embedBuilder));
+        }
 
         embedBuilder.AddField("\u200B", EmbedMessages.DmModMail);
         return embedBuilder;
@@ -45,12 +48,23 @@ internal static class DiscordEmbedBuilderExtensions
         bool addThumbnail = true
     )
     {
-        ArgumentNullException.ThrowIfNull(embedBuilder);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (embedBuilder is null)
+        {
+            throw new ArgumentNullException(nameof(embedBuilder));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         string iconUrl = guild.GetIconUrl(ImageFormat.Png);
         embedBuilder.WithFooter(guild.Name, iconUrl: iconUrl);
-        if (addThumbnail) embedBuilder.WithThumbnail(iconUrl);
+        if (addThumbnail)
+        {
+            embedBuilder.WithThumbnail(iconUrl);
+        }
+
         return embedBuilder;
     }
 

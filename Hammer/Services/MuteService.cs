@@ -70,7 +70,11 @@ internal sealed class MuteService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="mute" /> is <see langword="null" />.</exception>
     public async Task<Mute> AddMuteAsync(Mute mute)
     {
-        ArgumentNullException.ThrowIfNull(mute);
+        if (mute is null)
+        {
+            throw new ArgumentNullException(nameof(mute));
+        }
+
         Mute? existingMute;
 
         lock (_mutes)
@@ -101,7 +105,10 @@ internal sealed class MuteService : BackgroundService
     /// <returns>A read-only view of the temporary mutes in the specified guild.</returns>
     public IReadOnlyList<Mute> GetTemporaryMutes(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         var result = new List<Mute>();
 

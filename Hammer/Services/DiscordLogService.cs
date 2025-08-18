@@ -46,8 +46,15 @@ internal sealed class DiscordLogService : BackgroundService
     public async Task LogAsync(DiscordGuild guild, DiscordEmbed embed,
         StaffNotificationOptions notificationOptions = StaffNotificationOptions.None)
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        ArgumentNullException.ThrowIfNull(embed);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (embed is null)
+        {
+            throw new ArgumentNullException(nameof(embed));
+        }
 
         if (_logChannels.TryGetValue(guild, out DiscordChannel? logChannel))
         {
@@ -76,7 +83,10 @@ internal sealed class DiscordLogService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public bool TryGetLogChannel(DiscordGuild guild, [NotNullWhen(true)] out DiscordChannel? channel)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
         {

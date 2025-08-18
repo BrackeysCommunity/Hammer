@@ -59,7 +59,11 @@ internal sealed class BanService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="temporaryBan" /> is <see langword="null" />.</exception>
     public TemporaryBan AddTemporaryBan(TemporaryBan temporaryBan)
     {
-        ArgumentNullException.ThrowIfNull(temporaryBan);
+        if (temporaryBan is null)
+        {
+            throw new ArgumentNullException(nameof(temporaryBan));
+        }
+
         TemporaryBan? existingBan;
 
         lock (_temporaryBans)
@@ -109,8 +113,15 @@ internal sealed class BanService : BackgroundService
         bool clearHistory
     )
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(issuer);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (issuer is null)
+        {
+            throw new ArgumentNullException(nameof(issuer));
+        }
 
         var options = new InfractionOptions
         {
@@ -163,7 +174,10 @@ internal sealed class BanService : BackgroundService
     /// <returns>A read-only view of the temporary bans in the specified guild.</returns>
     public IReadOnlyList<TemporaryBan> GetTemporaryBans(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         var result = new List<TemporaryBan>();
 
@@ -229,8 +243,15 @@ internal sealed class BanService : BackgroundService
         bool clearHistory
     )
     {
-        ArgumentNullException.ThrowIfNull(member);
-        ArgumentNullException.ThrowIfNull(staffMember);
+        if (member is null)
+        {
+            throw new ArgumentNullException(nameof(member));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         DiscordGuild guild = staffMember.Guild;
         if (member.Guild != guild)
@@ -310,8 +331,15 @@ internal sealed class BanService : BackgroundService
     /// </exception>
     public async Task RevokeBanAsync(DiscordUser user, DiscordMember revoker, string? reason)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(revoker);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (revoker is null)
+        {
+            throw new ArgumentNullException(nameof(revoker));
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         TemporaryBan? temporaryBan =
@@ -370,8 +398,15 @@ internal sealed class BanService : BackgroundService
         bool clearHistory
     )
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(issuer);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (issuer is null)
+        {
+            throw new ArgumentNullException(nameof(issuer));
+        }
 
         var options = new InfractionOptions
         {

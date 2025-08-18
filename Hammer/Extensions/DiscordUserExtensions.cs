@@ -69,18 +69,38 @@ internal static class DiscordUserExtensions
     /// </exception>
     public static PermissionLevel GetPermissionLevel(this DiscordMember member, GuildConfiguration guildConfiguration)
     {
-        ArgumentNullException.ThrowIfNull(member);
-        ArgumentNullException.ThrowIfNull(guildConfiguration);
+        if (member is null)
+        {
+            throw new ArgumentNullException(nameof(member));
+        }
+
+        if (guildConfiguration is null)
+        {
+            throw new ArgumentNullException(nameof(guildConfiguration));
+        }
 
         if ((member.Permissions & DSharpPlus.Permissions.Administrator) != 0)
+        {
             return PermissionLevel.Administrator;
+        }
 
         RoleConfiguration roleConfiguration = guildConfiguration.Roles;
         List<ulong> roles = member.Roles.Select(r => r.Id).ToList();
 
-        if (roles.Contains(roleConfiguration.AdministratorRoleId)) return PermissionLevel.Administrator;
-        if (roles.Contains(roleConfiguration.ModeratorRoleId)) return PermissionLevel.Moderator;
-        if (roles.Contains(roleConfiguration.GuruRoleId)) return PermissionLevel.Guru;
+        if (roles.Contains(roleConfiguration.AdministratorRoleId))
+        {
+            return PermissionLevel.Administrator;
+        }
+
+        if (roles.Contains(roleConfiguration.ModeratorRoleId))
+        {
+            return PermissionLevel.Moderator;
+        }
+
+        if (roles.Contains(roleConfiguration.GuruRoleId))
+        {
+            return PermissionLevel.Guru;
+        }
 
         return PermissionLevel.Default;
     }
@@ -126,9 +146,20 @@ internal static class DiscordUserExtensions
     /// </exception>
     public static bool IsHigherLevelThan(this DiscordMember member, DiscordMember other, GuildConfiguration guildConfiguration)
     {
-        ArgumentNullException.ThrowIfNull(member);
-        ArgumentNullException.ThrowIfNull(other);
-        ArgumentNullException.ThrowIfNull(guildConfiguration);
+        if (member is null)
+        {
+            throw new ArgumentNullException(nameof(member));
+        }
+
+        if (other is null)
+        {
+            throw new ArgumentNullException(nameof(other));
+        }
+
+        if (guildConfiguration is null)
+        {
+            throw new ArgumentNullException(nameof(guildConfiguration));
+        }
 
         if (member.IsStaffMember(guildConfiguration) && !other.IsStaffMember(guildConfiguration))
         {
@@ -162,9 +193,20 @@ internal static class DiscordUserExtensions
     /// </exception>
     public static bool IsHigherOrSameLevel(this DiscordMember member, DiscordMember other, GuildConfiguration guildConfiguration)
     {
-        ArgumentNullException.ThrowIfNull(member);
-        ArgumentNullException.ThrowIfNull(other);
-        ArgumentNullException.ThrowIfNull(guildConfiguration);
+        if (member is null)
+        {
+            throw new ArgumentNullException(nameof(member));
+        }
+
+        if (other is null)
+        {
+            throw new ArgumentNullException(nameof(other));
+        }
+
+        if (guildConfiguration is null)
+        {
+            throw new ArgumentNullException(nameof(guildConfiguration));
+        }
 
         if (GetPermissionLevel(member, guildConfiguration) >= GetPermissionLevel(other, guildConfiguration))
         {
@@ -189,8 +231,15 @@ internal static class DiscordUserExtensions
     /// </exception>
     public static bool IsStaffMember(this DiscordMember member, GuildConfiguration guildConfiguration)
     {
-        ArgumentNullException.ThrowIfNull(member);
-        ArgumentNullException.ThrowIfNull(guildConfiguration);
+        if (member is null)
+        {
+            throw new ArgumentNullException(nameof(member));
+        }
+
+        if (guildConfiguration is null)
+        {
+            throw new ArgumentNullException(nameof(guildConfiguration));
+        }
 
         return GetPermissionLevel(member, guildConfiguration) >= PermissionLevel.Moderator;
     }

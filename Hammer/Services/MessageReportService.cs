@@ -59,8 +59,15 @@ internal sealed class MessageReportService : BackgroundService
     /// </exception>
     public async Task BlockUserAsync(DiscordUser user, DiscordMember staffMember)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(staffMember);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         if (IsUserBlocked(user, staffMember.Guild)) return;
 
@@ -98,8 +105,15 @@ internal sealed class MessageReportService : BackgroundService
     /// <returns>The reported message.</returns>
     public async Task<ReportedMessage> CreateNewMessageReportAsync(DiscordMessage message, DiscordMember reporter)
     {
-        ArgumentNullException.ThrowIfNull(message);
-        ArgumentNullException.ThrowIfNull(reporter);
+        if (message is null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        if (reporter is null)
+        {
+            throw new ArgumentNullException(nameof(reporter));
+        }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
@@ -155,8 +169,15 @@ internal sealed class MessageReportService : BackgroundService
     /// <returns>An enumerable collection of <see cref="ReportedMessage" /> values.</returns>
     public IEnumerable<ReportedMessage> EnumerateSubmittedReports(DiscordUser user, DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         foreach (ReportedMessage reportedMessage in _reportedMessages)
         {
@@ -173,7 +194,11 @@ internal sealed class MessageReportService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="message" /> is <see langword="null" />.</exception>
     public int GetReportCount(DiscordMessage message)
     {
-        ArgumentNullException.ThrowIfNull(message);
+        if (message is null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
         return _reportedMessages.Count(m => m.MessageId == message.Id);
     }
 
@@ -185,7 +210,11 @@ internal sealed class MessageReportService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="member" /> is <see langword="null" />.</exception>
     public IReadOnlyList<ReportedMessage> GetReports(DiscordMember member)
     {
-        ArgumentNullException.ThrowIfNull(member);
+        if (member is null)
+        {
+            throw new ArgumentNullException(nameof(member));
+        }
+
         return GetReports(member, member.Guild);
     }
 
@@ -202,8 +231,15 @@ internal sealed class MessageReportService : BackgroundService
     /// </exception>
     public IReadOnlyList<ReportedMessage> GetReports(DiscordUser user, DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         var list = new List<ReportedMessage>();
 
@@ -221,7 +257,11 @@ internal sealed class MessageReportService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="member" /> is <see langword="null" />.</exception>
     public IReadOnlyList<ReportedMessage> GetSubmittedReports(DiscordMember member)
     {
-        ArgumentNullException.ThrowIfNull(member);
+        if (member is null)
+        {
+            throw new ArgumentNullException(nameof(member));
+        }
+
         return GetSubmittedReports(member, member.Guild);
     }
 
@@ -238,8 +278,15 @@ internal sealed class MessageReportService : BackgroundService
     /// </exception>
     public IReadOnlyList<ReportedMessage> GetSubmittedReports(DiscordUser user, DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         var list = new List<ReportedMessage>();
 
@@ -265,8 +312,15 @@ internal sealed class MessageReportService : BackgroundService
     /// </exception>
     public bool HasUserReportedMessage(DiscordMessage message, DiscordMember reporter)
     {
-        ArgumentNullException.ThrowIfNull(message);
-        ArgumentNullException.ThrowIfNull(reporter);
+        if (message is null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        if (reporter is null)
+        {
+            throw new ArgumentNullException(nameof(reporter));
+        }
 
         return _reportedMessages.Exists(m => m.MessageId == message.Id && m.ReporterId == reporter.Id);
     }
@@ -287,8 +341,15 @@ internal sealed class MessageReportService : BackgroundService
     /// </exception>
     public bool IsUserBlocked(DiscordUser user, DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         return _blockedReporters.Exists(r => r.UserId == user.Id && r.GuildId == guild.Id);
     }
@@ -305,8 +366,15 @@ internal sealed class MessageReportService : BackgroundService
     /// </exception>
     public async Task<bool> ReportMessageAsync(DiscordMessage message, DiscordMember reporter)
     {
-        ArgumentNullException.ThrowIfNull(message);
-        ArgumentNullException.ThrowIfNull(reporter);
+        if (message is null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        if (reporter is null)
+        {
+            throw new ArgumentNullException(nameof(reporter));
+        }
 
         if (IsUserBlocked(reporter, reporter.Guild))
         {
@@ -392,8 +460,15 @@ internal sealed class MessageReportService : BackgroundService
     /// </exception>
     public async Task UnblockUserAsync(DiscordUser user, DiscordMember staffMember)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(staffMember);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         if (!IsUserBlocked(user, staffMember.Guild)) return;
 

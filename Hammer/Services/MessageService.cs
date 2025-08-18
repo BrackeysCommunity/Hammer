@@ -89,8 +89,16 @@ internal sealed class MessageService
     /// </exception>
     public async Task<bool> MessageMemberAsync(DiscordMember recipient, DiscordMember staffMember, string message)
     {
-        ArgumentNullException.ThrowIfNull(recipient);
-        ArgumentNullException.ThrowIfNull(staffMember);
+        if (recipient is null)
+        {
+            throw new ArgumentNullException(nameof(recipient));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
+
         if (string.IsNullOrWhiteSpace(message)) throw new ArgumentException("Message cannot be empty", nameof(message));
 
         message = message.Trim();

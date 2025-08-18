@@ -29,8 +29,15 @@ internal static class DiscordGuildExtensions
         bool addThumbnail = true
     )
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        ArgumentNullException.ThrowIfNull(guildConfiguration);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (guildConfiguration is null)
+        {
+            throw new ArgumentNullException(nameof(guildConfiguration));
+        }
 
         return new DiscordEmbedBuilder().WithColor(guildConfiguration.PrimaryColor).WithGuildInfo(guild, addThumbnail);
     }

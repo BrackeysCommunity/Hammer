@@ -29,7 +29,7 @@ internal sealed class InfractionAutocompleteProvider : IAutocompleteProvider
 
     private static string GetInfractionSummary(DiscordClient client, Infraction infraction)
     {
-        string userString = $"User {infraction.UserId}";
+        var userString = $"User {infraction.UserId}";
         try
         {
             DiscordUser? user = client.GetUserAsync(infraction.UserId).GetAwaiter().GetResult();

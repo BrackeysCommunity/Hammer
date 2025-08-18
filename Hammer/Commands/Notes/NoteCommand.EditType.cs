@@ -21,7 +21,7 @@ internal sealed partial class NoteCommand
 
         if (!Enum.IsDefined(type))
         {
-            string validTypes = string.Join(", ", Enum.GetNames<MemberNoteType>());
+            var validTypes = string.Join(", ", Enum.GetNames<MemberNoteType>());
             embed.WithColor(0xFF0000);
             embed.WithTitle("Invalid Note Type");
             embed.WithDescription($"The specified note type {type} is invalid. " +

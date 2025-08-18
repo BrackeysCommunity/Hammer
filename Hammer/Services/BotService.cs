@@ -169,7 +169,7 @@ internal sealed class BotService : BackgroundService
 
         DiscordUser user = args.Context.User;
         string command = args.Context.CommandName;
-        string propertyString = string.Join("; ", properties);
+        var propertyString = string.Join("; ", properties);
         _logger.LogInformation("{User} ran context menu '{Command}' with resolved {Properties}", user, command, propertyString);
 
         return Task.CompletedTask;

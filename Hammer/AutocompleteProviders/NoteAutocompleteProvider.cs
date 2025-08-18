@@ -43,7 +43,7 @@ internal sealed class NoteAutocompleteProvider : IAutocompleteProvider
                 content = content[..10] + "...";
             }
 
-            string text = $"#{note.Id} (User {note.UserId}) - {content}";
+            var text = $"#{note.Id} (User {note.UserId}) - {content}";
             choices.Add(new DiscordAutoCompleteChoice(text, note.Id));
         }
 

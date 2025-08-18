@@ -60,8 +60,7 @@ internal sealed class MemberNoteService
             throw new ArgumentNullException(nameof(author));
         }
 
-        string? trimmedContent = content?.Trim();
-        if (string.IsNullOrWhiteSpace(trimmedContent))
+        if (string.IsNullOrWhiteSpace(content))
         {
             throw new ArgumentNullException(nameof(content));
         }
@@ -85,7 +84,7 @@ internal sealed class MemberNoteService
             noteType = MemberNoteType.Guru;
         }
 
-        var note = new MemberNote(noteType, user, author, guild, trimmedContent);
+        var note = new MemberNote(noteType, user, author, guild, content.Trim());
 
         await using (HammerContext context = await _dbContextFactory.CreateDbContextAsync())
         {

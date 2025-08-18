@@ -160,15 +160,15 @@ internal sealed class DiscordLogService : BackgroundService
 
     private async Task OnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
     {
-        var logChannel = _configuration.GetSection(e.Guild.Id.ToString())?.GetSection("logChannel")?.Get<ulong>();
-        if (!logChannel.HasValue)
+        var logChannel = _configuration.GetSection(e.Guild.Id.ToString()).GetSection("logChannel").Get<ulong>();
+        if (logChannel == 0)
         {
             return;
         }
 
         try
         {
-            DiscordChannel? channel = await _discordClient.GetChannelAsync(logChannel.Value);
+            DiscordChannel? channel = await _discordClient.GetChannelAsync(logChannel);
 
             if (channel is not null)
             {

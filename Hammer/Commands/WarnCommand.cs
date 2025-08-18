@@ -81,7 +81,7 @@ internal sealed class WarnCommand : ApplicationCommandModule
                 {
                     if (_ruleService.GuildHasRule(guild, ruleId))
                     {
-                        rule = _ruleService.GetRuleById(guild, ruleId)!;
+                        rule = _ruleService.GetRuleById(guild, ruleId);
                     }
                     else
                     {

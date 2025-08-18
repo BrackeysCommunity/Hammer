@@ -114,7 +114,7 @@ internal sealed class MuteCommand : ApplicationCommandModule
             {
                 if (_ruleService.GuildHasRule(guild, ruleId))
                 {
-                    rule = _ruleService.GetRuleById(guild, ruleId)!;
+                    rule = _ruleService.GetRuleById(guild, ruleId);
                 }
                 else
                 {

@@ -110,7 +110,7 @@ internal sealed class RuleService : BackgroundService
             return;
         }
 
-        Rule ruleToDelete = GetRuleById(guild, id)!;
+        Rule ruleToDelete = GetRuleById(guild, id);
         _guildRules[guild.Id].Remove(ruleToDelete);
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
@@ -379,7 +379,7 @@ internal sealed class RuleService : BackgroundService
             return;
         }
 
-        Rule rule = GetRuleById(guild, ruleId)!;
+        Rule rule = GetRuleById(guild, ruleId);
         SetRuleBrief(rule, brief);
     }
 
@@ -411,7 +411,7 @@ internal sealed class RuleService : BackgroundService
             return;
         }
 
-        Rule rule = GetRuleById(guild, ruleId)!;
+        Rule rule = GetRuleById(guild, ruleId);
         SetRuleContent(rule, content);
     }
 

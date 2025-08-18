@@ -258,7 +258,7 @@ internal sealed class InfractionCooldownService : BackgroundService
     {
         lock (_hotInfractions)
         {
-            foreach ((Infraction? infraction, DateTimeOffset cooldownStart) in _hotInfractions.ToArray())
+            foreach ((Infraction infraction, DateTimeOffset cooldownStart) in _hotInfractions.ToArray())
             {
                 if (DateTimeOffset.Now - cooldownStart > TimeSpan.FromMinutes(30))
                 {

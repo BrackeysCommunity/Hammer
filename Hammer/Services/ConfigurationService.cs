@@ -43,7 +43,7 @@ internal sealed class ConfigurationService
             throw new ArgumentNullException(nameof(guild));
         }
 
-        return _configuration.GetSection(guild.Id.ToString())?.Get<GuildConfiguration>();
+        return _configuration.GetSection(guild.Id.ToString()).Get<GuildConfiguration>();
     }
 
     /// <summary>

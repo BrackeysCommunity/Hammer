@@ -23,14 +23,12 @@ public sealed class MemberNote : IEquatable<MemberNote>
     /// </exception>
     public MemberNote(MemberNoteType type, ulong targetUserId, ulong authorId, ulong guildId, string content)
     {
-        string? trimmedContent = content?.Trim();
-
         if (!Enum.IsDefined(type))
         {
             throw new ArgumentOutOfRangeException(nameof(type));
         }
 
-        if (string.IsNullOrWhiteSpace(trimmedContent))
+        if (string.IsNullOrWhiteSpace(content))
         {
             throw new ArgumentNullException(nameof(content));
         }
@@ -39,7 +37,7 @@ public sealed class MemberNote : IEquatable<MemberNote>
         UserId = targetUserId;
         AuthorId = authorId;
         GuildId = guildId;
-        Content = trimmedContent;
+        Content = content.Trim();
         CreationTimestamp = DateTimeOffset.UtcNow;
     }
 
@@ -65,8 +63,6 @@ public sealed class MemberNote : IEquatable<MemberNote>
     /// </exception>
     public MemberNote(MemberNoteType type, DiscordUser targetUser, DiscordUser author, DiscordGuild guild, string content)
     {
-        string? trimmedContent = content?.Trim();
-
         if (!Enum.IsDefined(type))
         {
             throw new ArgumentOutOfRangeException(nameof(type));
@@ -87,7 +83,7 @@ public sealed class MemberNote : IEquatable<MemberNote>
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (string.IsNullOrWhiteSpace(trimmedContent))
+        if (string.IsNullOrWhiteSpace(content))
         {
             throw new ArgumentNullException(nameof(content));
         }
@@ -96,7 +92,7 @@ public sealed class MemberNote : IEquatable<MemberNote>
         UserId = targetUser.Id;
         AuthorId = author.Id;
         GuildId = guild.Id;
-        Content = trimmedContent;
+        Content = content.Trim();
         CreationTimestamp = DateTimeOffset.UtcNow;
     }
 

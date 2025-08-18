@@ -36,6 +36,7 @@ internal sealed partial class RulesCommand
 
         Rule rule = _ruleService.GetRuleById(guild, (int)ruleId);
         string? oldBrief = rule.Brief?.AsNullIfWhiteSpace();
+        // ReSharper disable once VariableCanBeNotNullable
         string? oldDescription = rule.Description.AsNullIfWhiteSpace();
 
         var modal = new DiscordModalBuilder(context.Client);

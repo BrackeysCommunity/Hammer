@@ -131,9 +131,16 @@ internal static class DiscordUserExtensions
         ArgumentNullException.ThrowIfNull(guildConfiguration);
 
         if (member.IsStaffMember(guildConfiguration) && !other.IsStaffMember(guildConfiguration))
+        {
             return true;
+        }
 
-        return GetPermissionLevel(member, guildConfiguration) > GetPermissionLevel(other, guildConfiguration);
+        if (GetPermissionLevel(member, guildConfiguration) > GetPermissionLevel(other, guildConfiguration))
+        {
+            return true;
+        }
+
+        return member.Roles.Max(r => r.Position) > other.Roles.Max(r => r.Position);
     }
 
     /// <summary>
@@ -160,9 +167,11 @@ internal static class DiscordUserExtensions
         ArgumentNullException.ThrowIfNull(guildConfiguration);
 
         if (GetPermissionLevel(member, guildConfiguration) >= GetPermissionLevel(other, guildConfiguration))
+        {
             return true;
+        }
 
-        return member.Roles.Min(r => r.Position) <= other.Roles.Min(r => r.Position);
+        return member.Roles.Max(r => r.Position) >= other.Roles.Max(r => r.Position);
     }
 
     /// <summary>

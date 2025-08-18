@@ -1,7 +1,6 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
-using Hammer.Configuration;
 using Hammer.Data;
 
 namespace Hammer.Commands.Infractions;
@@ -25,7 +24,7 @@ internal sealed partial class InfractionCommand
             return;
         }
 
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out _))
         {
             await context.CreateResponseAsync("Guild is not configured!", true);
             return;

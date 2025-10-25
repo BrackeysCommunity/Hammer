@@ -1,10 +1,12 @@
 using DSharpPlus;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Hammer.AutocompleteProviders;
 
@@ -13,13 +15,12 @@ namespace Hammer.AutocompleteProviders;
 /// </summary>
 internal sealed class InfractionAutoCompleteProvider : IAutoCompleteProvider
 {
-    /// <inheritdoc />
-    public Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext context)
+    public ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context)
     {
-        var infractionService = context.Services.GetRequiredService<InfractionService>();
+        var infractionService = context.ServiceProvider.GetRequiredService<InfractionService>();
         IEnumerable<Infraction> infractions = infractionService.EnumerateInfractions(context.Guild);
 
-        return Task.FromResult(infractions.OrderByDescending(i => i.IssuedAt).Take(10).Select(infraction =>
+        return ValueTask.FromResult(infractions.OrderByDescending(i => i.IssuedAt).Take(10).Select(infraction =>
         {
             string summary = GetInfractionSummary(context.Client, infraction);
             return new DiscordAutoCompleteChoice(summary, infraction.Id);

@@ -1,8 +1,11 @@
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
+using Hammer.Extensions;
 using Hammer.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Hammer.AutocompleteProviders;
 
@@ -11,11 +14,11 @@ namespace Hammer.AutocompleteProviders;
 /// </summary>
 internal sealed class NoteAutoCompleteProvider : IAutoCompleteProvider
 {
-    /// <inheritdoc />
-    public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext context)
+    public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context)
     {
-        var noteService = context.Services.GetRequiredService<MemberNoteService>();
-        var configurationService = context.Services.GetRequiredService<ConfigurationService>();
+        IServiceProvider serviceProvider = context.ServiceProvider;
+        var noteService = serviceProvider.GetRequiredService<MemberNoteService>();
+        var configurationService = serviceProvider.GetRequiredService<ConfigurationService>();
 
         if (!configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
         {

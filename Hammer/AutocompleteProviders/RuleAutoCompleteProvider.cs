@@ -1,7 +1,9 @@
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Hammer.AutocompleteProviders;
 
@@ -10,14 +12,13 @@ namespace Hammer.AutocompleteProviders;
 /// </summary>
 internal sealed class RuleAutoCompleteProvider : IAutoCompleteProvider
 {
-    /// <inheritdoc />
-    public Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext context)
+    public ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context)
     {
-        var ruleService = context.Services.GetRequiredService<RuleService>();
+        var ruleService = context.ServiceProvider.GetRequiredService<RuleService>();
         IReadOnlyList<Rule> rules = ruleService.GetGuildRules(context.Guild);
 
         var result = new List<DiscordAutoCompleteChoice>();
-        string optionValue = context.OptionValue?.ToString() ?? string.Empty;
+        string optionValue = context.UserInput ?? string.Empty;
         bool hasOptionValue = !string.IsNullOrWhiteSpace(optionValue);
         string[] searchTerms = optionValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -36,7 +37,7 @@ internal sealed class RuleAutoCompleteProvider : IAutoCompleteProvider
             }
         }
 
-        return Task.FromResult<IEnumerable<DiscordAutoCompleteChoice>>(result);
+        return ValueTask.FromResult<IEnumerable<DiscordAutoCompleteChoice>>(result);
     }
 
     private static string GetRuleDescription(Rule rule)

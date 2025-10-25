@@ -79,7 +79,7 @@ internal static class DiscordUserExtensions
             throw new ArgumentNullException(nameof(guildConfiguration));
         }
 
-        if ((member.Permissions & DSharpPlus.Permissions.Administrator) != 0)
+        if (member.Permissions.HasAnyPermission(DiscordPermission.Administrator))
         {
             return PermissionLevel.Administrator;
         }

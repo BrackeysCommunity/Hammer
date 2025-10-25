@@ -38,8 +38,12 @@ internal sealed class ConfigurationService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public GuildConfiguration? GetGuildConfiguration(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        return _configuration.GetSection(guild.Id.ToString())?.Get<GuildConfiguration>();
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        return _configuration.GetSection(guild.Id.ToString()).Get<GuildConfiguration>();
     }
 
     /// <summary>
@@ -58,7 +62,10 @@ internal sealed class ConfigurationService
         configuration = null;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (guild is null) return false;
+        if (guild is null)
+        {
+            return false;
+        }
 
         configuration = GetGuildConfiguration(guild);
         return configuration is not null;

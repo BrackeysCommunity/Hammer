@@ -70,7 +70,10 @@ internal sealed class BanCommand
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
             DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
             bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed);
-            if (!result) return;
+            if (!result)
+            {
+                return;
+            }
         }
 
         DiscordGuild guild = context.Guild;
@@ -118,7 +121,7 @@ internal sealed class BanCommand
             {
                 if (_ruleService.GuildHasRule(guild, ruleId))
                 {
-                    rule = _ruleService.GetRuleById(guild, ruleId)!;
+                    rule = _ruleService.GetRuleById(guild, ruleId);
                 }
                 else
                 {
@@ -143,7 +146,9 @@ internal sealed class BanCommand
             (infraction, bool dmSuccess) = await infractionTask;
 
             if (!dmSuccess)
+            {
                 importantNotes.Add("The ban was successfully issued, but the user could not be DM'd.");
+            }
 
             builder.WithAuthor(user);
             builder.WithColor(DiscordColor.Red);
@@ -166,7 +171,9 @@ internal sealed class BanCommand
             }
 
             if (importantNotes.Count > 0)
+            {
                 builder.AddField("⚠️ Important Notes", string.Join("\n", importantNotes.Select(n => $"• {n}")));
+            }
         }
         catch (Exception exception)
         {

@@ -67,7 +67,10 @@ internal sealed class KickCommand
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
             DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
             bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed);
-            if (!result) return;
+            if (!result)
+            {
+                return;
+            }
         }
 
         var builder = new DiscordEmbedBuilder();
@@ -102,7 +105,7 @@ internal sealed class KickCommand
                 {
                     if (_ruleService.GuildHasRule(guild, ruleId))
                     {
-                        rule = _ruleService.GetRuleById(guild, ruleId)!;
+                        rule = _ruleService.GetRuleById(guild, ruleId);
                     }
                     else
                     {
@@ -123,10 +126,14 @@ internal sealed class KickCommand
                 await _banService.KickAsync(member, context.Member!, reason, rule, clearMessageHistory);
 
             if (!dmSuccess)
+            {
                 importantNotes.Add("The kick was successfully issued, but the user could not be DM'd.");
+            }
 
             if (importantNotes.Count > 0)
+            {
                 builder.AddField("⚠️ Important Notes", string.Join("\n", importantNotes.Select(n => $"• {n}")));
+            }
 
             builder.WithAuthor(member);
             builder.WithColor(DiscordColor.Red);

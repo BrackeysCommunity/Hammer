@@ -60,8 +60,16 @@ internal sealed class Mute : IEquatable<Mute>
     /// <inheritdoc />
     public bool Equals(Mute? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return UserId == other.UserId && GuildId == other.GuildId;
     }
 

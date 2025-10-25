@@ -53,7 +53,7 @@ internal sealed class RuleCommand
                 return;
             }
 
-            rule = _ruleService.GetRuleById(guild, ruleId)!;
+            rule = _ruleService.GetRuleById(guild, ruleId);
         }
         else
         {

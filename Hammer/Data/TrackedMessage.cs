@@ -104,15 +104,27 @@ internal class TrackedMessage : IEquatable<TrackedMessage>, IEquatable<DiscordMe
     /// <inheritdoc />
     public bool Equals(DiscordMessage? other)
     {
-        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
         return Id == other.Id && ChannelId == other.Channel.Id && GuildId == other.Channel.Guild.Id;
     }
 
     /// <inheritdoc />
     public bool Equals(TrackedMessage? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return ChannelId == other.ChannelId && Id == other.Id && GuildId == other.GuildId;
     }
 

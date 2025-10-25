@@ -25,15 +25,16 @@ internal sealed partial class NoteCommand
             embed.WithColor(0xFF0000);
             embed.WithTitle("No Such Note");
             embed.WithDescription($"No note with the ID {noteId} could be found.");
-            await context.CreateResponseAsync(embed, true);
-            return;
+        }
+        else
+        {
+            await _noteService.DeleteNoteAsync(note.Id);
+            embed.WithColor(0x4CAF50);
+            embed.WithTitle("Note Deleted");
+            embed.AddField("Note ID", note.Id);
+            embed.AddField("Content", note.Content);
         }
 
-        await _noteService.DeleteNoteAsync(note.Id);
-        embed.WithTitle("Note Deleted");
-        embed.AddField("Note ID", note.Id);
-        embed.AddField("Content", note.Content);
-        embed.WithColor(0x4CAF50);
         await context.CreateResponseAsync(embed, true);
     }
 }

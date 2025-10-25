@@ -93,7 +93,11 @@ internal sealed class InfractionBuilder
         get => _type ?? (InfractionType)(-1);
         set
         {
-            if (!Enum.IsDefined(value)) throw new ArgumentOutOfRangeException(nameof(value));
+            if (!Enum.IsDefined(value))
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+
             _type = value;
         }
     }
@@ -104,9 +108,20 @@ internal sealed class InfractionBuilder
     /// <returns>A new instance of <see cref="Infraction" />.</returns>
     public Infraction Build()
     {
-        if (_target is null) throw new InvalidOperationException($"{nameof(Target)} is not set!");
-        if (_type is null) throw new InvalidOperationException($"{nameof(Type)} is not set!");
-        if (_guild is null) throw new InvalidOperationException($"{nameof(Guild)} is not set!");
+        if (_target is null)
+        {
+            throw new InvalidOperationException($"{nameof(Target)} is not set!");
+        }
+
+        if (_type is null)
+        {
+            throw new InvalidOperationException($"{nameof(Type)} is not set!");
+        }
+
+        if (_guild is null)
+        {
+            throw new InvalidOperationException($"{nameof(Guild)} is not set!");
+        }
 
         return new Infraction
         {

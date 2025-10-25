@@ -48,14 +48,20 @@ internal sealed partial class InfractionCommand
             return;
         }
 
-        if (ruleId == 0) ruleId = null;
-        if (reason == "-") reason = null;
+        if (ruleId == 0)
+        {
+            ruleId = null;
+        }
+
+        if (reason == "-")
+        {
+            reason = null;
+        }
 
         Rule? rule = null;
         if (ruleId is not null)
         {
-            rule = _ruleService.GetRuleById(context.Guild, (int)ruleId.Value);
-            if (rule is null)
+            if (!_ruleService.GuildHasRule(context.Guild, (int)ruleId.Value))
             {
                 embed.WithColor(0xFF0000);
                 embed.WithTitle("Rule not found");
@@ -64,6 +70,8 @@ internal sealed partial class InfractionCommand
                 await context.EditResponseAsync(builder);
                 return;
             }
+
+            rule = _ruleService.GetRuleById(context.Guild, (int)ruleId.Value);
         }
 
         // D#+ only accepts long, so we must cast because stupidity
@@ -73,6 +81,7 @@ internal sealed partial class InfractionCommand
         var newRuleId = (int?)ruleId;
 
         embed.WithColor(DiscordColor.Green);
+        // ReSharper disable AccessToModifiedClosure
         _infractionService.ModifyInfraction(infraction, i =>
         {
             if (newRuleId is not null)
@@ -88,6 +97,7 @@ internal sealed partial class InfractionCommand
                 embed.AddField("New Reason", reason);
             }
         });
+        // ReSharper restore AccessToModifiedClosure
 
         builder.Clear();
         builder.AddEmbed(embed);

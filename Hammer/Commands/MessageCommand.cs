@@ -53,7 +53,9 @@ internal sealed class MessageCommand
                 await modal.Build().RespondToAsync(context.Interaction, TimeSpan.FromMinutes(5));
 
             if (response != DiscordModalResponse.Success)
+            {
                 return;
+            }
 
             string content = MentionUtility.ReplaceChannelMentions(guild, message.Value?.Trim() ?? string.Empty);
             var builder = new DiscordFollowupMessageBuilder();
@@ -90,6 +92,9 @@ internal sealed class MessageCommand
                 embed.AddField("Content", content);
                 await context.FollowupAsync(builder.AddEmbed(embed));
             }
+
+            embed.AddField("Content", content);
+            await context.FollowUpAsync(builder.AddEmbed(embed));
         }
     }
 }

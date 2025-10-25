@@ -28,11 +28,12 @@ internal sealed class BlockedReporterConfiguration : IEntityTypeConfiguration<Bl
         builder.ToTable("BlockedReporter");
         builder.HasKey(e => new { e.UserId, e.GuildId });
 
-        builder.Property(e => e.UserId);
-        builder.Property(e => e.GuildId);
-        builder.Property(e => e.StaffMemberId);
+        builder.Property(e => e.UserId).HasColumnOrder(1);
+        builder.Property(e => e.GuildId).HasColumnOrder(2);
+        builder.Property(e => e.StaffMemberId).HasColumnOrder(3);
 
         PropertyBuilder<DateTimeOffset> blockedAtProperty = builder.Property(e => e.BlockedAt);
+        blockedAtProperty.HasColumnOrder(4);
         if (_isMySql)
         {
             blockedAtProperty.HasColumnType("DATETIME(6)");

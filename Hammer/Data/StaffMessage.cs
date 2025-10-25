@@ -1,4 +1,4 @@
-﻿namespace Hammer.Data;
+namespace Hammer.Data;
 
 /// <summary>
 ///     Represents a message sent from a staff member to a community member.
@@ -43,8 +43,16 @@ internal sealed class StaffMessage : IEquatable<StaffMessage>
     /// <inheritdoc />
     public bool Equals(StaffMessage? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return Id == other.Id;
     }
 

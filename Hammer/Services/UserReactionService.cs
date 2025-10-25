@@ -46,10 +46,14 @@ internal sealed class UserReactionService : BackgroundService
     private async Task DiscordClientOnMessageReactionAdded(DiscordClient sender, MessageReactionAddEventArgs e)
     {
         if (e.Guild is not { } guild || e.User.IsBot)
+        {
             return;
+        }
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             return;
+        }
 
         ReactionConfiguration reactionConfiguration = guildConfiguration.Reactions;
         string reaction = e.Emoji.GetDiscordName();

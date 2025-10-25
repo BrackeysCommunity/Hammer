@@ -40,9 +40,20 @@ internal sealed class AltAccountService : BackgroundService
     /// </exception>
     public void AddAlt(DiscordUser user, DiscordUser alt, DiscordMember staffMember)
     {
-        if (user is null) throw new ArgumentNullException(nameof(user));
-        if (alt is null) throw new ArgumentNullException(nameof(alt));
-        if (staffMember is null) throw new ArgumentNullException(nameof(staffMember));
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (alt is null)
+        {
+            throw new ArgumentNullException(nameof(alt));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
         var record = new AltAccount { StaffMemberId = staffMember.Id, RegisteredAt = DateTimeOffset.UtcNow };
@@ -50,12 +61,12 @@ internal sealed class AltAccountService : BackgroundService
         context.AltAccounts.Add(record with { UserId = alt.Id, AltId = user.Id });
         context.SaveChanges();
 
-        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, new HashSet<ulong>());
+        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, []);
         cache.Add(alt.Id);
 
         foreach (ulong altId in cache)
         {
-            HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altId, new HashSet<ulong>());
+            HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altId, []);
             altCache.Add(user.Id);
         }
 
@@ -100,27 +111,48 @@ internal sealed class AltAccountService : BackgroundService
     /// </exception>
     public void RemoveAlt(DiscordUser user, DiscordUser alt, DiscordMember staffMember)
     {
-        if (user is null) throw new ArgumentNullException(nameof(user));
-        if (alt is null) throw new ArgumentNullException(nameof(alt));
-        if (staffMember is null) throw new ArgumentNullException(nameof(staffMember));
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (alt is null)
+        {
+            throw new ArgumentNullException(nameof(alt));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
 
         AltAccount? altAccount = context.AltAccounts.FirstOrDefault(a => a.UserId == user.Id && a.AltId == alt.Id);
-        if (altAccount is not null) context.AltAccounts.Remove(altAccount);
+        if (altAccount is not null)
+        {
+            context.AltAccounts.Remove(altAccount);
+        }
 
         AltAccount[] altAccounts = context.AltAccounts.Where(a => a.AltId == user.Id).ToArray();
-        if (altAccounts.Length > 0) context.AltAccounts.RemoveRange(altAccounts);
+        if (altAccounts.Length > 0)
+        {
+            context.AltAccounts.RemoveRange(altAccounts);
+        }
 
-        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, new HashSet<ulong>());
-        HashSet<ulong>? altCache = _altAccountCache.GetOrAdd(alt.Id, new HashSet<ulong>());
+        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, []);
+        HashSet<ulong>? altCache = _altAccountCache.GetOrAdd(alt.Id, []);
         cache.Remove(alt.Id);
         altCache.Remove(user.Id);
 
         foreach (ulong altId in GetAltsFor(alt.Id))
         {
             altAccounts = context.AltAccounts.Where(a => a.UserId == user.Id && a.AltId == altId).ToArray();
-            if (altAccounts.Length > 0) context.AltAccounts.RemoveRange(altAccounts);
+            if (altAccounts.Length > 0)
+            {
+                context.AltAccounts.RemoveRange(altAccounts);
+            }
+
             cache.Remove(altId);
             if (_altAccountCache.TryGetValue(altId, out altCache))
             {
@@ -142,21 +174,20 @@ internal sealed class AltAccountService : BackgroundService
     }
 
     /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        UpdateFromDatabase();
-        return Task.CompletedTask;
+        await UpdateFromDatabase();
     }
 
-    private void UpdateFromDatabase()
+    private async Task UpdateFromDatabase()
     {
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         foreach (IGrouping<ulong, AltAccount> group in context.AltAccounts.GroupBy(u => u.UserId))
         {
-            HashSet<ulong> cache = _altAccountCache.GetOrAdd(group.Key, new HashSet<ulong>());
+            HashSet<ulong> cache = _altAccountCache.GetOrAdd(group.Key, []);
             foreach (AltAccount altAccount in group)
             {
-                HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altAccount.AltId, new HashSet<ulong>());
+                HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altAccount.AltId, []);
                 cache.Add(altAccount.AltId);
                 altCache.Add(group.Key);
             }

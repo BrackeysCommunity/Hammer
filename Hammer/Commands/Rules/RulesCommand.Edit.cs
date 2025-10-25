@@ -37,6 +37,7 @@ internal sealed partial class RulesCommand
 
         Rule rule = _ruleService.GetRuleById(guild, (int)ruleId);
         string? oldBrief = rule.Brief?.AsNullIfWhiteSpace();
+        // ReSharper disable once VariableCanBeNotNullable
         string? oldDescription = rule.Description.AsNullIfWhiteSpace();
 
         var modal = new DiscordModalBuilder(context.Client);
@@ -61,10 +62,14 @@ internal sealed partial class RulesCommand
             var changed = false;
 
             if (!string.Equals(oldBrief, newBrief) && (changed = true))
+            {
                 _ruleService.SetRuleBrief(rule, newBrief);
+            }
 
             if (!string.Equals(oldDescription, newDescription) && (changed = true))
+            {
                 _ruleService.SetRuleContent(rule, newDescription!);
+            }
 
             DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
 
@@ -81,9 +86,13 @@ internal sealed partial class RulesCommand
             }
 
             if (string.IsNullOrWhiteSpace(brief.Value))
+            {
                 embed.WithDescription(rule.Description);
+            }
             else
+            {
                 embed.AddField(rule.Brief, rule.Description);
+            }
 
             var webhook = new DiscordWebhookBuilder();
             webhook.AddEmbed(embed);

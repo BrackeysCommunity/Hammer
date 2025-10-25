@@ -28,16 +28,16 @@ internal sealed class MuteConfiguration : IEntityTypeConfiguration<Mute>
         builder.ToTable("Mute");
         builder.HasKey(e => new { e.UserId, e.GuildId });
 
-        builder.Property(e => e.GuildId);
-        builder.Property(e => e.UserId);
+        builder.Property(e => e.GuildId).HasColumnOrder(1);
+        builder.Property(e => e.UserId).HasColumnOrder(2);
 
         if (_isMySql)
         {
-            builder.Property(e => e.ExpiresAt).HasColumnType("DATETIME(6)");
+            builder.Property(e => e.ExpiresAt).HasColumnOrder(3).HasColumnType("DATETIME(6)");
         }
         else
         {
-            builder.Property(e => e.ExpiresAt).HasConversion<DateTimeOffsetToBytesConverter>();
+            builder.Property(e => e.ExpiresAt).HasColumnOrder(3).HasConversion<DateTimeOffsetToBytesConverter>();
         }
     }
 }

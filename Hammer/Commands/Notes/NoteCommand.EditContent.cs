@@ -22,7 +22,9 @@ internal sealed partial class NoteCommand
         var embed = new DiscordEmbedBuilder();
 
         if (string.IsNullOrWhiteSpace(content))
+        {
             return;
+        }
 
         MemberNote? note = await _noteService.GetNoteAsync(noteId);
 
@@ -31,15 +33,16 @@ internal sealed partial class NoteCommand
             embed.WithColor(0xFF0000);
             embed.WithTitle("No Such Note");
             embed.WithDescription($"No note with the ID {noteId} could be found.");
-            await context.CreateResponseAsync(embed, true);
-            return;
+        }
+        else
+        {
+            await _noteService.EditNoteAsync(noteId, content);
+            embed.WithColor(0x4CAF50);
+            embed.WithTitle("Note Updated");
+            embed.AddField("Note ID", note.Id);
+            embed.AddField("Content", note.Content);
         }
 
-        await _noteService.EditNoteAsync(noteId, content);
-        embed.WithTitle("Note Updated");
-        embed.AddField("Note ID", note.Id);
-        embed.AddField("Content", note.Content);
-        embed.WithColor(0x4CAF50);
         await context.CreateResponseAsync(embed, true);
     }
 }

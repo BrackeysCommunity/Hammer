@@ -18,7 +18,9 @@ internal sealed class NoteAutoCompleteProvider : IAutoCompleteProvider
         var configurationService = context.Services.GetRequiredService<ConfigurationService>();
 
         if (!configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        {
             return ArraySegment<DiscordAutoCompleteChoice>.Empty;
+        }
 
         IAsyncEnumerable<MemberNote> notes = context.Member.GetPermissionLevel(guildConfiguration) < PermissionLevel.Moderator
             ? noteService.GetNotesAsync(context.Guild, MemberNoteType.Guru)
@@ -28,13 +30,18 @@ internal sealed class NoteAutoCompleteProvider : IAutoCompleteProvider
 
         await foreach (MemberNote note in notes)
         {
-            if (choices.Count == 10) break;
+            if (choices.Count == 10)
+            {
+                break;
+            }
 
             string content = note.Content;
             if (content.Length > 10)
+            {
                 content = content[..10] + "...";
+            }
 
-            string text = $"#{note.Id} (User {note.UserId}) - {content}";
+            var text = $"#{note.Id} (User {note.UserId}) - {content}";
             choices.Add(new DiscordAutoCompleteChoice(text, note.Id));
         }
 

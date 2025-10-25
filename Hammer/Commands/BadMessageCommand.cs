@@ -75,7 +75,9 @@ internal sealed class BadMessageCommand
             await modal.Build().RespondToAsync(context.Interaction, TimeSpan.FromMinutes(5));
 
         if (modalResponse != DiscordModalResponse.Success)
+        {
             return;
+        }
 
         DiscordGuild guild = context.Guild;
         if (!TryGetRule(guild, ruleInput.Value, out Rule? rule))
@@ -91,12 +93,16 @@ internal sealed class BadMessageCommand
             await _warningService.WarnAsync(user, staffMember, reason, rule, additionalInfo);
 
         if (!dmSuccess)
+        {
             importantNotes.Add("The warning was successfully issued, but the user could not be DM'd.");
+        }
 
         var builder = new DiscordEmbedBuilder();
 
         if (importantNotes.Count > 0)
+        {
             builder.AddField("⚠️ Important Notes", string.Join("\n", importantNotes.Select(n => $"• {n}")));
+        }
 
         builder.WithAuthor(user);
         builder.WithColor(DiscordColor.Orange);

@@ -80,7 +80,9 @@ internal sealed class InfractionService : BackgroundService
     public Infraction AddInfraction(Infraction infraction, DiscordGuild? guild = null)
     {
         if (guild is null && !_discordClient.Guilds.TryGetValue(infraction.GuildId, out guild))
+        {
             throw new InvalidOperationException("The specified guild is invalid.");
+        }
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
 
@@ -97,14 +99,16 @@ internal sealed class InfractionService : BackgroundService
             // if the error is not 19, or if THIS operation fails, just rethrow because it's not our concern here.
 
             if (exception.InnerException is not SqliteException { SqliteErrorCode: 19 })
+            {
                 throw;
+            }
 
             infraction.Id = 0;
             infraction = context.Add(infraction).Entity;
             context.SaveChanges();
         }
 
-        List<Infraction> infractions = _infractionCache.AddOrUpdate(guild.Id, _ => new List<Infraction>(), (_, list) => list);
+        List<Infraction> infractions = _infractionCache.AddOrUpdate(guild.Id, _ => [], (_, list) => list);
         infractions.Add(infraction);
         return infraction;
     }
@@ -121,7 +125,7 @@ internal sealed class InfractionService : BackgroundService
         foreach (IGrouping<ulong, Infraction> group in infractions.GroupBy(i => i.GuildId))
         {
             ulong guildId = group.Key;
-            List<Infraction> cache = _infractionCache.AddOrUpdate(guildId, _ => new List<Infraction>(), (_, list) => list);
+            List<Infraction> cache = _infractionCache.AddOrUpdate(guildId, _ => [], (_, list) => list);
             cache.AddRange(group);
         }
 
@@ -164,7 +168,9 @@ internal sealed class InfractionService : BackgroundService
         DateTimeOffset? expirationTime = options.ExpirationTime;
 
         if (type == InfractionType.Gag)
+        {
             expirationTime = DateTimeOffset.UtcNow + options.Duration;
+        }
 
         var builder = new InfractionBuilder();
         builder.WithType(type);
@@ -175,10 +181,14 @@ internal sealed class InfractionService : BackgroundService
         var additionalInfo = new List<string>();
 
         if (expirationTime.HasValue)
+        {
             additionalInfo.Add($"Duration: {(DateTimeOffset.UtcNow - expirationTime.Value).Humanize()}");
+        }
 
         if (!string.IsNullOrWhiteSpace(options.AdditionalInformation))
+        {
             additionalInfo.Add(options.AdditionalInformation);
+        }
 
         builder.WithAdditionalInformation(string.Join('\n', additionalInfo));
 
@@ -209,7 +219,10 @@ internal sealed class InfractionService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="infraction" /> is <see langword="null" />.</exception>
     public async Task<DiscordEmbed> CreateInfractionEmbedAsync(Infraction infraction)
     {
-        ArgumentNullException.ThrowIfNull(infraction);
+        if (infraction is null)
+        {
+            throw new ArgumentNullException(nameof(infraction));
+        }
 
         DiscordUser? user;
         try
@@ -230,12 +243,20 @@ internal sealed class InfractionService : BackgroundService
         var embedBuilder = new DiscordEmbedBuilder();
         embedBuilder.WithColor(0xFF0000);
 
-        if (user is null) embedBuilder.WithAuthor($"User {infraction.UserId}");
-        else embedBuilder.WithAuthor(user);
+        if (user is null)
+        {
+            embedBuilder.WithAuthor($"User {infraction.UserId}");
+        }
+        else
+        {
+            embedBuilder.WithAuthor(user);
+        }
 
         Rule? rule = null;
         if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        {
             rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+        }
 
         embedBuilder.WithTitle(infraction.Type.Humanize());
         embedBuilder.AddField("Infraction ID", infraction.Id, true);
@@ -267,7 +288,10 @@ internal sealed class InfractionService : BackgroundService
         InfractionSearchOptions searchOptions = default
     )
     {
-        ArgumentNullException.ThrowIfNull(response);
+        if (response is null)
+        {
+            throw new ArgumentNullException(nameof(response));
+        }
 
         switch (searchOptions)
         {
@@ -327,8 +351,14 @@ internal sealed class InfractionService : BackgroundService
 
             builder.Append(Formatter.Bold(content)).Append(" \u2022 ");
             builder.Append(infraction.Type.Humanize()).Append(" \u2022 ");
-            if (infraction.Reason is { } reason) builder.Append(reason);
-            else builder.Append("<none>");
+            if (infraction.Reason is { } reason)
+            {
+                builder.Append(reason);
+            }
+            else
+            {
+                builder.Append("<none>");
+            }
 
             builder.Append(" \u2022 ");
             builder.Append(Formatter.Timestamp(infraction.IssuedAt));
@@ -345,13 +375,20 @@ internal sealed class InfractionService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public IEnumerable<Infraction> EnumerateInfractions(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        {
             yield break;
+        }
 
         foreach (Infraction infraction in cache)
+        {
             yield return infraction;
+        }
     }
 
     /// <summary>
@@ -363,10 +400,14 @@ internal sealed class InfractionService : BackgroundService
     public IEnumerable<Infraction> EnumerateInfractions(ulong userId, ulong guildId)
     {
         if (!_infractionCache.TryGetValue(guildId, out List<Infraction>? cache))
+        {
             yield break;
+        }
 
         foreach (Infraction infraction in cache.Where(i => i.UserId == userId))
+        {
             yield return infraction;
+        }
     }
 
     /// <summary>
@@ -382,14 +423,25 @@ internal sealed class InfractionService : BackgroundService
     /// </exception>
     public IEnumerable<Infraction> EnumerateInfractions(DiscordUser user, DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        {
             yield break;
+        }
 
         foreach (Infraction infraction in cache.Where(i => i.UserId == user.Id))
+        {
             yield return infraction;
+        }
     }
 
     /// <summary>
@@ -411,7 +463,9 @@ internal sealed class InfractionService : BackgroundService
     {
         DiscordGuild guild = staffMember.Guild;
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             return (null, false);
+        }
 
         if (!duration.HasValue)
         {
@@ -469,7 +523,6 @@ internal sealed class InfractionService : BackgroundService
     public Infraction? GetInfraction(long infractionId)
     {
         return _infractionIdCache.TryGetValue(infractionId, out Infraction? infraction) ? infraction : null;
-        return _infractionCache.Values.SelectMany(i => i).FirstOrDefault(i => i.Id == infractionId);
     }
 
     /// <summary>
@@ -480,7 +533,11 @@ internal sealed class InfractionService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetInfractionCount(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
         return _infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache) ? cache.Count : 0;
     }
 
@@ -498,11 +555,20 @@ internal sealed class InfractionService : BackgroundService
     /// </exception>
     public int GetInfractionCount(DiscordUser user, DiscordGuild guild, InfractionSearchOptions searchOptions = default)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        {
             return 0;
+        }
 
         var total = 0;
         int count = cache.Count;
@@ -512,12 +578,25 @@ internal sealed class InfractionService : BackgroundService
         {
             Infraction infraction = cache[index];
 
-            if (searchOptions.Type is { } type && infraction.Type != type) continue;
-            if (searchOptions.IssuedAfter is { } minimum && infraction.IssuedAt < minimum) continue;
-            if (searchOptions.IssuedBefore is { } maximum && infraction.IssuedAt > maximum) continue;
+            if (searchOptions.Type is { } type && infraction.Type != type)
+            {
+                continue;
+            }
+
+            if (searchOptions.IssuedAfter is { } minimum && infraction.IssuedAt < minimum)
+            {
+                continue;
+            }
+
+            if (searchOptions.IssuedBefore is { } maximum && infraction.IssuedAt > maximum)
+            {
+                continue;
+            }
 
             if (infraction.UserId == userId)
+            {
                 total++;
+            }
         }
 
         return total;
@@ -533,7 +612,9 @@ internal sealed class InfractionService : BackgroundService
     public int GetInfractionCount(ulong userId, ulong guildId, InfractionSearchOptions searchOptions = default)
     {
         if (!_infractionCache.TryGetValue(guildId, out List<Infraction>? cache))
+        {
             return 0;
+        }
 
         var total = 0;
         int count = cache.Count;
@@ -542,12 +623,25 @@ internal sealed class InfractionService : BackgroundService
         {
             Infraction infraction = cache[index];
 
-            if (searchOptions.Type is { } type && infraction.Type != type) continue;
-            if (searchOptions.IssuedAfter is { } minimum && infraction.IssuedAt < minimum) continue;
-            if (searchOptions.IssuedBefore is { } maximum && infraction.IssuedAt > maximum) continue;
+            if (searchOptions.Type is { } type && infraction.Type != type)
+            {
+                continue;
+            }
+
+            if (searchOptions.IssuedAfter is { } minimum && infraction.IssuedAt < minimum)
+            {
+                continue;
+            }
+
+            if (searchOptions.IssuedBefore is { } maximum && infraction.IssuedAt > maximum)
+            {
+                continue;
+            }
 
             if (infraction.UserId == userId)
+            {
                 total++;
+            }
         }
 
         return total;
@@ -563,7 +657,10 @@ internal sealed class InfractionService : BackgroundService
     /// <exception cref="ArgumentException"><paramref name="searchOptions" /> contains invalid property values.</exception>
     public IReadOnlyList<Infraction> GetInfractions(DiscordGuild guild, InfractionSearchOptions searchOptions = default)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         switch (searchOptions)
         {
@@ -574,7 +671,9 @@ internal sealed class InfractionService : BackgroundService
         }
 
         if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        {
             return ArraySegment<Infraction>.Empty;
+        }
 
         var infractions = new Infraction[cache.Count];
         var resultIndex = 0;
@@ -583,9 +682,20 @@ internal sealed class InfractionService : BackgroundService
         {
             Infraction infraction = cache[index];
 
-            if (searchOptions.Type is { } type && infraction.Type != type) continue;
-            if (searchOptions.IssuedAfter is { } minimum && infraction.IssuedAt < minimum) continue;
-            if (searchOptions.IssuedBefore is { } maximum && infraction.IssuedAt > maximum) continue;
+            if (searchOptions.Type is { } type && infraction.Type != type)
+            {
+                continue;
+            }
+
+            if (searchOptions.IssuedAfter is { } minimum && infraction.IssuedAt < minimum)
+            {
+                continue;
+            }
+
+            if (searchOptions.IssuedBefore is { } maximum && infraction.IssuedAt > maximum)
+            {
+                continue;
+            }
 
             infractions[resultIndex++] = infraction;
         }
@@ -615,8 +725,15 @@ internal sealed class InfractionService : BackgroundService
         InfractionSearchOptions searchOptions = default
     )
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         return GetInfractions(user.Id, guild.Id, searchOptions);
     }
@@ -624,17 +741,17 @@ internal sealed class InfractionService : BackgroundService
     /// <summary>
     ///     Returns all infractions for a user in the specified guild.
     /// </summary>
-    /// <param name="user">The user whose infractions to return.</param>
-    /// <param name="guild">The guild whose infractions to search.</param>
+    /// <param name="userId">The user whose infractions to return.</param>
+    /// <param name="guildId">The guild whose infractions to search.</param>
     /// <param name="searchOptions">A structure containing options to filter the search results.</param>
     /// <returns>
-    ///     A read-only view of the list of <see cref="Infraction" /> objects issued to <paramref name="user" /> in
-    ///     <paramref name="guild" />.
+    ///     A read-only view of the list of <see cref="Infraction" /> objects issued to <paramref name="userId" /> in
+    ///     <paramref name="guildId" />.
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    ///     <para><paramref name="user" /> is <see langword="null" /></para>
+    ///     <para><paramref name="userId" /> is <see langword="null" /></para>
     ///     -or-
-    ///     <para><paramref name="guild" /> is <see langword="null" />.</para>
+    ///     <para><paramref name="guildId" /> is <see langword="null" />.</para>
     /// </exception>
     /// <exception cref="ArgumentException"><paramref name="searchOptions" /> contains invalid property values.</exception>
     public IReadOnlyList<Infraction> GetInfractions(
@@ -652,7 +769,9 @@ internal sealed class InfractionService : BackgroundService
         }
 
         if (!_infractionCache.TryGetValue(guildId, out List<Infraction>? cache))
+        {
             return ArraySegment<Infraction>.Empty;
+        }
 
         int count = cache.Count;
         var infractions = new Infraction[count];
@@ -662,10 +781,25 @@ internal sealed class InfractionService : BackgroundService
         {
             Infraction infraction = cache[index];
 
-            if (infraction.UserId != userId) continue;
-            if (searchOptions.Type is { } type && infraction.Type != type) continue;
-            if (searchOptions.IssuedAfter is { } minimum && infraction.IssuedAt < minimum) continue;
-            if (searchOptions.IssuedBefore is { } maximum && infraction.IssuedAt > maximum) continue;
+            if (infraction.UserId != userId)
+            {
+                continue;
+            }
+
+            if (searchOptions.Type is { } type && infraction.Type != type)
+            {
+                continue;
+            }
+
+            if (searchOptions.IssuedAfter is { } minimum && infraction.IssuedAt < minimum)
+            {
+                continue;
+            }
+
+            if (searchOptions.IssuedBefore is { } maximum && infraction.IssuedAt > maximum)
+            {
+                continue;
+            }
 
             infractions[resultIndex++] = infraction;
         }
@@ -685,8 +819,15 @@ internal sealed class InfractionService : BackgroundService
     /// </exception>
     public async Task LogInfractionAsync(DiscordGuild guild, Infraction infraction)
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        ArgumentNullException.ThrowIfNull(infraction);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (infraction is null)
+        {
+            throw new ArgumentNullException(nameof(infraction));
+        }
 
         DiscordEmbed embed = await CreateInfractionEmbedAsync(infraction);
         await _logService.LogAsync(guild, embed);
@@ -704,12 +845,22 @@ internal sealed class InfractionService : BackgroundService
     /// </exception>
     public void ModifyInfraction(Infraction infraction, Action<Infraction> action)
     {
-        ArgumentNullException.ThrowIfNull(infraction);
-        ArgumentNullException.ThrowIfNull(action);
+        if (infraction is null)
+        {
+            throw new ArgumentNullException(nameof(infraction));
+        }
+
+        if (action is null)
+        {
+            throw new ArgumentNullException(nameof(action));
+        }
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
         Infraction? existing = context.Infractions.Find(infraction.Id);
-        if (existing is null) return;
+        if (existing is null)
+        {
+            return;
+        }
 
         action(existing);
         context.Update(existing);
@@ -752,13 +903,18 @@ internal sealed class InfractionService : BackgroundService
             }
 
             if (isStale)
+            {
                 pruneInfractions.Add(infraction);
+            }
         }
 
         foreach (Infraction infraction in pruneInfractions)
         {
             if (_infractionCache.TryGetValue(infraction.GuildId, out List<Infraction>? cache))
+            {
                 cache.Remove(infraction);
+            }
+
             context.Remove(infraction);
         }
 
@@ -773,7 +929,10 @@ internal sealed class InfractionService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="infraction" /> is <see langword="null" />.</exception>
     public void RemoveInfraction(Infraction infraction)
     {
-        ArgumentNullException.ThrowIfNull(infraction);
+        if (infraction is null)
+        {
+            throw new ArgumentNullException(nameof(infraction));
+        }
 
         _cooldownService.StopCooldown(infraction.UserId);
         _infractionCache[infraction.GuildId].Remove(infraction);
@@ -790,7 +949,10 @@ internal sealed class InfractionService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="infractions" /> is <see langword="null" />.</exception>
     public void RemoveInfractions(IEnumerable<Infraction> infractions)
     {
-        ArgumentNullException.ThrowIfNull(infractions);
+        if (infractions is null)
+        {
+            throw new ArgumentNullException(nameof(infractions));
+        }
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
 
@@ -828,7 +990,7 @@ internal sealed class InfractionService : BackgroundService
     {
         if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
         {
-            cache = new List<Infraction>();
+            cache = [];
             _infractionCache.AddOrUpdate(guild.Id, cache, (_, _) => cache);
         }
 
@@ -848,13 +1010,22 @@ internal sealed class InfractionService : BackgroundService
     private void UpdateInfractionRules(DiscordGuild guild)
     {
         if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        {
             return;
+        }
 
         var updated = new List<Infraction>();
         foreach (Infraction infraction in cache)
         {
-            if (!infraction.RuleId.HasValue || !string.IsNullOrWhiteSpace(infraction.RuleText)) continue;
-            if (!_ruleService.GuildHasRule(infraction.GuildId, infraction.RuleId.Value)) continue;
+            if (!infraction.RuleId.HasValue || !string.IsNullOrWhiteSpace(infraction.RuleText))
+            {
+                continue;
+            }
+
+            if (!_ruleService.GuildHasRule(infraction.GuildId, infraction.RuleId.Value))
+            {
+                continue;
+            }
 
             Rule rule = _ruleService.GetRuleById(infraction.GuildId, infraction.RuleId.Value);
             infraction.RuleText = rule.Brief ?? rule.Description;
@@ -881,7 +1052,9 @@ internal sealed class InfractionService : BackgroundService
     private Task OnGuildUnavailable(DiscordClient sender, GuildDeleteEventArgs args)
     {
         if (_infractionCache.TryRemove(args.Guild.Id, out List<Infraction>? infractions))
+        {
             infractions.Clear();
+        }
 
         return Task.CompletedTask;
     }

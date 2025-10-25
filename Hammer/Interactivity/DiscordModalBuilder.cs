@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
+using Hammer.Resources;
 
 namespace Hammer.Interactivity;
 
@@ -9,7 +10,7 @@ namespace Hammer.Interactivity;
 public sealed class DiscordModalBuilder
 {
     private readonly DiscordClient _discordClient;
-    private readonly List<DiscordModalTextInput> _inputs = new();
+    private readonly List<DiscordModalTextInput> _inputs = [];
     private string _title = string.Empty;
 
     /// <summary>
@@ -31,7 +32,9 @@ public sealed class DiscordModalBuilder
         set
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(value));
+            {
+                throw new ArgumentException(ExceptionMessages.ValueCannotBeNullOrWhitespace, nameof(value));
+            }
 
             _title = value;
         }
@@ -79,7 +82,11 @@ public sealed class DiscordModalBuilder
     /// <exception cref="ArgumentNullException"><paramref name="builder" /> is <see langword="null" />.</exception>
     public static implicit operator DiscordModal(DiscordModalBuilder builder)
     {
-        if (builder is null) throw new ArgumentNullException(nameof(builder));
+        if (builder is null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
+
         return builder.Build();
     }
 
@@ -89,7 +96,11 @@ public sealed class DiscordModalBuilder
     /// <returns>The newly-constructed <see cref="DiscordModal" />.</returns>
     public DiscordModal Build()
     {
-        if (string.IsNullOrWhiteSpace(_title)) throw new InvalidOperationException("Title cannot be null or whitespace.");
+        if (string.IsNullOrWhiteSpace(_title))
+        {
+            throw new InvalidOperationException("Title cannot be null or whitespace.");
+        }
+
         return new DiscordModal(Title, _inputs, _discordClient);
     }
 }

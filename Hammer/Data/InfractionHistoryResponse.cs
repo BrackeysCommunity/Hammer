@@ -40,16 +40,11 @@ internal sealed class InfractionHistoryResponse
         InfractionSearchOptions searchOptions = default
     )
     {
-        ArgumentNullException.ThrowIfNull(infractionService);
-        ArgumentNullException.ThrowIfNull(targetUser);
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(guild);
-
-        _infractionService = infractionService;
+        _infractionService = infractionService ?? throw new ArgumentNullException(nameof(infractionService));
         _searchOptions = searchOptions;
-        TargetUser = targetUser;
-        User = user;
-        Guild = guild;
+        TargetUser = targetUser ?? throw new ArgumentNullException(nameof(targetUser));
+        User = user ?? throw new ArgumentNullException(nameof(user));
+        Guild = guild ?? throw new ArgumentNullException(nameof(guild));
         StaffRequested = staffRequested;
     }
 

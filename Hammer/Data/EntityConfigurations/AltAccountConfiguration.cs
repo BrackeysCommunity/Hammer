@@ -28,17 +28,17 @@ internal sealed class AltAccountConfiguration : IEntityTypeConfiguration<AltAcco
         builder.ToTable("AltAccount");
         builder.HasKey(e => new { e.UserId, e.AltId });
 
-        builder.Property(e => e.UserId);
-        builder.Property(e => e.AltId);
-        builder.Property(e => e.StaffMemberId);
+        builder.Property(e => e.UserId).HasColumnOrder(1);
+        builder.Property(e => e.AltId).HasColumnOrder(2);
+        builder.Property(e => e.StaffMemberId).HasColumnOrder(3);
 
         if (_isMySql)
         {
-            builder.Property(e => e.RegisteredAt).HasColumnType("DATETIME(6)");
+            builder.Property(e => e.RegisteredAt).HasColumnOrder(4).HasColumnType("DATETIME(6)");
         }
         else
         {
-            builder.Property(e => e.RegisteredAt).HasConversion<DateTimeOffsetToBytesConverter>();
+            builder.Property(e => e.RegisteredAt).HasColumnOrder(4).HasConversion<DateTimeOffsetToBytesConverter>();
         }
     }
 }

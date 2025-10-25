@@ -1,4 +1,5 @@
 using DSharpPlus.Entities;
+using JetBrains.Annotations;
 
 namespace Hammer.Data;
 
@@ -23,16 +24,21 @@ public sealed class MemberNote : IEquatable<MemberNote>
     /// </exception>
     public MemberNote(MemberNoteType type, ulong targetUserId, ulong authorId, ulong guildId, string content)
     {
-        string? trimmedContent = content?.Trim();
+        if (!Enum.IsDefined(type))
+        {
+            throw new ArgumentOutOfRangeException(nameof(type));
+        }
 
-        if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
-        if (string.IsNullOrWhiteSpace(trimmedContent)) throw new ArgumentNullException(nameof(content));
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
 
         Type = type;
         UserId = targetUserId;
         AuthorId = authorId;
         GuildId = guildId;
-        Content = trimmedContent;
+        Content = content.Trim();
         CreationTimestamp = DateTimeOffset.UtcNow;
     }
 
@@ -58,22 +64,40 @@ public sealed class MemberNote : IEquatable<MemberNote>
     /// </exception>
     public MemberNote(MemberNoteType type, DiscordUser targetUser, DiscordUser author, DiscordGuild guild, string content)
     {
-        string? trimmedContent = content?.Trim();
+        if (!Enum.IsDefined(type))
+        {
+            throw new ArgumentOutOfRangeException(nameof(type));
+        }
 
-        if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
-        if (targetUser == null) throw new ArgumentNullException(nameof(targetUser));
-        if (author == null) throw new ArgumentNullException(nameof(author));
-        if (guild == null) throw new ArgumentNullException(nameof(guild));
-        if (string.IsNullOrWhiteSpace(trimmedContent)) throw new ArgumentNullException(nameof(content));
+        if (targetUser == null)
+        {
+            throw new ArgumentNullException(nameof(targetUser));
+        }
+
+        if (author == null)
+        {
+            throw new ArgumentNullException(nameof(author));
+        }
+
+        if (guild == null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
 
         Type = type;
         UserId = targetUser.Id;
         AuthorId = author.Id;
         GuildId = guild.Id;
-        Content = trimmedContent;
+        Content = content.Trim();
         CreationTimestamp = DateTimeOffset.UtcNow;
     }
 
+    [UsedImplicitly]
     private MemberNote()
     {
     }
@@ -106,7 +130,7 @@ public sealed class MemberNote : IEquatable<MemberNote>
     ///     Gets the ID of this note.
     /// </summary>
     /// <value>The note ID.</value>
-    public long Id { get; private set; }
+    public long Id { get; [UsedImplicitly] private set; }
 
     /// <summary>
     ///     Gets the type of this note.
@@ -123,8 +147,16 @@ public sealed class MemberNote : IEquatable<MemberNote>
     /// <inheritdoc />
     public bool Equals(MemberNote? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return Id == other.Id;
     }
 

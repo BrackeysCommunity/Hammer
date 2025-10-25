@@ -18,7 +18,7 @@ internal sealed class MessageHistoryCommand
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="MessageHistoryCommand" /> class.
-    /// </summary
+    /// </summary>
     public MessageHistoryCommand(MessageService messageService, MessageDeletionService messageDeletionService)
     {
         _messageService = messageService;
@@ -33,7 +33,10 @@ internal sealed class MessageHistoryCommand
         DiscordUser user
     )
     {
-        ArgumentNullException.ThrowIfNull(user);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
 
         await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();

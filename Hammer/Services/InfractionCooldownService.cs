@@ -42,15 +42,24 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="user" /> is <see langword="null" />.</exception>
     public bool IsCooldownActive(DiscordUser user, DiscordMember staffMember)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(staffMember);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         lock (_hotInfractions)
         {
             foreach ((Infraction infraction, _) in _hotInfractions.OrderByDescending(p => p.Value))
             {
                 if (infraction.UserId == user.Id)
+                {
                     return infraction.StaffMemberId != staffMember.Id;
+                }
             }
         }
 
@@ -124,17 +133,24 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <exception cref="InvalidOperationException"><paramref name="infraction" /> is already on a cooldown.</exception>
     public void StartCooldown(Infraction infraction)
     {
-        ArgumentNullException.ThrowIfNull(infraction);
+        if (infraction is null)
+        {
+            throw new ArgumentNullException(nameof(infraction));
+        }
 
         lock (_hotInfractions)
         {
             if (_hotInfractions.ContainsKey(infraction))
+            {
                 throw new InvalidOperationException("Infraction is already on cooldown.");
+            }
 
             foreach (Infraction current in _hotInfractions.Keys.ToArray())
             {
                 if (current.UserId == infraction.UserId)
+                {
                     _hotInfractions.Remove(current);
+                }
             }
 
             _hotInfractions.Add(infraction, DateTimeOffset.Now);
@@ -161,7 +177,9 @@ internal sealed class InfractionCooldownService : BackgroundService
             foreach (Infraction infraction in _hotInfractions.Keys.ToArray())
             {
                 if (infraction.UserId == userId)
+                {
                     _hotInfractions.Remove(infraction);
+                }
             }
         }
     }
@@ -173,14 +191,19 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="user" /> is <see langword="null" />.</exception>
     public void StopCooldown(DiscordUser user)
     {
-        ArgumentNullException.ThrowIfNull(user);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
 
         lock (_hotInfractions)
         {
             foreach (Infraction infraction in _hotInfractions.Keys.ToArray())
             {
                 if (infraction.UserId == user.Id)
+                {
                     _hotInfractions.Remove(infraction);
+                }
             }
         }
     }
@@ -201,7 +224,10 @@ internal sealed class InfractionCooldownService : BackgroundService
         infraction = null;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (user is null) return false;
+        if (user is null)
+        {
+            return false;
+        }
 
         lock (_hotInfractions)
         {
@@ -232,7 +258,7 @@ internal sealed class InfractionCooldownService : BackgroundService
     {
         lock (_hotInfractions)
         {
-            foreach ((Infraction? infraction, DateTimeOffset cooldownStart) in _hotInfractions.ToArray())
+            foreach ((Infraction infraction, DateTimeOffset cooldownStart) in _hotInfractions.ToArray())
             {
                 if (DateTimeOffset.Now - cooldownStart > TimeSpan.FromMinutes(30))
                 {

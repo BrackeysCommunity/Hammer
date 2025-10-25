@@ -73,7 +73,10 @@ internal sealed class MuteCommand
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
             DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
             bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed);
-            if (!result) return;
+            if (!result)
+            {
+                return;
+            }
         }
 
         DiscordGuild guild = context.Guild;
@@ -114,7 +117,7 @@ internal sealed class MuteCommand
             {
                 if (_ruleService.GuildHasRule(guild, ruleId))
                 {
-                    rule = _ruleService.GetRuleById(guild, ruleId)!;
+                    rule = _ruleService.GetRuleById(guild, ruleId);
                 }
                 else
                 {
@@ -136,10 +139,14 @@ internal sealed class MuteCommand
         var shouldClampDuration = false;
 
         if (guildConfiguration.Mute.MaxModeratorMuteDuration is { } maxModeratorMuteDuration and > 0)
+        {
             shouldClampDuration = permissionLevel == PermissionLevel.Moderator;
+        }
         else
             // pattern match does not initialize to 0 on failure. explicit = 0 is required here, else the compiler complains
+        {
             maxModeratorMuteDuration = 0;
+        }
 
         if (duration is null)
         {
@@ -149,12 +156,16 @@ internal sealed class MuteCommand
                 infractionTask = _muteService.TemporaryMuteAsync(user, context.Member!, reason, duration.Value, rule);
             }
             else
+            {
                 infractionTask = _muteService.MuteAsync(user, context.Member!, reason, rule);
+            }
         }
         else
         {
             if (shouldClampDuration && duration.Value.TotalMilliseconds > maxModeratorMuteDuration)
+            {
                 duration = TimeSpan.FromMilliseconds(maxModeratorMuteDuration);
+            }
 
             infractionTask = _muteService.TemporaryMuteAsync(user, context.Member!, reason, duration.Value, rule);
         }
@@ -166,7 +177,9 @@ internal sealed class MuteCommand
             (infraction, bool dmSuccess) = await infractionTask;
 
             if (!dmSuccess)
+            {
                 importantNotes.Add("The mute was successfully issued, but the user could not be DM'd.");
+            }
 
             builder.WithAuthor(user);
             builder.WithColor(DiscordColor.Red);
@@ -188,7 +201,9 @@ internal sealed class MuteCommand
             }
 
             if (importantNotes.Count > 0)
+            {
                 builder.AddField("⚠️ Important Notes", string.Join("\n", importantNotes.Select(n => $"• {n}")));
+            }
         }
         catch (Exception exception)
         {

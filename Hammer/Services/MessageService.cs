@@ -89,14 +89,27 @@ internal sealed class MessageService
     /// </exception>
     public async Task<bool> MessageMemberAsync(DiscordMember recipient, DiscordMember staffMember, string message)
     {
-        ArgumentNullException.ThrowIfNull(recipient);
-        ArgumentNullException.ThrowIfNull(staffMember);
-        if (string.IsNullOrWhiteSpace(message)) throw new ArgumentException("Message cannot be empty", nameof(message));
+        if (recipient is null)
+        {
+            throw new ArgumentNullException(nameof(recipient));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
+
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            throw new ArgumentException(ExceptionMessages.MessageCannotBeEmpty, nameof(message));
+        }
 
         message = message.Trim();
 
         if (recipient.Guild != staffMember.Guild)
+        {
             throw new ArgumentException(ExceptionMessages.StaffMemberRecipientGuildMismatch, nameof(recipient));
+        }
 
         StaffMessage staffMessage = await CreateStaffMessageAsync(recipient, staffMember, message);
 
@@ -126,7 +139,9 @@ internal sealed class MessageService
         DiscordUser user = await _discordClient.GetUserAsync(message.RecipientId);
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
+        }
 
         DiscordEmbedBuilder embedBuilder = guild.CreateDefaultEmbed(guildConfiguration, false);
 
@@ -144,7 +159,9 @@ internal sealed class MessageService
         DiscordUser user = await _discordClient.GetUserAsync(message.RecipientId);
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
+        }
 
         DiscordEmbedBuilder embedBuilder = guild.CreateDefaultEmbed(guildConfiguration);
 

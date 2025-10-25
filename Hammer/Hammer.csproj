@@ -29,9 +29,9 @@
 
     <ItemGroup>
         <PackageReference Include="Alexinea.Extensions.Configuration.Yaml" Version="7.0.0"/>
-        <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02459"/>
-        <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02459"/>
-        <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02459"/>
+        <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02554"/>
+        <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02554"/>
+        <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02554"/>
         <PackageReference Include="Humanizer.Core" Version="2.14.1"/>
         <PackageReference Include="JetBrains.Annotations" Version="2025.2.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">

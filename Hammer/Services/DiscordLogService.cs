@@ -4,7 +4,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Hammer.Configuration;
 using Hammer.Data;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace Hammer.Services;
@@ -14,7 +13,6 @@ namespace Hammer.Services;
 /// </summary>
 internal sealed class DiscordLogService : BackgroundService
 {
-    private readonly IConfiguration _configuration;
     private readonly DiscordClient _discordClient;
     private readonly ConfigurationService _configurationService;
     private readonly Dictionary<DiscordGuild, DiscordChannel> _logChannels = new();
@@ -22,12 +20,10 @@ internal sealed class DiscordLogService : BackgroundService
     /// <summary>
     ///     Initializes a new instance of the <see cref="DiscordLogService" /> class.
     /// </summary>
-    /// <param name="configuration">The configuration.</param>
     /// <param name="discordClient">The Discord client.</param>
     /// <param name="configurationService">The configuration service.</param>
-    public DiscordLogService(IConfiguration configuration, DiscordClient discordClient, ConfigurationService configurationService)
+    public DiscordLogService(ConfigurationService configurationService, DiscordClient discordClient)
     {
-        _configuration = configuration;
         _discordClient = discordClient;
         _configurationService = configurationService;
     }
@@ -160,7 +156,12 @@ internal sealed class DiscordLogService : BackgroundService
 
     private async Task OnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
     {
-        var logChannel = _configuration.GetSection(e.Guild.Id.ToString()).GetSection("logChannel").Get<ulong>();
+        if (!_configurationService.TryGetGuildConfiguration(e.Guild, out GuildConfiguration? configuration))
+        {
+            return;
+        }
+
+        ulong logChannel = configuration.LogChannel;
         if (logChannel == 0)
         {
             return;

@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
@@ -13,11 +15,9 @@ internal sealed partial class NoteCommand
     [Command("edittype")]
     [Description("Edits the type of a note.")]
     [RequireGuild]
-    public async Task EditTypeAsync(CommandContext context,
-        [Autocomplete(typeof(NoteAutoCompleteProvider))] [Parameter("note"), Description("The note to edit.")]
-        long noteId,
-        [Parameter("type"), Description("The new type of the note.")]
-        MemberNoteType type)
+    public async Task EditTypeAsync(SlashCommandContext context,
+        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to edit.")] long noteId,
+        [Parameter("type"), Description("The new type of the note.")] MemberNoteType type)
     {
         var embed = new DiscordEmbedBuilder();
 
@@ -28,7 +28,7 @@ internal sealed partial class NoteCommand
             embed.WithTitle("Invalid Note Type");
             embed.WithDescription($"The specified note type {type} is invalid. " +
                                   $"Please use one of the following types: {validTypes}");
-            await context.CreateResponseAsync(embed, true);
+            await context.RespondAsync(embed, true);
             return;
         }
 
@@ -49,6 +49,6 @@ internal sealed partial class NoteCommand
             embed.AddField("Note Type", type.ToString("G"));
         }
 
-        await context.CreateResponseAsync(embed, true);
+        await context.RespondAsync(embed, true);
     }
 }

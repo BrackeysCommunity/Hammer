@@ -2,6 +2,7 @@ using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Extensions;
@@ -26,7 +27,7 @@ internal sealed class ViewInfractionCommand
     [Command("viewinfraction")]
     [Description("Views an infraction.")]
     [RequireGuild]
-    public async Task ViewInfractionAsync(CommandContext context,
+    public async Task ViewInfractionAsync(SlashCommandContext context,
         [Parameter("infraction"), Description("The infraction to view.")]
         long infractionId
     )

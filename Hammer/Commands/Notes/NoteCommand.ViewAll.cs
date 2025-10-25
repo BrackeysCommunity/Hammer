@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -15,13 +16,12 @@ internal sealed partial class NoteCommand
     [Command("viewall")]
     [Description("Views all notes for a given user.")]
     [RequireGuild]
-    public async Task ViewAllAsync(CommandContext context,
-        [Parameter("user"), Description("The user whose notes to view.")]
-        DiscordUser user)
+    public async Task ViewAllAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user whose notes to view.")] DiscordUser user)
     {
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
@@ -66,6 +66,6 @@ internal sealed partial class NoteCommand
             embed.WithFooter("See log for more details.");
         }
 
-        await context.CreateResponseAsync(embed, true);
+        await context.RespondAsync(embed, true);
     }
 }

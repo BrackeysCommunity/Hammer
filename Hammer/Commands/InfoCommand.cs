@@ -3,11 +3,13 @@ using System.Text;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
+using Humanizer.Localisation;
 
 namespace Hammer.Commands;
 
@@ -33,7 +35,7 @@ internal sealed class InfoCommand
     [Command("info")]
     [Description("Displays information about the bot.")]
     [RequireGuild]
-    public async Task InfoAsync(CommandContext context)
+    public async Task InfoAsync(SlashCommandContext context)
     {
         DiscordGuild guild = context.Guild;
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
@@ -49,25 +51,27 @@ internal sealed class InfoCommand
         {
             embedColor = configuration.PrimaryColor;
         }
+        
+        TimeSpan latency = client.GetConnectionLatency(guild.Id);
+        string ping = latency.Humanize(minUnit: TimeUnit.Millisecond, maxUnit: TimeUnit.Second);
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(member);
         embed.WithColor(embedColor);
         embed.WithThumbnail(member.AvatarUrl);
         embed.WithTitle($"Hammer v{hammerVersion}");
-        embed.AddField("Ping", $"{client.Ping} ms", true);
+        embed.AddField("Ping", $"{ping}", true);
         embed.AddField("Uptime", (DateTimeOffset.UtcNow - _botService.StartedAt).Humanize(), true);
         embed.AddField("Source", "[View on GitHub](https://github.com/BrackeysCommunity/Hammer)", true);
 
         var builder = new StringBuilder();
         builder.AppendLine($"Hammer: {hammerVersion}");
         builder.AppendLine($"D#+: {client.VersionString}");
-        builder.AppendLine($"Gateway: {client.GatewayVersion}");
         builder.AppendLine($"CLR: {Environment.Version.ToString(3)}");
         builder.AppendLine($"Host: {Environment.OSVersion}");
 
         embed.AddField("Version", Formatter.BlockCode(builder.ToString()));
 
-        await context.CreateResponseAsync(embed, true);
+        await context.RespondAsync(embed, true);
     }
 }

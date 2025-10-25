@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
 using Hammer.Services;
@@ -31,10 +32,9 @@ internal sealed class UnbanCommand
     [Command("unban")]
     [Description("Unbans a user.")]
     [RequireGuild]
-    public async Task UnbanAsync(CommandContext context,
+    public async Task UnbanAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user to unban.")] DiscordUser user,
-        [Parameter("reason"), Description("The reason for the ban revocation.")]
-        string? reason = null)
+        [Parameter("reason"), Description("The reason for the ban revocation.")] string? reason = null)
     {
         await context.DeferResponseAsync(true);
 

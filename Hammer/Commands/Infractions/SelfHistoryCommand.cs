@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Services;
@@ -26,7 +27,7 @@ internal sealed class SelfHistoryCommand
     [Command("selfhistory")]
     [Description("View your own infraction history.")]
     [RequireGuild]
-    public async Task SelfHistoryAsync(CommandContext context)
+    public async Task SelfHistoryAsync(SlashCommandContext context)
     {
         await context.DeferResponseAsync(true);
 

@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Hammer.AutocompleteProviders;
@@ -49,12 +51,10 @@ internal sealed class KickCommand
     [Command("kick")]
     [Description("Kicks a member")]
     [RequireGuild]
-    public async Task KickAsync(CommandContext context,
-        [Parameter("member"), Description("The member to kick.")]
-        DiscordUser user,
-        [Parameter("reason"), Description("The reason for the kick.")]
-        string? reason = null,
-        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutoCompleteProvider))]
+    public async Task KickAsync(SlashCommandContext context,
+        [Parameter("member"), Description("The member to kick.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the kick.")] string? reason = null,
+        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null,
         [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)

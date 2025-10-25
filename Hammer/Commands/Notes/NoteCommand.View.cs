@@ -2,6 +2,8 @@ using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Configuration;
@@ -16,13 +18,12 @@ internal sealed partial class NoteCommand
     [Command("view")]
     [Description("Views a note.")]
     [RequireGuild]
-    public async Task ViewAsync(CommandContext context,
-        [Autocomplete(typeof(NoteAutoCompleteProvider))] [Parameter("note"), Description("The note to view.")]
-        long noteId)
+    public async Task ViewAsync(SlashCommandContext context,
+        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to view.")] long noteId)
     {
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
@@ -48,7 +49,7 @@ internal sealed partial class NoteCommand
             embed.WithColor(0xFF0000);
             embed.WithTitle("No Such Note");
             embed.WithDescription($"No note with the ID {noteId} could be found.");
-            await context.CreateResponseAsync(embed, true);
+            await context.RespondAsync(embed, true);
             return;
         }
 
@@ -62,6 +63,6 @@ internal sealed partial class NoteCommand
         embed.AddField("Author", author.Mention, true);
         embed.AddField("Creation Time", timestamp, true);
         embed.AddField("Content", note.Content);
-        await context.CreateResponseAsync(embed, true);
+        await context.RespondAsync(embed, true);
     }
 }

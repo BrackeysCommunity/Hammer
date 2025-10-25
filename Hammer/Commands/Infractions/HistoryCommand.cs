@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Services;
@@ -28,9 +29,10 @@ internal sealed class HistoryCommand
         _infractionService = infractionService;
     }
 
-    [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "View Infraction History", false)]
+    [Command("View Infraction History")]
+    [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
     [RequireGuild]
-    public async Task HistoryAsync(ContextMenuContext context)
+    public async Task HistoryAsync(SlashCommandContext context)
     {
         DiscordUser user = context.Interaction.Data.Resolved.Users.First().Value;
 
@@ -51,15 +53,11 @@ internal sealed class HistoryCommand
     [Command("history")]
     [Description("Views the infraction history for a user.")]
     [RequireGuild]
-    public async Task HistoryAsync(CommandContext context,
-        [Parameter("user"), Description("The user whose history to view.")]
-        DiscordUser user,
-        [Parameter("before"), Description("If set, limits to infractions before the specified date.")]
-        string? beforeRaw = null,
-        [Parameter("after"), Description("If set, limits to infractions after the specified date.")]
-        string? afterRaw = null,
-        [Parameter("type"), Description("If set, limits to infractions of the specified type.")]
-        InfractionType? type = null
+    public async Task HistoryAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user whose history to view.")] DiscordUser user,
+        [Parameter("before"), Description("If set, limits to infractions before the specified date.")] string? beforeRaw = null,
+        [Parameter("after"), Description("If set, limits to infractions after the specified date.")] string? afterRaw = null,
+        [Parameter("type"), Description("If set, limits to infractions of the specified type.")] InfractionType? type = null
     )
     {
         DateTimeOffset? afterDate = null;

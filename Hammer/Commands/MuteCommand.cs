@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Configuration;
@@ -55,14 +57,11 @@ internal sealed class MuteCommand
     [Command("mute")]
     [Description("Temporarily or permanently mutes a user.")]
     [RequireGuild]
-    public async Task MuteAsync(CommandContext context,
-        [Parameter("user"), Description("The user to mute.")]
-        DiscordUser user,
-        [Parameter("reason"), Description("The reason for the mute.")]
-        string? reason = null,
-        [Parameter("duration"), Description("The duration of the mute.")]
-        string? durationRaw = null,
-        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutoCompleteProvider))]
+    public async Task MuteAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to mute.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the mute.")] string? reason = null,
+        [Parameter("duration"), Description("The duration of the mute.")] string? durationRaw = null,
+        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null)
     {
         await context.DeferResponseAsync(true);

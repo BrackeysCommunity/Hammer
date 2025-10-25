@@ -3,6 +3,7 @@ using System.Text;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Extensions;
@@ -30,7 +31,7 @@ internal sealed class StaffHistoryCommand
     [Command("staffhistory")]
     [Description("Searches a staff member's history.")]
     [RequireGuild]
-    public async Task StaffHistoryAsync(CommandContext context,
+    public async Task StaffHistoryAsync(SlashCommandContext context,
         [Parameter("staffMember"), Description("The staff member whose infractions to search.")]
         DiscordUser user)
     {
@@ -69,6 +70,6 @@ internal sealed class StaffHistoryCommand
         }
 
         embed.WithDescription($"**Last 10 Infractions**\n{builder}");
-        await context.CreateResponseAsync(embed);
+        await context.RespondAsync(embed);
     }
 }

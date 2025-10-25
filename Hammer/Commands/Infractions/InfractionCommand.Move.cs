@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Extensions;
@@ -12,7 +13,7 @@ internal sealed partial class InfractionCommand
     [Command("move")]
     [Description("Moves all infractions from one user to another.")]
     [RequireGuild]
-    public async Task MoveAsync(CommandContext context,
+    public async Task MoveAsync(SlashCommandContext context,
         [Parameter("source"), Description("The user whose infractions to move.")]
         DiscordUser source,
         [Parameter("destination"), Description("The user who will acquire the moved infractions.")]
@@ -20,7 +21,7 @@ internal sealed partial class InfractionCommand
     {
         if (source == destination)
         {
-            await context.CreateResponseAsync("You can't move infractions to the same user.", true);
+            await context.RespondAsync("You can't move infractions to the same user.", true);
             return;
         }
 

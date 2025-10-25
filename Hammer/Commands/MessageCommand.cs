@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
 using Hammer.Interactivity;
@@ -27,9 +28,8 @@ internal sealed class MessageCommand
     [Description("Sends a private staff message to a member.")]
     [RequireGuild]
     public async Task MessageAsync(
-        CommandContext context,
-        [Parameter("member"), Description("The member to message.")]
-        DiscordUser user
+        SlashCommandContext context,
+        [Parameter("member"), Description("The member to message.")] DiscordUser user
     )
     {
         var embed = new DiscordEmbedBuilder();
@@ -41,13 +41,14 @@ internal sealed class MessageCommand
             embed.WithColor(DiscordColor.Red);
             embed.WithTitle("Not In Guild");
             embed.WithDescription($"User {user.Id} ({user.Mention}) was found, but is not in this guild.");
-            await context.CreateResponseAsync(embed, ephemeral: true);
+            await context.RespondAsync(embed, ephemeral: true);
         }
         else
         {
             var modal = new DiscordModalBuilder(context.Client);
             modal.WithTitle("Send Message");
-            DiscordModalTextInput message = modal.AddInput("Message", isRequired: true, inputStyle: DiscordTextInputStyle.Paragraph);
+            DiscordModalTextInput message =
+                modal.AddInput("Message", isRequired: true, inputStyle: DiscordTextInputStyle.Paragraph);
 
             DiscordModalResponse response =
                 await modal.Build().RespondToAsync(context.Interaction, TimeSpan.FromMinutes(5));
@@ -94,7 +95,7 @@ internal sealed class MessageCommand
             }
 
             embed.AddField("Content", content);
-            await context.FollowUpAsync(builder.AddEmbed(embed));
+            await context.FollowupAsync(builder.AddEmbed(embed));
         }
     }
 }

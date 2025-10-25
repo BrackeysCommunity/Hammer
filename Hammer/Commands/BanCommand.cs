@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
@@ -50,14 +52,11 @@ internal sealed class BanCommand
     [Command("ban")]
     [Description("Temporarily or permanently bans a user.")]
     [RequireGuild]
-    public async Task BanAsync(CommandContext context,
-        [Parameter("user"), Description("The user to ban.")]
-        DiscordUser user,
-        [Parameter("reason"), Description("The reason for the ban.")]
-        string? reason = null,
-        [Parameter("duration"), Description("The duration of the ban.")]
-        string? durationRaw = null,
-        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutoCompleteProvider))]
+    public async Task BanAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to ban.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the ban.")] string? reason = null,
+        [Parameter("duration"), Description("The duration of the ban.")] string? durationRaw = null,
+        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null,
         [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)

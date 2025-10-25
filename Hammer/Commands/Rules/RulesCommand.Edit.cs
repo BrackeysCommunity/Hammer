@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Configuration;
@@ -16,22 +18,21 @@ internal sealed partial class RulesCommand
     [Command("edit")]
     [Description("Edits a rule.")]
     [RequireGuild]
-    public async Task EditAsync(CommandContext context,
-        [Autocomplete(typeof(RuleAutoCompleteProvider))] [Parameter("rule"), Description("The rule to modify.")]
-        long ruleId)
+    public async Task EditAsync(SlashCommandContext context,
+        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>] [Parameter("rule"), Description("The rule to modify.")] long ruleId)
     {
         DiscordGuild guild = context.Guild;
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
         if (!_ruleService.GuildHasRule(guild, (int)ruleId))
         {
             DiscordEmbed embed = _ruleService.CreateRuleNotFoundEmbed((int)ruleId);
-            await context.CreateResponseAsync(embed, true);
+            await context.RespondAsync(embed, true);
             return;
         }
 

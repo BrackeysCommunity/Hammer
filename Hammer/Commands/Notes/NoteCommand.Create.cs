@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -14,15 +15,13 @@ internal sealed partial class NoteCommand
     [Command("create")]
     [Description("Creates a new note.")]
     [RequireGuild]
-    public async Task CreateAsync(CommandContext context,
-        [Parameter("user"), Description("The user for whom to create a note.")]
-        DiscordUser user,
-        [Parameter("content"), Description("The content of the note.")]
-        string content)
+    public async Task CreateAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user for whom to create a note.")] DiscordUser user,
+        [Parameter("content"), Description("The content of the note.")] string content)
     {
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
@@ -51,6 +50,6 @@ internal sealed partial class NoteCommand
             embed.WithFooter("See log for more details.");
         }
 
-        await context.CreateResponseAsync(embed, true);
+        await context.RespondAsync(embed, true);
     }
 }

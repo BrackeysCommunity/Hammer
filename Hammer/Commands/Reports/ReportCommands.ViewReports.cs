@@ -2,6 +2,7 @@ using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Hammer.Data;
@@ -16,9 +17,8 @@ internal sealed partial class ReportCommands
     [Description("Views all reports made against this user.")]
     [RequireGuild]
     public async Task ViewReportsAsync(
-        CommandContext context,
-        [Parameter("user"), Description("The user whose reported messages to view.")]
-        DiscordUser user
+        SlashCommandContext context,
+        [Parameter("user"), Description("The user whose reported messages to view.")] DiscordUser user
     )
     {
         await context.DeferResponseAsync();

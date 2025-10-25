@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Configuration;
@@ -32,14 +34,16 @@ internal sealed class RuleCommand
     [Command("rule")]
     [Description("Displays a rule.")]
     [RequireGuild]
-    public async Task RuleAsync(CommandContext context,
-        [Parameter("rule"), Description("The rule to display."), Autocomplete(typeof(RuleAutoCompleteProvider))] string search,
+    public async Task RuleAsync(SlashCommandContext context,
+        [Parameter("rule"), Description("The rule to display.")]
+        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        string search,
         [Parameter("mention"), Description("The user to mention.")] DiscordUser? mentionUser = null)
     {
         DiscordGuild guild = context.Guild;
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
@@ -49,7 +53,7 @@ internal sealed class RuleCommand
         {
             if (!_ruleService.GuildHasRule(guild, ruleId))
             {
-                await context.CreateResponseAsync(_ruleService.CreateRuleNotFoundEmbed(ruleId), true);
+                await context.RespondAsync(_ruleService.CreateRuleNotFoundEmbed(ruleId), true);
                 return;
             }
 
@@ -60,7 +64,7 @@ internal sealed class RuleCommand
             rule = _ruleService.SearchForRule(guild, search);
             if (rule is null)
             {
-                await context.CreateResponseAsync(_ruleService.CreateRuleNotFoundEmbed(search), true);
+                await context.RespondAsync(_ruleService.CreateRuleNotFoundEmbed(search), true);
                 return;
             }
         }
@@ -70,7 +74,7 @@ internal sealed class RuleCommand
         embed.WithTitle(string.IsNullOrWhiteSpace(rule.Brief) ? $"Rule #{rule.Id}" : $"Rule #{rule.Id}. {rule.Brief}");
         embed.WithDescription(rule.Description);
 
-        var response  = new DiscordInteractionResponseBuilder();
+        var response = new DiscordInteractionResponseBuilder();
         response.AddEmbed(embed);
 
         if (mentionUser is not null)
@@ -79,6 +83,6 @@ internal sealed class RuleCommand
             response.AddMention(new UserMention(mentionUser.Id));
         }
 
-        await context.CreateResponseAsync(response).ConfigureAwait(false);
+        await context.RespondAsync(response).ConfigureAwait(false);
     }
 }

@@ -1,3 +1,5 @@
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Resources;
 using SmartFormat;
@@ -6,8 +8,9 @@ namespace Hammer.Commands.Reports;
 
 internal sealed partial class ReportCommands
 {
-    [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Report Message")]
-    public async Task ReportMessageAsync(ContextMenuContext context)
+    [Command("Report Message")]
+    [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
+    public async Task ReportMessageAsync(SlashCommandContext context)
     {
         await context.DeferResponseAsync(true);
 

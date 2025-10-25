@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Services;
 using Microsoft.Extensions.Logging;
@@ -26,14 +27,14 @@ internal sealed class MigrateDatabaseCommand
     [Command("migratedb")]
     [Description("Migrates the SQLite database to MySQL/MariaDB.")]
     [RequireGuild]
-    public async Task MigrateDatabaseAsync(CommandContext context)
+    public async Task MigrateDatabaseAsync(SlashCommandContext context)
     {
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(DiscordColor.Orange);
         embed.WithTitle("⏳ Migration in progress");
         embed.WithDescription("Please wait while the database is migrated...");
 
-        await context.CreateResponseAsync(embed);
+        await context.RespondAsync(embed);
         try
         {
             int rows = await _databaseService.MigrateAsync();

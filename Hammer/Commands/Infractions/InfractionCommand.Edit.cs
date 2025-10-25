@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
@@ -13,12 +15,12 @@ internal sealed partial class InfractionCommand
     [Command("edit")]
     [Description("Edits an infraction.")]
     [RequireGuild]
-    public async Task EditAsync(CommandContext context,
+    public async Task EditAsync(SlashCommandContext context,
         [Parameter("infraction"), Description("The infraction to modify.")]
         long infractionId,
         [Parameter("reason"), Description("The new reason for the infraction. To remove the reason, enter a single hyphen ( - ).")]
         string? reason = null,
-        [Autocomplete(typeof(RuleAutoCompleteProvider))]
+        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         [Parameter("rule"), Description("The new rule which was broken. To remove the rule, enter 0.")]
         long? ruleId = null
     )

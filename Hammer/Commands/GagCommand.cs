@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
 using Hammer.Services;
@@ -28,9 +29,10 @@ internal sealed class GagCommand
         _infractionService = infractionService;
     }
 
-    [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Gag", false)]
+    [Command("Gag")]
+    [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
     [RequireGuild]
-    public async Task GagAsync(ContextMenuContext context)
+    public async Task GagAsync(SlashCommandContext context)
     {
         var builder = new DiscordEmbedBuilder();
         var message = new DiscordWebhookBuilder();
@@ -40,7 +42,7 @@ internal sealed class GagCommand
 
         if (staffMember is null)
         {
-            await context.CreateResponseAsync("Cannot perform this action outside of a guild.", true);
+            await context.RespondAsync("Cannot perform this action outside of a guild.", true);
             return;
         }
 
@@ -73,11 +75,9 @@ internal sealed class GagCommand
     [Description("Temporarily gags a user, so that a more final infraction can be issued.")]
     [RequireGuild]
     public async Task GagAsync(
-        CommandContext context,
-        [Parameter("user"), Description("The user to gag.")]
-        DiscordUser user,
-        [Parameter("duration"), Description("The duration of the gag. Defaults to 5 minutes.")]
-        string? duration = null
+        SlashCommandContext context,
+        [Parameter("user"), Description("The user to gag.")] DiscordUser user,
+        [Parameter("duration"), Description("The duration of the gag. Defaults to 5 minutes.")] string? duration = null
     )
     {
         var builder = new DiscordEmbedBuilder();
@@ -86,7 +86,7 @@ internal sealed class GagCommand
 
         if (staffMember is null)
         {
-            await context.CreateResponseAsync("Cannot perform this action outside of a guild.", true);
+            await context.RespondAsync("Cannot perform this action outside of a guild.", true);
             return;
         }
 

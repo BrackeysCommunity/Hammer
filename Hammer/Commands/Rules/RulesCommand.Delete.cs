@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Configuration;
@@ -13,13 +15,12 @@ internal sealed partial class RulesCommand
     [Command("delete")]
     [Description("Deletes a rule.")]
     [RequireGuild]
-    public async Task DeleteAsync(CommandContext context,
-        [Autocomplete(typeof(RuleAutoCompleteProvider))] [Parameter("rule"), Description("The rule to modify")]
-        long ruleId)
+    public async Task DeleteAsync(SlashCommandContext context,
+        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>] [Parameter("rule"), Description("The rule to modify")] long ruleId)
     {
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 

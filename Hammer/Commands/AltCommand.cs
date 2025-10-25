@@ -3,6 +3,7 @@ using System.Text;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
 using Hammer.Services;
@@ -27,11 +28,9 @@ internal sealed class AltCommand
     [Command("add")]
     [Description("Adds an alt account to a user.")]
     [RequireGuild]
-    public async Task AddAltAsync(CommandContext context,
-        [Parameter("user"), Description("The user to add an alt account to.")]
-        DiscordUser user,
-        [Parameter("alt"), Description("The alt account to add.")]
-        DiscordUser alt)
+    public async Task AddAltAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to add an alt account to.")] DiscordUser user,
+        [Parameter("alt"), Description("The alt account to add.")] DiscordUser alt)
     {
         await context.DeferResponseAsync();
         _altAccountService.AddAlt(user, alt, context.Member);
@@ -52,11 +51,9 @@ internal sealed class AltCommand
     [Command("remove")]
     [Description("Removes an alt account from a user.")]
     [RequireGuild]
-    public async Task RemoveAltAsync(CommandContext context,
-        [Parameter("user"), Description("The user to remove an alt account from.")]
-        DiscordUser user,
-        [Parameter("alt"), Description("The alt account to remove.")]
-        DiscordUser alt)
+    public async Task RemoveAltAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to remove an alt account from.")] DiscordUser user,
+        [Parameter("alt"), Description("The alt account to remove.")] DiscordUser alt)
     {
         await context.DeferResponseAsync();
         _altAccountService.RemoveAlt(user, alt, context.Member);
@@ -75,9 +72,8 @@ internal sealed class AltCommand
     [Command("view")]
     [Description("Views the alt accounts for a user.")]
     [RequireGuild]
-    public async Task ViewAltsAsync(CommandContext context,
-        [Parameter("user"), Description("The user to add an alt account to.")]
-        DiscordUser user)
+    public async Task ViewAltsAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to add an alt account to.")] DiscordUser user)
     {
         await context.DeferResponseAsync();
         IReadOnlyCollection<ulong> altAccounts = _altAccountService.GetAltsFor(user.Id);

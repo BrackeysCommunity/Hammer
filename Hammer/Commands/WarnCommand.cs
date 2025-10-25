@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
@@ -48,12 +50,10 @@ internal sealed class WarnCommand
     [Command("warn")]
     [Description("Issues a warning to a user.")]
     [RequireGuild]
-    public async Task WarnAsync(CommandContext context,
-        [Parameter("user"), Description("The user to warn.")]
-        DiscordUser user,
-        [Parameter("reason"), Description("The reason for the warning.")]
-        string reason,
-        [Parameter("rule"), Description("The rule which was broken."), Autocomplete(typeof(RuleAutoCompleteProvider))]
+    public async Task WarnAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to warn.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the warning.")] string reason,
+        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null)
     {
         await context.DeferResponseAsync(true);

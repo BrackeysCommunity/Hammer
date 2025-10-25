@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
@@ -28,7 +29,7 @@ internal sealed class PruneInfractionsCommand
     [Command("pruneinfractions")]
     [Description("Prune all stale infractions for invalid users.")]
     [RequireGuild]
-    public async Task PruneAsync(CommandContext context)
+    public async Task PruneAsync(SlashCommandContext context)
     {
         await context.DeferResponseAsync();
 
@@ -47,7 +48,7 @@ internal sealed class PruneInfractionsCommand
 
         DiscordMessage message = await context.EditResponseAsync(builder);
 
-        InteractivityResult<ComponentInteractionCreateEventArgs> result =
+        InteractivityResult<ComponentInteractionCreatedEventArgs> result =
             await message.WaitForButtonAsync(i => i.User == context.User);
 
         builder.Clear();

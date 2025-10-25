@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
@@ -13,8 +15,8 @@ internal sealed partial class NoteCommand
     [Command("editcontent")]
     [Description("Edits the content of a note.")]
     [RequireGuild]
-    public async Task EditContentAsync(CommandContext context,
-        [Autocomplete(typeof(NoteAutoCompleteProvider))] [Parameter("note"), Description("The note to edit.")]
+    public async Task EditContentAsync(SlashCommandContext context,
+        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to edit.")]
         long noteId,
         [Parameter("content"), Description("The new content of the note.")]
         string content)
@@ -43,6 +45,6 @@ internal sealed partial class NoteCommand
             embed.AddField("Content", note.Content);
         }
 
-        await context.CreateResponseAsync(embed, true);
+        await context.RespondAsync(embed, true);
     }
 }

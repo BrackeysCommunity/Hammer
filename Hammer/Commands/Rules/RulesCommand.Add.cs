@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -14,13 +15,13 @@ internal sealed partial class RulesCommand
     [Command("add")]
     [Description("Add a rule.")]
     [RequireGuild]
-    public async Task AddAsync(CommandContext context)
+    public async Task AddAsync(SlashCommandContext context)
     {
         DiscordGuild guild = context.Guild;
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 

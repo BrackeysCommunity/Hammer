@@ -1,4 +1,6 @@
+using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -44,19 +46,21 @@ internal sealed class BadMessageCommand
         _warningService = warningService;
     }
 
-    [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Warn For This", false)]
+    [Command("Warn For This")]
+    [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
     [RequireGuild]
-    public async Task BadMessageAsync(ContextMenuContext context)
+    public async Task BadMessageAsync(SlashCommandContext context, DiscordMessage message)
     {
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? configuration))
+        DiscordGuild guild = context.Guild!;
+
+        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
         {
             configuration = new GuildConfiguration();
         }
 
         string defaultReason = configuration.DefaultBadMessageWarning;
-        DiscordMember staffMember = context.Member;
-        DiscordMessage message = context.TargetMessage;
-        DiscordUser user = message.Author;
+        DiscordMember staffMember = context.Member!;
+        DiscordUser user = message.Author!;
 
         var importantNotes = new List<string>();
         var modal = new DiscordModalBuilder(context.Client);
@@ -79,7 +83,6 @@ internal sealed class BadMessageCommand
             return;
         }
 
-        DiscordGuild guild = context.Guild;
         if (!TryGetRule(guild, ruleInput.Value, out Rule? rule))
         {
             importantNotes.Add("The specified rule does not exist - it will be omitted from the infraction.");

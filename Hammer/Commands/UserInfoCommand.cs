@@ -2,6 +2,7 @@ using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Extensions;
@@ -36,40 +37,41 @@ internal sealed class UserInfoCommand
     [Command("userinfo")]
     [Description("Displays information about a user.")]
     [RequireGuild]
-    public async Task UserInfoAsync(CommandContext context,
-        [Parameter("user"), Description("The user whose information to view.")]
-        DiscordUser user)
+    public async Task UserInfoAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user whose information to view.")] DiscordUser user)
     {
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         GuildConfiguration? configuration = _configurationService.GetGuildConfiguration(guild);
         if (configuration is null)
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        bool staffRequested = context.Member.IsStaffMember(configuration);
+        bool staffRequested = context.Member!.IsStaffMember(configuration);
         DiscordMember? member = await user.GetAsMemberOfAsync(guild);
         DiscordEmbed embed = CreateUserInfoEmbed(user, member, staffRequested, guild);
 
-        await context.CreateResponseAsync(embed);
+        await context.RespondAsync(embed);
     }
 
-    [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "User Information")]
+    [Command("User Information")]
+    [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
     [RequireGuild]
-    public async Task UserInfoAsync(ContextMenuContext context)
+    public async Task UserInfoContextMenuAsync(SlashCommandContext context, DiscordUser user)
     {
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         GuildConfiguration? configuration = _configurationService.GetGuildConfiguration(guild);
         if (configuration is null)
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        bool staffRequested = context.Member.IsStaffMember(configuration);
-        DiscordEmbed embed = CreateUserInfoEmbed(context.TargetUser, context.TargetMember, staffRequested, guild);
-        await context.CreateResponseAsync(embed, true);
+        bool staffRequested = context.Member!.IsStaffMember(configuration);
+        var member = await user.GetAsMemberOfAsync(guild);
+        DiscordEmbed embed = CreateUserInfoEmbed(user, member, staffRequested, guild);
+        await context.RespondAsync(embed, true);
     }
 
     private DiscordEmbed CreateUserInfoEmbed(DiscordUser user, DiscordMember? member, bool staffRequested, DiscordGuild guild)

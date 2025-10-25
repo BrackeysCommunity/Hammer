@@ -1,4 +1,6 @@
+using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Services;
 
@@ -20,28 +22,18 @@ internal sealed class DeleteMessageCommand
         _deletionService = deletionService;
     }
 
-    [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Delete Message", false)]
+    [Command("Delete Message")]
+    [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
     [RequireGuild]
-    public async Task DeleteMessageAsync(ContextMenuContext context)
+    public async Task DeleteMessageAsync(SlashCommandContext context, DiscordMessage message)
     {
         await context.DeferResponseAsync(true);
         var builder = new DiscordWebhookBuilder();
         var embed = new DiscordEmbedBuilder();
 
-        DiscordMessage? message = context.TargetMessage;
-        if (message is null)
-        {
-            embed.WithColor(DiscordColor.Red);
-            embed.WithTitle("Deletion failed");
-            embed.WithDescription("The specified message could not be retrieved.");
-            builder.AddEmbed(embed);
-            await context.EditResponseAsync(builder);
-            return;
-        }
-
         try
         {
-            await _deletionService.DeleteMessageAsync(message, context.Member);
+            await _deletionService.DeleteMessageAsync(message, context.Member!);
         }
         catch (Exception exception)
         {
@@ -56,7 +48,7 @@ internal sealed class DeleteMessageCommand
 
         embed.WithColor(DiscordColor.Green);
         embed.WithTitle("Message deleted");
-        embed.WithDescription($"Message {message.Id} by {message.Author.Mention} deleted.");
+        embed.WithDescription($"Message {message.Id} by {message.Author?.Mention} deleted.");
         builder.AddEmbed(embed);
         await context.EditResponseAsync(builder);
     }

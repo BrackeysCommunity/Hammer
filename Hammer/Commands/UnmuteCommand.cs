@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
 using Hammer.Services;
@@ -31,11 +32,9 @@ internal sealed class UnmuteCommand
     [Command("unmute")]
     [Description("Unmutes a user.")]
     [RequireGuild]
-    public async Task UnmuteAsync(CommandContext context,
-        [Parameter("user"), Description("The user to unmute.")]
-        DiscordUser user,
-        [Parameter("reason"), Description("The reason for the mute revocation.")]
-        string? reason = null)
+    public async Task UnmuteAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to unmute.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the mute revocation.")] string? reason = null)
     {
         await context.DeferResponseAsync(true);
 

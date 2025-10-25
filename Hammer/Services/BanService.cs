@@ -165,7 +165,7 @@ internal sealed class BanService : BackgroundService
         await _logService.LogAsync(guild, embed);
         await _mailmanService.SendInfractionAsync(infraction, infractionCount, options);
 
-        await guild.BanMemberAsync(user.Id, reason: reason, delete_message_days: clearHistory ? 7 : 0);
+        await guild.BanMemberAsync(user.Id, reason: reason, messageDeleteDuration: TimeSpan.FromDays(clearHistory ? 7 : 0));
         return (infraction, success);
     }
 

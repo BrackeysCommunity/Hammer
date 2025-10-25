@@ -58,7 +58,7 @@ internal static class DiscordEmbedBuilderExtensions
             throw new ArgumentNullException(nameof(guild));
         }
 
-        string iconUrl = guild.GetIconUrl(ImageFormat.Png);
+        string iconUrl = guild.GetIconUrl(MediaFormat.Png) ?? guild.IconUrl;
         embedBuilder.WithFooter(guild.Name, iconUrl: iconUrl);
         if (addThumbnail)
         {

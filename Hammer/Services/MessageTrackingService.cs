@@ -1,6 +1,5 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Hammer.Data;
 using Microsoft.EntityFrameworkCore;

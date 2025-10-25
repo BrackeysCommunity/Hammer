@@ -1,6 +1,5 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using Hammer.Configuration;
 using Microsoft.Extensions.Hosting;
 

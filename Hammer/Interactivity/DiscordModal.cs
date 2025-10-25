@@ -75,7 +75,7 @@ public sealed class DiscordModal
         }
     }
 
-    private Task OnModalSubmitted(DiscordClient sender, ModalSubmitEventArgs e)
+    private Task OnModalSubmitted(DiscordClient sender, ModalSubmittedEventArgs e)
     {
         if (e.Interaction.Data.CustomId != _customId)
         {

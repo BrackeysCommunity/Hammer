@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using Hammer.Configuration;
 using Hammer.Data;
 using Microsoft.Extensions.Hosting;

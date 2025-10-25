@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Extensions;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Services;
@@ -9,7 +10,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using Serilog;
-using Serilog.Extensions.Logging;
 using X10D.Hosting.DependencyInjection;
 
 Directory.CreateDirectory("data");
@@ -29,12 +29,8 @@ builder.Logging.ClearProviders();
 builder.Logging.AddSerilog();
 
 builder.Services.AddSingleton<ConfigurationService>();
-builder.Services.AddSingleton(new DiscordClient(new DiscordConfiguration
-{
-    Token = Environment.GetEnvironmentVariable("DISCORD_TOKEN"),
-    LoggerFactory = new SerilogLoggerFactory(),
-    Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers | DiscordIntents.MessageContents
-}));
+const DiscordIntents intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers | DiscordIntents.MessageContents;
+builder.Services.AddDiscordClient(Environment.GetEnvironmentVariable("DISCORD_TOKEN")!, intents);
 
 builder.Services.AddDbContextFactory<HammerContext>((services, optionsBuilder) =>
 {

@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Text;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Hammer.Configuration;
 using Hammer.Data;

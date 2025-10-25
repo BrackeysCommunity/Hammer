@@ -1,9 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Timers;
-using DSharpPlus;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.SlashCommands;
 using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
@@ -75,7 +74,7 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <param name="infractionEmbed">The infraction embed to display.</param>
     /// <returns><see langword="true" /> if the user confirmed the infraction; otherwise, <see langword="false" />.</returns>
     public async Task<bool> ShowConfirmationAsync(
-        InteractionContext context,
+        SlashCommandContext context,
         DiscordUser user,
         Infraction infraction,
         DiscordEmbed infractionEmbed

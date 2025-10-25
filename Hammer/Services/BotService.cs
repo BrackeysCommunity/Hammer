@@ -2,7 +2,6 @@ using System.Reflection;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using DSharpPlus.Interactivity.Extensions;
 using Hammer.Commands;
 using Hammer.Commands.Infractions;
 using Hammer.Commands.Notes;

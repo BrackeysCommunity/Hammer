@@ -39,8 +39,7 @@ internal sealed class GagCommand
         var builder = new DiscordEmbedBuilder();
         var message = new DiscordWebhookBuilder();
 
-        DiscordMember staffMember = context.Member;
-        DiscordUser user = context.Interaction.Data.Resolved.Users.First().Value;
+        DiscordMember? staffMember = context.Member;
 
         if (staffMember is null)
         {
@@ -85,7 +84,7 @@ internal sealed class GagCommand
     {
         var builder = new DiscordEmbedBuilder();
         var message = new DiscordWebhookBuilder();
-        DiscordMember staffMember = context.Member;
+        DiscordMember? staffMember = context.Member;
 
         if (staffMember is null)
         {

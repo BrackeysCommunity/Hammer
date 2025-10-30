@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Timers;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -200,12 +201,7 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
             }
         }
 
-        var options = new InfractionOptions
-        {
-            NotifyUser = true,
-            Reason = reason.AsNullIfWhiteSpace(),
-            RuleBroken = ruleBroken
-        };
+        var options = new InfractionOptions { NotifyUser = true, Reason = reason.AsNullIfWhiteSpace(), RuleBroken = ruleBroken };
 
         await CreateMuteAsync(user, guild, null);
 
@@ -435,8 +431,10 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
             var configuration = _configurationService.GetGuildConfiguration(guild);
             configuration ??= new GuildConfiguration();
 
-            result = guild.GetRole(configuration.Roles.MutedRoleId);
-            _mutedRoles.TryAdd(guild, result);
+            if (guild.Roles.TryGetValue(configuration.Roles.MutedRoleId, out result))
+            {
+                _mutedRoles.TryAdd(guild, result);
+            }
         }
 
         return result is not null;

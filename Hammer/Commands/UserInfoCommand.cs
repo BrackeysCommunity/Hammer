@@ -89,7 +89,7 @@ internal sealed class UserInfoCommand
 
         // ReSharper disable ConditionIsAlwaysTrueOrFalse
         embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
-        embed.WithColor(member?.Color ?? DiscordColor.Gray);
+        embed.WithColor(member?.Color.PrimaryColor ?? DiscordColor.Gray);
         embed.WithTitle("User Information");
         embed.WithThumbnail(user.AvatarUrl);
 

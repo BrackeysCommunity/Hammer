@@ -129,12 +129,7 @@ internal sealed class BanService : BackgroundService
             throw new ArgumentNullException(nameof(issuer));
         }
 
-        var options = new InfractionOptions
-        {
-            NotifyUser = false,
-            Reason = reason.AsNullIfWhiteSpace(),
-            RuleBroken = ruleBroken
-        };
+        var options = new InfractionOptions { NotifyUser = false, Reason = reason.AsNullIfWhiteSpace(), RuleBroken = ruleBroken };
 
         (Infraction infraction, bool success) =
             await _infractionService.CreateInfractionAsync(InfractionType.Ban, user, issuer, options);
@@ -273,12 +268,7 @@ internal sealed class BanService : BackgroundService
             throw new ArgumentException("The member and staff member must be in the same guild.");
         }
 
-        var options = new InfractionOptions
-        {
-            NotifyUser = false,
-            Reason = reason.AsNullIfWhiteSpace(),
-            RuleBroken = ruleBroken
-        };
+        var options = new InfractionOptions { NotifyUser = false, Reason = reason.AsNullIfWhiteSpace(), RuleBroken = ruleBroken };
 
         (Infraction infraction, bool success) =
             await _infractionService.CreateInfractionAsync(InfractionType.Kick, member, staffMember, options);
@@ -323,8 +313,15 @@ internal sealed class BanService : BackgroundService
                 foreach (DiscordChannel channel in channels)
                 {
                     var messagesToDelete = new List<DiscordMessage>();
-                    IReadOnlyList<DiscordMessage> messages = await channel.GetMessagesAsync();
-                    messagesToDelete.AddRange(messages.Where(m => m.Author.Id == member.Id));
+
+                    await foreach (DiscordMessage message in channel.GetMessagesAsync())
+                    {
+                        if (message.Author?.Id == member.Id)
+                        {
+                            messagesToDelete.Add(message);
+                        }
+                    }
+
                     if (messagesToDelete.Count > 0)
                     {
                         tasks.Add(channel.DeleteMessagesAsync(messagesToDelete, "User was kicked"));
@@ -483,8 +480,14 @@ internal sealed class BanService : BackgroundService
                 foreach (DiscordChannel channel in channels)
                 {
                     var messagesToDelete = new List<DiscordMessage>();
-                    IReadOnlyList<DiscordMessage> messages = await channel.GetMessagesAsync();
-                    messagesToDelete.AddRange(messages.Where(m => m.Author.Id == user.Id));
+                    await foreach (DiscordMessage message in channel.GetMessagesAsync())
+                    {
+                        if (message.Author?.Id == user.Id)
+                        {
+                            messagesToDelete.Add(message);
+                        }
+                    }
+
                     if (messagesToDelete.Count > 0)
                     {
                         tasks.Add(channel.DeleteMessagesAsync(messagesToDelete, "User was temp-banned"));

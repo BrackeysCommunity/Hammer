@@ -46,12 +46,12 @@ internal sealed class InfoCommand
         DiscordClient client = context.Client;
         DiscordMember member = (await client.CurrentUser.GetAsMemberOfAsync(guild))!;
         string hammerVersion = _botService.Version;
-        DiscordColor embedColor = member.Color;
+        DiscordColor embedColor = member.Color.PrimaryColor;
         if (embedColor.Value == 0)
         {
             embedColor = configuration.PrimaryColor;
         }
-        
+
         TimeSpan latency = client.GetConnectionLatency(guild.Id);
         string ping = latency.Humanize(minUnit: TimeUnit.Millisecond, maxUnit: TimeUnit.Second);
 

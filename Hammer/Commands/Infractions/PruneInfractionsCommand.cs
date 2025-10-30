@@ -44,7 +44,7 @@ internal sealed class PruneInfractionsCommand
 
         var yes = new DiscordButtonComponent(DiscordButtonStyle.Success, "prune-confirm", "Yes");
         var no = new DiscordButtonComponent(DiscordButtonStyle.Danger, "prune-cancel", "No");
-        builder.AddComponents(yes, no);
+        builder.AddActionRowComponent(yes, no);
 
         DiscordMessage message = await context.EditResponseAsync(builder);
 

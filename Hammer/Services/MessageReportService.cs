@@ -390,8 +390,8 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
             return false;
         }
 
-        DiscordUser author = message.Author;
-        DiscordChannel channel = message.Channel;
+        DiscordUser? author = message.Author;
+        DiscordChannel channel = message.Channel!;
         if (author is null)
         {
             message = await channel.GetMessageAsync(message.Id);

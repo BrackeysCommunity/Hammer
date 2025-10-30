@@ -219,7 +219,7 @@ internal sealed class BanService : BackgroundService
             }
         }
 
-        IReadOnlyList<DiscordBan>? bans = await guild.GetBansAsync();
+        IReadOnlyList<DiscordBan> bans = await guild.GetBansAsync();
         return bans.Any(b => b.User == user);
     }
 
@@ -544,7 +544,7 @@ internal sealed class BanService : BackgroundService
             try
             {
                 DiscordMember botMember = await guild.GetMemberAsync(_discordClient.CurrentUser.Id);
-                DiscordUser? user = await _discordClient.GetUserAsync(ban.UserId);
+                DiscordUser user = await _discordClient.GetUserAsync(ban.UserId);
                 await RevokeBanAsync(user, botMember, "Temporary ban expired");
             }
             catch (NotFoundException)

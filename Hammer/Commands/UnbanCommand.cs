@@ -43,15 +43,19 @@ internal sealed class UnbanCommand
         var embed = new DiscordEmbedBuilder();
         try
         {
-            await _banService.RevokeBanAsync(user, context.Member!, reason);
+            DiscordMember member = context.Member!;
+            await _banService.RevokeBanAsync(user, member, reason);
 
             embed.WithAuthor(user);
             embed.WithColor(DiscordColor.SpringGreen);
             embed.WithTitle("Unbanned user");
-            embed.WithDescription(reason);
+            if (reason is not null)
+            {
+                embed.WithDescription(reason);
+            }
 
             reason = reason.WithWhiteSpaceAlternative("None");
-            _logger.LogInformation("{StaffMember} unbanned {User}. Reason: {Reason}", context.Member, user, reason);
+            _logger.LogInformation("{StaffMember} unbanned {User}. Reason: {Reason}", member, user, reason);
         }
         catch (Exception exception)
         {

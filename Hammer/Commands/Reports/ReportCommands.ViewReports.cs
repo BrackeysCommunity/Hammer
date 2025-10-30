@@ -27,7 +27,7 @@ internal sealed partial class ReportCommands
 
         var list = new List<string>();
 
-        foreach (ReportedMessage reportedMessage in _reportService.EnumerateReports(user, context.Guild))
+        foreach (ReportedMessage reportedMessage in _reportService.EnumerateReports(user, context.Guild!))
         {
             var id = reportedMessage.MessageId.ToString();
 

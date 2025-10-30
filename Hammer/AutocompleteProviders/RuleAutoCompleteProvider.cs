@@ -15,7 +15,7 @@ internal sealed class RuleAutoCompleteProvider : IAutoCompleteProvider
     public ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context)
     {
         var ruleService = context.ServiceProvider.GetRequiredService<RuleService>();
-        IReadOnlyList<Rule> rules = ruleService.GetGuildRules(context.Guild);
+        IReadOnlyList<Rule> rules = ruleService.GetGuildRules(context.Guild!);
 
         var result = new List<DiscordAutoCompleteChoice>();
         string optionValue = context.UserInput ?? string.Empty;

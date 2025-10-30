@@ -41,10 +41,10 @@ internal sealed class StaffReactionService : IEventHandler<MessageReactionAddedE
         if (message.Author is null)
         {
             // not cached! fetch new message
-            message = await message.Channel.GetMessageAsync(message.Id);
+            message = await message.Channel!.GetMessageAsync(message.Id);
         }
 
-        DiscordUser author = message.Author;
+        DiscordUser author = message.Author!;
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
         {
             return;

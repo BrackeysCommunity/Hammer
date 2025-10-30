@@ -34,13 +34,13 @@ internal sealed class StaffHistoryCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task StaffHistoryAsync(SlashCommandContext context,
-        [Parameter("staffMember"), Description("The staff member whose infractions to search.")]
-        DiscordUser user)
+        [Parameter("staffMember"), Description("The staff member whose infractions to search.")] DiscordUser user)
     {
-        IEnumerable<Infraction> infractions =
-            _infractionService.GetInfractions(context.Guild).Where(i => i.StaffMemberId == user.Id);
-        Infraction[] staffInfractions =
-            infractions.Where(i => i.StaffMemberId == user.Id).OrderByDescending(i => i.IssuedAt).ToArray();
+        IEnumerable<Infraction> infractions = _infractionService.GetInfractions(context.Guild!)
+            .Where(i => i.StaffMemberId == user.Id);
+        Infraction[] staffInfractions = infractions.Where(i => i.StaffMemberId == user.Id)
+            .OrderByDescending(i => i.IssuedAt)
+            .ToArray();
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user);

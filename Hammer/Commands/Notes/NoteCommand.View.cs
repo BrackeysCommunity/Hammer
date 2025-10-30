@@ -23,13 +23,13 @@ internal sealed partial class NoteCommand
     public async Task ViewAsync(SlashCommandContext context,
         [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to view.")] long noteId)
     {
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        DiscordGuild guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        DiscordGuild guild = context.Guild!;
         MemberNote? note = await _noteService.GetNoteAsync(noteId);
         DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
 
@@ -40,7 +40,7 @@ internal sealed partial class NoteCommand
         }
 
         if (note?.Type == MemberNoteType.Staff &&
-            context.Member.GetPermissionLevel(guildConfiguration) < PermissionLevel.Moderator)
+            context.Member!.GetPermissionLevel(guildConfiguration) < PermissionLevel.Moderator)
             // non-staff cannot see staff notes
         {
             note = null;
@@ -55,8 +55,8 @@ internal sealed partial class NoteCommand
             return;
         }
 
-        DiscordUser? author = await context.Client.GetUserAsync(note.AuthorId);
-        DiscordUser? user = await context.Client.GetUserAsync(note.UserId);
+        DiscordUser author = await context.Client.GetUserAsync(note.AuthorId);
+        DiscordUser user = await context.Client.GetUserAsync(note.UserId);
         string timestamp = Formatter.Timestamp(note.CreationTimestamp, TimestampFormat.ShortDateTime);
 
         embed.WithAuthor(user);

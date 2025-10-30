@@ -49,7 +49,8 @@ internal sealed class MessageHistoryCommand
         embed.WithAuthor(user);
 
         var staffMessages = new List<string>();
-        await foreach (StaffMessage staffMessage in _messageService.GetStaffMessages(user, context.Guild))
+        DiscordGuild guild = context.Guild!;
+        await foreach (StaffMessage staffMessage in _messageService.GetStaffMessages(user, guild))
         {
             staffMessages.Add($"**ID: {staffMessage.Id}** \u2022 " +
                               $"Sent by {MentionUtility.MentionUser(staffMessage.StaffMemberId)} \u2022 " +
@@ -58,7 +59,7 @@ internal sealed class MessageHistoryCommand
 
 
         var deletedMessages = new List<string>();
-        await foreach (DeletedMessage deletedMessage in _messageDeletionService.GetDeletedMessages(user, context.Guild))
+        await foreach (DeletedMessage deletedMessage in _messageDeletionService.GetDeletedMessages(user, guild))
         {
             deletedMessages.Add($"**ID: {deletedMessage.MessageId}** \u2022 " +
                                 $"Sent in {MentionUtility.MentionChannel(deletedMessage.ChannelId)} \u2022 " +

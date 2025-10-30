@@ -60,6 +60,7 @@ internal sealed class UserInfoCommand
     [Command("User Information")]
     [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task UserInfoContextMenuAsync(SlashCommandContext context, DiscordUser user)
     {
         DiscordGuild guild = context.Guild!;
@@ -89,7 +90,6 @@ internal sealed class UserInfoCommand
             return embed;
         }
 
-        // ReSharper disable ConditionIsAlwaysTrueOrFalse
         embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(member?.Color.PrimaryColor ?? DiscordColor.Gray);
         embed.WithTitle("User Information");
@@ -129,7 +129,6 @@ internal sealed class UserInfoCommand
         {
             embed.WithFooter("⚠️ This user is not currently in the server.");
         }
-        // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
         return embed;
     }

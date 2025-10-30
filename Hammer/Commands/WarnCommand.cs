@@ -60,7 +60,8 @@ internal sealed class WarnCommand
     {
         await context.DeferResponseAsync(true);
 
-        if (_cooldownService.IsCooldownActive(user, context.Member) &&
+        DiscordMember member = context.Member!;
+        if (_cooldownService.IsCooldownActive(user, member) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
@@ -81,7 +82,7 @@ internal sealed class WarnCommand
             Rule? rule = null;
             if (!string.IsNullOrWhiteSpace(ruleSearch))
             {
-                DiscordGuild guild = context.Guild;
+                DiscordGuild guild = context.Guild!;
                 if (int.TryParse(ruleSearch, out int ruleId))
                 {
                     if (_ruleService.GuildHasRule(guild, ruleId))
@@ -104,7 +105,7 @@ internal sealed class WarnCommand
             }
 
             (infraction, bool dmSuccess) =
-                await _warningService.WarnAsync(user, context.Member, reason, rule);
+                await _warningService.WarnAsync(user, member, reason, rule);
 
             if (!dmSuccess)
             {
@@ -123,7 +124,7 @@ internal sealed class WarnCommand
             builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
 
             reason = reason.WithWhiteSpaceAlternative("None");
-            _logger.LogInformation("{StaffMember} warned {User}. Reason: {Reason}", context.Member, user, reason);
+            _logger.LogInformation("{StaffMember} warned {User}. Reason: {Reason}", member, user, reason);
         }
         catch (Exception exception)
         {

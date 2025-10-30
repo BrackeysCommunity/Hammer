@@ -85,11 +85,12 @@ internal sealed class MessageDeletionService
             throw new ArgumentNullException(nameof(staffMember));
         }
 
-        _logger.LogInformation("{Message} in channel {Channel} is requested to be deleted by {StaffMember}",
-            message, message.Channel, staffMember);
+        DiscordChannel channel = message.Channel!;
+        _logger.LogInformation("{Message} in channel {Channel} is requested to be deleted by {StaffMember}", message, channel,
+            staffMember);
 
-        message = await message.Channel.GetMessageAsync(message.Id);
-        DiscordGuild guild = message.Channel.Guild;
+        message = await channel.GetMessageAsync(message.Id);
+        DiscordGuild guild = channel.Guild;
 
         if (guild is null)
         {
@@ -106,7 +107,7 @@ internal sealed class MessageDeletionService
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
         }
 
-        DiscordUser user = message.Author;
+        DiscordUser user = message.Author!;
         DiscordMember? member = await user.GetAsMemberOfAsync(guild);
 
         if (!staffMember.IsStaffMember(guildConfiguration))
@@ -146,7 +147,7 @@ internal sealed class MessageDeletionService
         await context.AddAsync(deletedMessage);
         await context.SaveChangesAsync();
 
-        _logger.LogInformation("{Message} in {Channel} was deleted by {StaffMember}", message, message.Channel, staffMember);
+        _logger.LogInformation("{Message} in {Channel} was deleted by {StaffMember}", message, channel, staffMember);
         await message.DeleteAsync($"Deleted by {staffMember.GetUsernameWithDiscriminator()}");
         await _logService.LogAsync(guild, staffLogEmbed);
     }
@@ -183,10 +184,10 @@ internal sealed class MessageDeletionService
 
     private static DiscordEmbed CreateMessageDeletionToAuthorEmbed(DiscordMessage message, GuildConfiguration guildConfiguration)
     {
-        DiscordUser author = message.Author;
+        DiscordUser author = message.Author!;
         if (message.Interaction is not null)
         {
-            author = message.Interaction.User;
+            author = message.Interaction.User!;
         }
 
         var formatObject = new { user = author, channel = message.Channel };
@@ -198,7 +199,7 @@ internal sealed class MessageDeletionService
         string? content = hasContent ? Formatter.Sanitize(message.Content) : null;
         string? attachments = hasAttachments ? string.Join('\n', message.Attachments.Select(a => a.Url)) : null;
 
-        return message.Channel.Guild.CreateDefaultEmbed(guildConfiguration)
+        return message.Channel!.Guild.CreateDefaultEmbed(guildConfiguration)
             .WithColor(0xFF0000)
             .WithTitle("Message Deleted")
             .WithDescription(description)
@@ -218,11 +219,11 @@ internal sealed class MessageDeletionService
 
         string? content = hasContent ? Formatter.Sanitize(message.Content) : null;
         string? attachments = hasAttachments ? string.Join('\n', message.Attachments.Select(a => a.Url)) : null;
-        string mention = message.Author.IsBot && message.Interaction is not null
-            ? $"{message.Interaction.User.Mention} via {message.Author.Mention}"
+        string mention = message.Author!.IsBot && message.Interaction is not null
+            ? $"{message.Interaction.User!.Mention} via {message.Author.Mention}"
             : message.Author.Mention;
 
-        DiscordEmbedBuilder embed = message.Channel.Guild.CreateDefaultEmbed(guildConfiguration, false)
+        DiscordEmbedBuilder embed = message.Channel!.Guild.CreateDefaultEmbed(guildConfiguration, false)
             .WithColor(0xFF0000)
             .WithTitle("Message Deleted")
             .WithDescription($"A message in {message.Channel.Mention} was deleted by a staff member.")

@@ -65,7 +65,7 @@ internal sealed class BanCommand
     {
         await context.DeferResponseAsync(true);
 
-        if (_cooldownService.IsCooldownActive(user, context.Member) &&
+        if (_cooldownService.IsCooldownActive(user, context.Member!) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
@@ -77,7 +77,7 @@ internal sealed class BanCommand
             }
         }
 
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         if (await _banService.IsUserBannedAsync(user, guild))
         {
             var responseBuilder = new DiscordWebhookBuilder();
@@ -154,7 +154,12 @@ internal sealed class BanCommand
             builder.WithAuthor(user);
             builder.WithColor(DiscordColor.Red);
             builder.WithTitle("Banned user");
-            builder.WithDescription(reason);
+
+            if (!string.IsNullOrWhiteSpace(reason))
+            {
+                builder.WithDescription(reason);
+            }
+
             builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
             reason = reason.WithWhiteSpaceAlternative("None");
 

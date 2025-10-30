@@ -59,7 +59,7 @@ internal sealed class AltCommand
         [Parameter("alt"), Description("The alt account to remove.")] DiscordUser alt)
     {
         await context.DeferResponseAsync();
-        _altAccountService.RemoveAlt(user, alt, context.Member);
+        _altAccountService.RemoveAlt(user, alt, context.Member!);
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));

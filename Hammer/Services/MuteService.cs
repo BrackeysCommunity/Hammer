@@ -518,7 +518,7 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
             try
             {
                 DiscordMember botMember = await guild.GetMemberAsync(_discordClient.CurrentUser.Id);
-                DiscordUser? user = await _discordClient.GetUserAsync(mute.UserId);
+                DiscordUser user = await _discordClient.GetUserAsync(mute.UserId);
                 await RevokeMuteAsync(user, botMember, "Temporary mute expired");
             }
             catch (NotFoundException)

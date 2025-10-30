@@ -16,7 +16,8 @@ internal sealed partial class InfractionCommand
     [UsedImplicitly]
     public async Task StatsAsync(SlashCommandContext context)
     {
-        IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(context.Guild);
+        DiscordGuild guild = context.Guild!;
+        IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild);
 
         if (infractions.Count == 0)
         {
@@ -29,14 +30,14 @@ internal sealed partial class InfractionCommand
             return;
         }
 
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out _))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out _))
         {
             await context.RespondAsync("Guild is not configured!", true);
             return;
         }
 
         await context.DeferResponseAsync();
-        DiscordEmbed result = await _infractionStatisticsService.CreateStatisticsEmbedAsync(context.Guild);
+        DiscordEmbed result = await _infractionStatisticsService.CreateStatisticsEmbedAsync(guild);
 
         var builder = new DiscordWebhookBuilder();
         builder.AddEmbed(result);

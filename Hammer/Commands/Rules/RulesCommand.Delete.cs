@@ -20,7 +20,8 @@ internal sealed partial class RulesCommand
     public async Task DeleteAsync(SlashCommandContext context,
         [SlashAutoCompleteProvider<RuleAutoCompleteProvider>] [Parameter("rule"), Description("The rule to modify")] long ruleId)
     {
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        DiscordGuild guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
@@ -28,7 +29,6 @@ internal sealed partial class RulesCommand
 
         await context.DeferResponseAsync();
 
-        DiscordGuild guild = context.Guild;
         var builder = new DiscordWebhookBuilder();
 
         if (!_ruleService.GuildHasRule(guild, (int)ruleId))

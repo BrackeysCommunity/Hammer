@@ -249,7 +249,7 @@ internal sealed class RuleService : BackgroundService
     public async Task ModifyRulesMessageAsync(DiscordMessage message)
     {
         DiscordColor color = DiscordColor.Orange;
-        DiscordChannel channel = message.Channel;
+        DiscordChannel channel = message.Channel!;
         DiscordGuild guild = channel.Guild;
         IReadOnlyList<Rule> rules = GetGuildRules(guild);
         var builder = new DiscordMessageBuilder();
@@ -336,7 +336,7 @@ internal sealed class RuleService : BackgroundService
     /// </exception>
     public Rule? SearchForRule(DiscordGuild guild, string searchQuery)
     {
-        if (guild == null)
+        if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }

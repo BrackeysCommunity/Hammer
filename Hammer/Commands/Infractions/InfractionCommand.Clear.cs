@@ -22,10 +22,11 @@ internal sealed partial class InfractionCommand
     {
         await context.DeferResponseAsync();
 
-        IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(user, context.Guild);
+        DiscordGuild guild = context.Guild!;
+        IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(user, guild);
         _infractionService.RemoveInfractions(infractions);
 
-        int infractionCount = _infractionService.GetInfractionCount(user, context.Guild);
+        int infractionCount = _infractionService.GetInfractionCount(user, guild);
         int differential = infractions.Count - infractionCount;
 
         var embed = new DiscordEmbedBuilder();
@@ -46,8 +47,8 @@ internal sealed partial class InfractionCommand
             embed.WithTitle("Infractions Cleared");
             embed.AddField("User", user.Mention, true);
             embed.AddField("Count", differential, true);
-            embed.AddField("Staff Member", context.Member.Mention, true);
-            await _logService.LogAsync(context.Guild, embed);
+            embed.AddField("Staff Member", context.Member!.Mention, true);
+            await _logService.LogAsync(guild, embed);
         }
     }
 }

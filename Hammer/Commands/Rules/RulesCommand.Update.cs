@@ -29,7 +29,7 @@ internal sealed partial class RulesCommand
         }
 
         var guildId = ulong.Parse(match.Groups[1].Value);
-        if (guildId != context.Guild.Id)
+        if (guildId != context.Guild!.Id)
         {
             await context.RespondAsync("Invalid message link.", true);
             return;

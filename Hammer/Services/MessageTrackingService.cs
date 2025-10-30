@@ -79,7 +79,7 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
     /// <returns>A <see cref="MessageTrackState" /> representing the tracked state of the specified message.</returns>
     public MessageTrackState GetMessageTrackState(DiscordMessage message)
     {
-        return GetMessageTrackState(message.Channel.Guild.Id, message.Channel.Id, message.Id);
+        return GetMessageTrackState(message.Channel!.Guild.Id, message.Channel.Id, message.Id);
     }
 
     /// <summary>
@@ -175,7 +175,7 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
     /// <inheritdoc />
     public async Task HandleEventAsync(DiscordClient sender, MessageUpdatedEventArgs e)
     {
-        if (e.Message.Channel.Guild is null)
+        if (e.Message.Channel?.Guild is null)
         {
             return;
         }

@@ -18,7 +18,7 @@ internal sealed partial class ReportCommands
         [Parameter("user"), Description("The user to block.")] DiscordUser user)
     {
         await context.DeferResponseAsync(true);
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user);
@@ -34,7 +34,7 @@ internal sealed partial class ReportCommands
             embed.WithColor(DiscordColor.Red);
             embed.WithTitle("User Blocked");
             embed.WithDescription($"{user.Mention} will no longer be able to make message reports.");
-            await _reportService.BlockUserAsync(user, context.Member);
+            await _reportService.BlockUserAsync(user, context.Member!);
         }
 
         var builder = new DiscordWebhookBuilder();

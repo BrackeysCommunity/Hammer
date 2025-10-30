@@ -101,7 +101,7 @@ internal sealed class HistoryCommand
         await context.DeferResponseAsync();
 
         var builder = new DiscordWebhookBuilder();
-        var response = new InfractionHistoryResponse(_infractionService, user, context.User, context.Guild, true, searchOptions);
+        var response = new InfractionHistoryResponse(_infractionService, user, context.User, context.Guild!, true, searchOptions);
 
         for (var pageIndex = 0; pageIndex < response.Pages; pageIndex++)
         {

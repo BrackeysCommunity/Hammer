@@ -63,9 +63,10 @@ internal sealed partial class InfractionCommand
         }
 
         Rule? rule = null;
+        DiscordGuild guild = context.Guild!;
         if (ruleId is not null)
         {
-            if (!_ruleService.GuildHasRule(context.Guild, (int)ruleId.Value))
+            if (!_ruleService.GuildHasRule(guild, (int)ruleId.Value))
             {
                 embed.WithColor(0xFF0000);
                 embed.WithTitle("Rule not found");
@@ -75,7 +76,7 @@ internal sealed partial class InfractionCommand
                 return;
             }
 
-            rule = _ruleService.GetRuleById(context.Guild, (int)ruleId.Value);
+            rule = _ruleService.GetRuleById(guild, (int)ruleId.Value);
         }
 
         // D#+ only accepts long, so we must cast because stupidity
@@ -112,11 +113,11 @@ internal sealed partial class InfractionCommand
         embed.WithTitle("Infraction Edited");
         embed.AddField("ID", infraction.Id, true);
         embed.AddField("User", MentionUtility.MentionUser(infraction.UserId), true);
-        embed.AddField("Staff Member", context.Member.Mention, true);
+        embed.AddField("Staff Member", context.Member!.Mention, true);
         embed.AddFieldIf(newRuleId is not null, "Old Rule", oldRuleId, true);
         embed.AddFieldIf(newRuleId is not null, "New Rule", () => newRuleId!.Value, true);
         embed.AddFieldIf(!string.IsNullOrWhiteSpace(reason), "Old Reason", oldReason);
         embed.AddFieldIf(!string.IsNullOrWhiteSpace(reason), "New Reason", () => reason);
-        await _logService.LogAsync(context.Guild, embed);
+        await _logService.LogAsync(guild, embed);
     }
 }

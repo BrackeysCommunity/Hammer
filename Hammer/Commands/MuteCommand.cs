@@ -68,7 +68,8 @@ internal sealed class MuteCommand
     {
         await context.DeferResponseAsync(true);
 
-        if (_cooldownService.IsCooldownActive(user, context.Member) &&
+        DiscordMember member = context.Member!;
+        if (_cooldownService.IsCooldownActive(user, member) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
@@ -80,7 +81,7 @@ internal sealed class MuteCommand
             }
         }
 
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
             DiscordWebhookBuilder responseBuilder = new DiscordWebhookBuilder().WithContent("This guild is not configured.");
@@ -136,7 +137,7 @@ internal sealed class MuteCommand
         }
 
         Task<(Infraction, bool)> infractionTask;
-        PermissionLevel permissionLevel = context.Member.GetPermissionLevel(guildConfiguration);
+        PermissionLevel permissionLevel = member.GetPermissionLevel(guildConfiguration);
         var shouldClampDuration = false;
 
         if (guildConfiguration.Mute.MaxModeratorMuteDuration is { } maxModeratorMuteDuration and > 0)
@@ -154,11 +155,11 @@ internal sealed class MuteCommand
             if (shouldClampDuration)
             {
                 duration = TimeSpan.FromMilliseconds(maxModeratorMuteDuration);
-                infractionTask = _muteService.TemporaryMuteAsync(user, context.Member!, reason, duration.Value, rule);
+                infractionTask = _muteService.TemporaryMuteAsync(user, member, reason, duration.Value, rule);
             }
             else
             {
-                infractionTask = _muteService.MuteAsync(user, context.Member!, reason, rule);
+                infractionTask = _muteService.MuteAsync(user, member, reason, rule);
             }
         }
         else
@@ -168,7 +169,7 @@ internal sealed class MuteCommand
                 duration = TimeSpan.FromMilliseconds(maxModeratorMuteDuration);
             }
 
-            infractionTask = _muteService.TemporaryMuteAsync(user, context.Member!, reason, duration.Value, rule);
+            infractionTask = _muteService.TemporaryMuteAsync(user, member, reason, duration.Value, rule);
         }
 
         var builder = new DiscordEmbedBuilder();
@@ -184,21 +185,25 @@ internal sealed class MuteCommand
 
             builder.WithAuthor(user);
             builder.WithColor(DiscordColor.Red);
-            builder.WithDescription(reason);
+            if (!string.IsNullOrWhiteSpace(reason))
+            {
+                builder.WithDescription(reason);
+            }
+
             builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
             reason = reason.WithWhiteSpaceAlternative("None");
 
             if (infraction.Type == InfractionType.Mute)
             {
                 builder.WithTitle("Muted user");
-                _logger.LogInformation("{StaffMember} muted {User}. Reason: {Reason}", context.Member, user, reason);
+                _logger.LogInformation("{StaffMember} muted {User}. Reason: {Reason}", member, user, reason);
             }
             else if (infraction.Type == InfractionType.TemporaryMute)
             {
                 builder.WithTitle("Temporarily muted user");
                 builder.AddField("Duration", duration!.Value.Humanize());
                 _logger.LogInformation("{StaffMember} temporarily muted {User} for {Duration}. Reason: {Reason}",
-                    context.Member, user, duration.Value.Humanize(), reason);
+                    member, user, duration.Value.Humanize(), reason);
             }
 
             if (importantNotes.Count > 0)

@@ -19,7 +19,7 @@ internal sealed partial class ReportCommands
     {
         await context.DeferResponseAsync(true);
 
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user);
@@ -29,7 +29,7 @@ internal sealed partial class ReportCommands
             embed.WithColor(DiscordColor.Green);
             embed.WithTitle("User Unblocked");
             embed.WithDescription($"{user.Mention} has been unblocked. Their message reports will now be acknowledged.");
-            await _reportService.UnblockUserAsync(user, context.Member);
+            await _reportService.UnblockUserAsync(user, context.Member!);
         }
         else
         {

@@ -20,14 +20,15 @@ internal sealed class NoteAutoCompleteProvider : IAutoCompleteProvider
         var noteService = serviceProvider.GetRequiredService<MemberNoteService>();
         var configurationService = serviceProvider.GetRequiredService<ConfigurationService>();
 
-        if (!configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        DiscordGuild guild = context.Guild!;
+        if (!configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
             return ArraySegment<DiscordAutoCompleteChoice>.Empty;
         }
 
-        IAsyncEnumerable<MemberNote> notes = context.Member.GetPermissionLevel(guildConfiguration) < PermissionLevel.Moderator
-            ? noteService.GetNotesAsync(context.Guild, MemberNoteType.Guru)
-            : noteService.GetNotesAsync(context.Guild);
+        IAsyncEnumerable<MemberNote> notes = context.Member!.GetPermissionLevel(guildConfiguration) < PermissionLevel.Moderator
+            ? noteService.GetNotesAsync(guild, MemberNoteType.Guru)
+            : noteService.GetNotesAsync(guild);
 
         var choices = new List<DiscordAutoCompleteChoice>();
 

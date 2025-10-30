@@ -21,13 +21,14 @@ internal sealed partial class NoteCommand
     public async Task ViewAllAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user whose notes to view.")] DiscordUser user)
     {
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        DiscordGuild guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        DiscordEmbedBuilder embed = context.Guild.CreateDefaultEmbed(guildConfiguration, false);
+        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
 
         try
         {
@@ -35,13 +36,13 @@ internal sealed partial class NoteCommand
 
             // guru can only retrieve guru notes
             IAsyncEnumerable<MemberNote> notes =
-                context.Member.GetPermissionLevel(guildConfiguration) >= PermissionLevel.Moderator
-                    ? _noteService.GetNotesAsync(user, context.Guild)
-                    : _noteService.GetNotesAsync(user, context.Guild, MemberNoteType.Guru);
+                context.Member!.GetPermissionLevel(guildConfiguration) >= PermissionLevel.Moderator
+                    ? _noteService.GetNotesAsync(user, guild)
+                    : _noteService.GetNotesAsync(user, guild, MemberNoteType.Guru);
 
             await foreach (MemberNote note in notes)
             {
-                if (note.GuildId != context.Guild.Id)
+                if (note.GuildId != guild.Id)
                 {
                     continue;
                 }

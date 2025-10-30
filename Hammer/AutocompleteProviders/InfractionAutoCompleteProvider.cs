@@ -18,7 +18,7 @@ internal sealed class InfractionAutoCompleteProvider : IAutoCompleteProvider
     public ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context)
     {
         var infractionService = context.ServiceProvider.GetRequiredService<InfractionService>();
-        IEnumerable<Infraction> infractions = infractionService.EnumerateInfractions(context.Guild);
+        IEnumerable<Infraction> infractions = infractionService.EnumerateInfractions(context.Guild!);
 
         return ValueTask.FromResult(infractions.OrderByDescending(i => i.IssuedAt).Take(10).Select(infraction =>
         {
@@ -32,7 +32,7 @@ internal sealed class InfractionAutoCompleteProvider : IAutoCompleteProvider
         var userString = $"User {infraction.UserId}";
         try
         {
-            DiscordUser? user = client.GetUserAsync(infraction.UserId).GetAwaiter().GetResult();
+            DiscordUser user = client.GetUserAsync(infraction.UserId).GetAwaiter().GetResult();
             userString = user.GetUsernameWithDiscriminator();
         }
         catch (NotFoundException)

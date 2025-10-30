@@ -51,8 +51,8 @@ internal sealed partial class InfractionCommand
             embed.AddField("ID", infraction.Id, true);
             embed.AddField("User", MentionUtility.MentionUser(infraction.UserId), true);
             embed.AddField("Type", infraction.Type, true);
-            embed.AddField("Staff Member", context.Member.Mention, true);
-            await _logService.LogAsync(context.Guild, embed);
+            embed.AddField("Staff Member", context.Member!.Mention, true);
+            await _logService.LogAsync(context.Guild!, embed);
         }
     }
 }

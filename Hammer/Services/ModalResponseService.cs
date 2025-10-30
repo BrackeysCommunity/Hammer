@@ -134,7 +134,7 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
 
         Rule rule = _ruleService.GetRuleById(guild, ruleId);
         string? oldBrief = rule.Brief?.AsNullIfWhiteSpace();
-        string? oldDescription = rule.Description.AsNullIfWhiteSpace();
+        string oldDescription = rule.Description.AsNullIfWhiteSpace();
 
         string? brief = (e.Values["brief"] as TextInputModalSubmission)?.Value;
         string? description = (e.Values["description"] as TextInputModalSubmission)?.Value;
@@ -263,7 +263,7 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
             throw new InvalidOperationException("Message input is missing.");
         }
 
-        string content = MentionUtility.ReplaceChannelMentions(guild, message.Value?.Trim() ?? string.Empty);
+        string content = MentionUtility.ReplaceChannelMentions(guild, message.Value.Trim());
         var builder = new DiscordFollowupMessageBuilder();
         builder.AsEphemeral();
 

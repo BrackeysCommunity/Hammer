@@ -47,7 +47,7 @@ internal sealed class InfoCommand
 
         DiscordClient client = context.Client;
         DiscordMember member = (await client.CurrentUser.GetAsMemberOfAsync(guild))!;
-        string hammerVersion = _botService.Version;
+        string botVersion = _botService.Version;
         DiscordColor embedColor = member.Color.PrimaryColor;
         if (embedColor.Value == 0)
         {
@@ -61,13 +61,13 @@ internal sealed class InfoCommand
         embed.WithAuthor(member);
         embed.WithColor(embedColor);
         embed.WithThumbnail(member.AvatarUrl);
-        embed.WithTitle($"Hammer v{hammerVersion}");
+        embed.WithTitle($"Hammer v{botVersion}");
         embed.AddField("Ping", $"{ping}", true);
         embed.AddField("Uptime", (DateTimeOffset.UtcNow - _botService.StartedAt).Humanize(), true);
         embed.AddField("Source", "[View on GitHub](https://github.com/BrackeysCommunity/Hammer)", true);
 
         var builder = new StringBuilder();
-        builder.AppendLine($"Hammer: {hammerVersion}");
+        builder.AppendLine($"Hammer: {botVersion}");
         builder.AppendLine($"D#+: {client.VersionString}");
         builder.AppendLine($"CLR: {Environment.Version.ToString(3)}");
         builder.AppendLine($"Host: {Environment.OSVersion}");

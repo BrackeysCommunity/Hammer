@@ -21,13 +21,14 @@ internal sealed partial class NoteCommand
         [Parameter("user"), Description("The user for whom to create a note.")] DiscordUser user,
         [Parameter("content"), Description("The content of the note.")] string content)
     {
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        DiscordGuild guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        DiscordEmbedBuilder embed = context.Guild.CreateDefaultEmbed(guildConfiguration, false);
+        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
 
         try
         {
@@ -39,7 +40,7 @@ internal sealed partial class NoteCommand
             embed.WithFooter($"Note #{note.Id}");
 
             _logger.LogInformation("{User} created note for {Target} in {Guild}: {Content}",
-                context.User, user, context.Guild, content);
+                context.User, user, guild, content);
         }
         catch (Exception exception)
         {

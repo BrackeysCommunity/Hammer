@@ -29,7 +29,8 @@ internal sealed partial class InfractionCommand
 
         await context.DeferResponseAsync();
 
-        IEnumerable<Infraction> infractions = _infractionService.EnumerateInfractions(source, context.Guild);
+        DiscordGuild guild = context.Guild!;
+        IEnumerable<Infraction> infractions = _infractionService.EnumerateInfractions(source, guild);
         List<Infraction> copies = infractions.Select(infraction => new Infraction(infraction) { UserId = destination.Id })
             .ToList();
 
@@ -51,7 +52,7 @@ internal sealed partial class InfractionCommand
         embed.AddField("From", source.Mention, true);
         embed.AddField("To", destination.Mention, true);
         embed.AddField("Count", copies.Count, true);
-        embed.AddField("Staff Member", context.Member.Mention, true);
-        await _logService.LogAsync(context.Guild, embed);
+        embed.AddField("Staff Member", context.Member!.Mention, true);
+        await _logService.LogAsync(guild, embed);
     }
 }

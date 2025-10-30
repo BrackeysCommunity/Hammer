@@ -4,8 +4,6 @@ using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
-using Hammer.Interactivity;
-using Hammer.Services;
 
 namespace Hammer.Commands;
 
@@ -14,16 +12,6 @@ namespace Hammer.Commands;
 /// </summary>
 internal sealed class MessageCommand
 {
-    private readonly MessageService _messageService;
-
-    /// <summary>
-    ///     Initializes a new instance of the <see cref="MessageCommand" /> class.
-    /// </summary>
-    public MessageCommand(MessageService messageService)
-    {
-        _messageService = messageService;
-    }
-
     [Command("message")]
     [Description("Sends a private staff message to a member.")]
     [RequireGuild]
@@ -33,7 +21,7 @@ internal sealed class MessageCommand
     )
     {
         var embed = new DiscordEmbedBuilder();
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         DiscordMember? member = await user.GetAsMemberOfAsync(guild);
 
         if (member is null)
@@ -45,57 +33,19 @@ internal sealed class MessageCommand
         }
         else
         {
-            var modal = new DiscordModalBuilder(context.Client);
+            var modal = new DiscordModalBuilder();
+            modal.WithCustomId(new CustomIdBuilder().Type(CustomIds.MessageMember).Add("user", user.Id).ToString());
             modal.WithTitle("Send Message");
-            DiscordModalTextInput message =
-                modal.AddInput("Message", isRequired: true, inputStyle: DiscordTextInputStyle.Paragraph);
 
-            DiscordModalResponse response =
-                await modal.Build().RespondToAsync(context.Interaction, TimeSpan.FromMinutes(5));
 
-            if (response != DiscordModalResponse.Success)
-            {
-                return;
-            }
+            var messageInput = new DiscordTextInputComponent(
+                customId: "message",
+                required: true,
+                style: DiscordTextInputStyle.Paragraph);
 
-            string content = MentionUtility.ReplaceChannelMentions(guild, message.Value?.Trim() ?? string.Empty);
-            var builder = new DiscordFollowupMessageBuilder();
-            builder.AsEphemeral();
+            modal.AddTextInput(messageInput, "Message");
 
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                embed = new DiscordEmbedBuilder();
-                embed.WithColor(DiscordColor.Red);
-                embed.WithAuthor(user);
-                embed.WithTitle("Message not sent");
-                embed.WithDescription($"An empty message cannot be sent to {user.Mention}");
-                await context.FollowupAsync(builder.AddEmbed(embed));
-                return;
-            }
-
-            bool success = await _messageService.MessageMemberAsync(member, context.Member, content);
-
-            if (success)
-            {
-                embed.WithColor(DiscordColor.Green);
-                embed.WithAuthor(user);
-                embed.WithTitle("Message Sent");
-                embed.AddField("Content", content);
-                await context.FollowupAsync(builder.AddEmbed(embed));
-            }
-            else
-            {
-                embed.WithColor(DiscordColor.Red);
-                embed.WithAuthor(user);
-                embed.WithTitle("Failed to send message");
-                embed.WithDescription($"The message could not be sent to {user.Mention}. " +
-                                      "This is likely due to DMs being disabled for this user.");
-                embed.AddField("Content", content);
-                await context.FollowupAsync(builder.AddEmbed(embed));
-            }
-
-            embed.AddField("Content", content);
-            await context.FollowupAsync(builder.AddEmbed(embed));
+            await context.RespondWithModalAsync(modal);
         }
     }
 }

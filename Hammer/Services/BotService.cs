@@ -1,5 +1,7 @@
 using System.Reflection;
 using DSharpPlus;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -8,7 +10,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which manages the bot's Discord connection.
 /// </summary>
-internal sealed class BotService : BackgroundService
+internal sealed class BotService : BackgroundService, IEventHandler<ClientStartedEventArgs>
 {
     private readonly ILogger<BotService> _logger;
     private readonly DiscordClient _discordClient;
@@ -38,6 +40,17 @@ internal sealed class BotService : BackgroundService
     /// </summary>
     /// <value>The bot version.</value>
     public string Version { get; }
+
+    /// <inheritdoc />
+    public Task HandleEventAsync(DiscordClient sender, ClientStartedEventArgs e)
+    {
+        DiscordUser user = sender.CurrentUser;
+        _logger.LogInformation("Connected to Discord as {BotUsername}#{BotDiscriminator} ({BotId})",
+            user.Username,
+            user.Discriminator,
+            user.Id);
+        return Task.CompletedTask;
+    }
 
     /// <inheritdoc />
     public override Task StopAsync(CancellationToken cancellationToken)

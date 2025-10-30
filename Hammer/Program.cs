@@ -39,6 +39,7 @@ const DiscordIntents intents = DiscordIntents.AllUnprivileged | DiscordIntents.G
 builder.Services.AddDiscordClient(Environment.GetEnvironmentVariable("DISCORD_TOKEN")!, intents);
 builder.Services.ConfigureEventHandlers(events =>
 {
+    events.AddEventHandlers<BotService>(ServiceLifetime.Singleton);
     events.AddEventHandlers<DiscordLogService>(ServiceLifetime.Singleton);
     events.AddEventHandlers<InfractionService>(ServiceLifetime.Singleton);
     events.AddEventHandlers<MessageTrackingService>(ServiceLifetime.Singleton);

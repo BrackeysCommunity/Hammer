@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
@@ -35,6 +36,7 @@ internal sealed class ViewMessageCommand
 
     [Command("viewmessage")]
     [Description("Views a staff message, or deleted message, by its ID.")]
+    [RequireGuild]
     [UsedImplicitly]
     public async Task ViewMessageAsync(
         SlashCommandContext context,

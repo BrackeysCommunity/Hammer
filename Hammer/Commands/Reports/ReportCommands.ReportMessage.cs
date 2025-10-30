@@ -1,4 +1,5 @@
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Resources;
@@ -11,6 +12,7 @@ internal sealed partial class ReportCommands
 {
     [Command("Report Message")]
     [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
+    [RequireGuild]
     [UsedImplicitly]
     public async Task ReportMessageAsync(SlashCommandContext context, DiscordMessage message)
     {

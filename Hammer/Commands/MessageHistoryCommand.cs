@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus;
 using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Data;
@@ -29,6 +30,7 @@ internal sealed class MessageHistoryCommand
 
     [Command("messagehistory")]
     [Description("Views the message history for a user.")]
+    [RequireGuild]
     [UsedImplicitly]
     public async Task MessageHistoryAsync(
         SlashCommandContext context,

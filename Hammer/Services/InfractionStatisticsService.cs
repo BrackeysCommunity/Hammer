@@ -130,14 +130,14 @@ internal sealed class InfractionStatisticsService
 
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < bans.Count; index++)
+        foreach (Infraction ban in bans)
         {
-            users.Add(bans[index].UserId);
+            users.Add(ban.UserId);
         }
 
-        for (var index = 0; index < temporaryBans.Count; index++)
+        foreach (Infraction temporaryBan in temporaryBans)
         {
-            users.Add(temporaryBans[index].UserId);
+            users.Add(temporaryBan.UserId);
         }
 
         return users.Count;
@@ -160,9 +160,9 @@ internal sealed class InfractionStatisticsService
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild, options);
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < infractions.Count; index++)
+        foreach (Infraction gag in infractions)
         {
-            users.Add(infractions[index].UserId);
+            users.Add(gag.UserId);
         }
 
         return users.Count;
@@ -185,9 +185,9 @@ internal sealed class InfractionStatisticsService
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild, options);
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < infractions.Count; index++)
+        foreach (Infraction kick in infractions)
         {
-            users.Add(infractions[index].UserId);
+            users.Add(kick.UserId);
         }
 
         return users.Count;
@@ -215,14 +215,14 @@ internal sealed class InfractionStatisticsService
 
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < mutes.Count; index++)
+        foreach (Infraction mute in mutes)
         {
-            users.Add(mutes[index].UserId);
+            users.Add(mute.UserId);
         }
 
-        for (var index = 0; index < temporaryMutes.Count; index++)
+        foreach (Infraction temporaryMute in temporaryMutes)
         {
-            users.Add(temporaryMutes[index].UserId);
+            users.Add(temporaryMute.UserId);
         }
 
         return users.Count;
@@ -245,9 +245,9 @@ internal sealed class InfractionStatisticsService
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild, options);
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < infractions.Count; index++)
+        foreach (Infraction warning in infractions)
         {
-            users.Add(infractions[index].UserId);
+            users.Add(warning.UserId);
         }
 
         return users.Count;
@@ -268,9 +268,9 @@ internal sealed class InfractionStatisticsService
         IReadOnlyList<TemporaryBan> bans = _banService.GetTemporaryBans(guild);
         TimeSpan total = TimeSpan.Zero;
 
-        for (var index = 0; index < bans.Count; index++)
+        foreach (TemporaryBan temporaryBan in bans)
         {
-            total += bans[index].ExpiresAt - DateTimeOffset.UtcNow;
+            total += temporaryBan.ExpiresAt - DateTimeOffset.UtcNow;
         }
 
         return total;
@@ -291,9 +291,9 @@ internal sealed class InfractionStatisticsService
         IReadOnlyList<Mute> mutes = _muteService.GetTemporaryMutes(guild);
         TimeSpan total = TimeSpan.Zero;
 
-        for (var index = 0; index < mutes.Count; index++)
+        foreach (Mute mute in mutes)
         {
-            if (mutes[index].ExpiresAt is { } expiresAt)
+            if (mute.ExpiresAt is { } expiresAt)
             {
                 total += expiresAt - DateTimeOffset.UtcNow;
             }
@@ -370,9 +370,9 @@ internal sealed class InfractionStatisticsService
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild);
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < infractions.Count; index++)
+        foreach (Infraction infraction in infractions)
         {
-            users.Add(infractions[index].UserId);
+            users.Add(infraction.UserId);
         }
 
         return users.Count;

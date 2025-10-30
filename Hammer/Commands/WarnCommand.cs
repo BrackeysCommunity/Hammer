@@ -1,10 +1,14 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 
@@ -13,7 +17,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a class which implements the <c>warn</c> command.
 /// </summary>
-internal sealed class WarnCommand : ApplicationCommandModule
+internal sealed class WarnCommand
 {
     private readonly ILogger<WarnCommand> _logger;
     private readonly InfractionCooldownService _cooldownService;
@@ -44,23 +48,25 @@ internal sealed class WarnCommand : ApplicationCommandModule
         _warningService = warningService;
     }
 
-    [SlashCommand("warn", "Issues a warning to a user.", false)]
-    [SlashRequireGuild]
-    public async Task WarnAsync(InteractionContext context,
-        [Option("user", "The user to warn.")] DiscordUser user,
-        [Option("reason", "The reason for the warning.")]
-        string reason,
-        [Option("rule", "The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+    [Command("warn")]
+    [Description("Issues a warning to a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task WarnAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to warn.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the warning.")] string reason,
+        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
-        if (_cooldownService.IsCooldownActive(user, context.Member) &&
+        DiscordMember member = context.Member!;
+        if (_cooldownService.IsCooldownActive(user, member) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
             DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
-            bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
             if (!result)
             {
                 return;
@@ -76,7 +82,7 @@ internal sealed class WarnCommand : ApplicationCommandModule
             Rule? rule = null;
             if (!string.IsNullOrWhiteSpace(ruleSearch))
             {
-                DiscordGuild guild = context.Guild;
+                DiscordGuild guild = context.Guild!;
                 if (int.TryParse(ruleSearch, out int ruleId))
                 {
                     if (_ruleService.GuildHasRule(guild, ruleId))
@@ -99,7 +105,7 @@ internal sealed class WarnCommand : ApplicationCommandModule
             }
 
             (infraction, bool dmSuccess) =
-                await _warningService.WarnAsync(user, context.Member, reason, rule);
+                await _warningService.WarnAsync(user, member, reason, rule);
 
             if (!dmSuccess)
             {
@@ -118,7 +124,7 @@ internal sealed class WarnCommand : ApplicationCommandModule
             builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
 
             reason = reason.WithWhiteSpaceAlternative("None");
-            _logger.LogInformation("{StaffMember} warned {User}. Reason: {Reason}", context.Member, user, reason);
+            _logger.LogInformation("{StaffMember} warned {User}. Reason: {Reason}", member, user, reason);
         }
         catch (Exception exception)
         {

@@ -1,34 +1,39 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Configuration;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Rules;
 
 internal sealed partial class RulesCommand
 {
-    [SlashCommand("delete", "Deletes a rule.", false)]
-    [SlashRequireGuild]
-    public async Task DeleteAsync(InteractionContext context,
-        [Autocomplete(typeof(RuleAutocompleteProvider))] [Option("rule", "The rule to modify")]
-        long ruleId)
+    [Command("delete")]
+    [Description("Deletes a rule.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task DeleteAsync(SlashCommandContext context,
+        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>] [Parameter("rule"), Description("The rule to modify")] long ruleId)
     {
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        DiscordGuild guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
 
-        DiscordGuild guild = context.Guild;
         var builder = new DiscordWebhookBuilder();
 
         if (!_ruleService.GuildHasRule(guild, (int)ruleId))
         {
-            builder.AddEmbed(_ruleService.CreateRuleNotFoundEmbed((int)ruleId));
+            builder.AddEmbed(Services.RuleService.CreateRuleNotFoundEmbed((int)ruleId));
             await context.EditResponseAsync(builder);
             return;
         }

@@ -1,18 +1,24 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Notes;
 
 internal sealed partial class NoteCommand
 {
-    [SlashCommand("delete", "Deletes a note.", false)]
-    [SlashRequireGuild]
-    public async Task DeleteAsync(InteractionContext context,
-        [Autocomplete(typeof(NoteAutocompleteProvider))] [Option("note", "The note to delete.")] long noteId)
+    [Command("delete")]
+    [Description("Deletes a note.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task DeleteAsync(SlashCommandContext context,
+        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to delete.")] long noteId)
     {
         var embed = new DiscordEmbedBuilder();
         MemberNote? note = await _noteService.GetNoteAsync(noteId);
@@ -32,6 +38,6 @@ internal sealed partial class NoteCommand
             embed.AddField("Content", note.Content);
         }
 
-        await context.CreateResponseAsync(embed, true);
+        await context.RespondAsync(embed, true);
     }
 }

@@ -1,19 +1,27 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Notes;
 
 internal sealed partial class NoteCommand
 {
-    [SlashCommand("editcontent", "Edits the content of a note.", false)]
-    [SlashRequireGuild]
-    public async Task EditContentAsync(InteractionContext context,
-        [Autocomplete(typeof(NoteAutocompleteProvider))] [Option("note", "The note to edit.")] long noteId,
-        [Option("content", "The new content of the note.")] string content)
+    [Command("editcontent")]
+    [Description("Edits the content of a note.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task EditContentAsync(SlashCommandContext context,
+        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to edit.")]
+        long noteId,
+        [Parameter("content"), Description("The new content of the note.")]
+        string content)
     {
         var embed = new DiscordEmbedBuilder();
 
@@ -39,6 +47,6 @@ internal sealed partial class NoteCommand
             embed.AddField("Content", note.Content);
         }
 
-        await context.CreateResponseAsync(embed, true);
+        await context.RespondAsync(embed, true);
     }
 }

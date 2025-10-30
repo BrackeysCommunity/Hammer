@@ -1,4 +1,5 @@
-using DSharpPlus.SlashCommands;
+using System.ComponentModel;
+using DSharpPlus.Commands;
 using Hammer.Services;
 
 namespace Hammer.Commands.Infractions;
@@ -6,8 +7,9 @@ namespace Hammer.Commands.Infractions;
 /// <summary>
 ///     Represents a module which implements infraction commands.
 /// </summary>
-[SlashCommandGroup("infraction", "Manage infractions.", false)]
-internal sealed partial class InfractionCommand : ApplicationCommandModule
+[Command("infraction")]
+[Description("Manage infractions.")]
+internal sealed partial class InfractionCommand
 {
     private readonly ConfigurationService _configurationService;
     private readonly InfractionService _infractionService;

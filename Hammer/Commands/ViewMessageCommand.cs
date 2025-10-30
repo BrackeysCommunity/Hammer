@@ -1,17 +1,21 @@
+using System.ComponentModel;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Resources;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
 /// <summary>
 ///     Represents a module which implements the <c>viewmessage</c> command.
 /// </summary>
-internal sealed class ViewMessageCommand : ApplicationCommandModule
+internal sealed class ViewMessageCommand
 {
     private readonly ConfigurationService _configurationService;
     private readonly MessageService _messageService;
@@ -30,14 +34,16 @@ internal sealed class ViewMessageCommand : ApplicationCommandModule
         _messageDeletionService = messageDeletionService;
     }
 
-    [SlashCommand("viewmessage", "Views a staff message, or deleted message, by its ID.", false)]
+    [Command("viewmessage")]
+    [Description("Views a staff message, or deleted message, by its ID.")]
+    [RequireGuild]
+    [UsedImplicitly]
     public async Task ViewMessageAsync(
-        InteractionContext context,
-        [Option("id", "The ID of the message to retrieve.")]
-        string rawId
+        SlashCommandContext context,
+        [Parameter("id"), Description("The ID of the message to retrieve.")] string rawId
     )
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
 
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))

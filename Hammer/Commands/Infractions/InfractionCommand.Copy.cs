@@ -1,30 +1,36 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
 internal sealed partial class InfractionCommand
 {
-    [SlashCommand("copy", "Copies all infractions from one user to another.", false)]
-    [SlashRequireGuild]
-    public async Task CopyAsync(InteractionContext context,
-        [Option("source", "The user whose infractions to copy.")]
+    [Command("copy")]
+    [Description("Copies all infractions from one user to another.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task CopyAsync(SlashCommandContext context,
+        [Parameter("source"), Description("The user whose infractions to copy.")]
         DiscordUser source,
-        [Option("destination", "The user who will acquire the copied infractions.")]
+        [Parameter("destination"), Description("The user who will acquire the copied infractions.")]
         DiscordUser destination)
     {
         if (source == destination)
         {
-            await context.CreateResponseAsync("You can't copy infractions to the same user.", true);
+            await context.RespondAsync("You can't copy infractions to the same user.", true);
             return;
         }
 
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
 
-        IEnumerable<Infraction> infractions = _infractionService.EnumerateInfractions(source, context.Guild);
+        DiscordGuild guild = context.Guild!;
+        IEnumerable<Infraction> infractions = _infractionService.EnumerateInfractions(source, guild);
         List<Infraction> copies = infractions.Select(infraction => new Infraction(infraction) { UserId = destination.Id })
             .ToList();
 
@@ -46,7 +52,7 @@ internal sealed partial class InfractionCommand
         embed.AddField("From", source.Mention, true);
         embed.AddField("To", destination.Mention, true);
         embed.AddField("Count", copies.Count, true);
-        embed.AddField("Staff Member", context.Member.Mention, true);
-        await _logService.LogAsync(context.Guild, embed);
+        embed.AddField("Staff Member", context.Member!.Mention, true);
+        await _logService.LogAsync(guild, embed);
     }
 }

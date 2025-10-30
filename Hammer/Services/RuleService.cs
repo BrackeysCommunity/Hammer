@@ -66,7 +66,7 @@ internal sealed class RuleService : BackgroundService
     /// </summary>
     /// <param name="ruleId">The ID of the rule which wasn't found.</param>
     /// <returns>A <see cref="DiscordEmbed" /> stating the rule cannot be found.</returns>
-    public DiscordEmbed CreateRuleNotFoundEmbed(int ruleId)
+    public static DiscordEmbed CreateRuleNotFoundEmbed(int ruleId)
     {
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(0xFF0000);
@@ -80,7 +80,7 @@ internal sealed class RuleService : BackgroundService
     /// </summary>
     /// <param name="searchQuery">The search query which failed.</param>
     /// <returns>A <see cref="DiscordEmbed" /> stating the rule cannot be found.</returns>
-    public DiscordEmbed CreateRuleNotFoundEmbed(string searchQuery)
+    public static DiscordEmbed CreateRuleNotFoundEmbed(string searchQuery)
     {
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(0xFF0000);
@@ -249,7 +249,7 @@ internal sealed class RuleService : BackgroundService
     public async Task ModifyRulesMessageAsync(DiscordMessage message)
     {
         DiscordColor color = DiscordColor.Orange;
-        DiscordChannel channel = message.Channel;
+        DiscordChannel channel = message.Channel!;
         DiscordGuild guild = channel.Guild;
         IReadOnlyList<Rule> rules = GetGuildRules(guild);
         var builder = new DiscordMessageBuilder();
@@ -298,7 +298,7 @@ internal sealed class RuleService : BackgroundService
     ///     <see langword="true" /> if <paramref name="rule" /> matches <paramref name="searchTerms" />; otherwise,
     ///     <see langword="false" />.
     /// </returns>
-    public bool RuleMatches(Rule rule, IEnumerable<string> searchTerms)
+    public static bool RuleMatches(Rule rule, IEnumerable<string> searchTerms)
     {
         foreach (string term in searchTerms)
         {
@@ -336,7 +336,7 @@ internal sealed class RuleService : BackgroundService
     /// </exception>
     public Rule? SearchForRule(DiscordGuild guild, string searchQuery)
     {
-        if (guild == null)
+        if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }

@@ -1,9 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Timers;
-using DSharpPlus;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.SlashCommands;
 using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
@@ -74,8 +73,8 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <param name="infraction">The recently-issued infraction.</param>
     /// <param name="infractionEmbed">The infraction embed to display.</param>
     /// <returns><see langword="true" /> if the user confirmed the infraction; otherwise, <see langword="false" />.</returns>
-    public async Task<bool> ShowConfirmationAsync(
-        InteractionContext context,
+    public static async Task<bool> ShowConfirmationAsync(
+        SlashCommandContext context,
         DiscordUser user,
         Infraction infraction,
         DiscordEmbed infractionEmbed
@@ -89,9 +88,9 @@ internal sealed class InfractionCooldownService : BackgroundService
         builder.WithContent(content);
         builder.AddEmbed(infractionEmbed);
 
-        var proceed = new DiscordButtonComponent(ButtonStyle.Success, "infr-proceed", "Proceed");
-        var cancel = new DiscordButtonComponent(ButtonStyle.Danger, "infr-cancel", "Cancel");
-        builder.AddComponents(proceed, cancel);
+        var proceed = new DiscordButtonComponent(DiscordButtonStyle.Success, "infr-proceed", "Proceed");
+        var cancel = new DiscordButtonComponent(DiscordButtonStyle.Danger, "infr-cancel", "Cancel");
+        builder.AddActionRowComponent(proceed, cancel);
 
         DiscordMessage message = await context.EditResponseAsync(builder);
         var result = await message.WaitForButtonAsync(TimeSpan.FromMinutes(1));

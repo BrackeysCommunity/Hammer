@@ -73,7 +73,7 @@ internal sealed class AltAccountService : BackgroundService
         AltAccount[] altAccounts = context.AltAccounts.Where(a => a.AltId == user.Id).ToArray();
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(DiscordColor.Green);
         embed.WithTitle("Alt account registered");
         embed.WithDescription("The following users have been registered as alts of each other.");
@@ -163,7 +163,7 @@ internal sealed class AltAccountService : BackgroundService
         context.SaveChanges();
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(DiscordColor.Orange);
         embed.WithTitle("Alt account unregistered");
         embed.WithDescription("The following users have been unregistered as alts of each other.");

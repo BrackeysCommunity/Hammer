@@ -1,20 +1,24 @@
-using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Hammer.Resources;
+using JetBrains.Annotations;
 using SmartFormat;
 
 namespace Hammer.Commands.Reports;
 
 internal sealed partial class ReportCommands
 {
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Report Message")]
-    public async Task ReportMessageAsync(ContextMenuContext context)
+    [Command("Report Message")]
+    [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task ReportMessageAsync(SlashCommandContext context, DiscordMessage message)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         DiscordUser user = context.User;
-        DiscordMessage message = context.Interaction.Data.Resolved.Messages.First().Value;
         await _reportService.ReportMessageAsync(message, (DiscordMember)user);
 
         var builder = new DiscordWebhookBuilder();

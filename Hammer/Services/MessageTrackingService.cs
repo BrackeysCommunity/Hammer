@@ -5,7 +5,6 @@ using DSharpPlus.Exceptions;
 using Hammer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Hammer.Services;
@@ -13,10 +12,11 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which tracks specific user messages.
 /// </summary>
-internal sealed class MessageTrackingService : BackgroundService
+internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEventArgs>,
+    IEventHandler<MessageDeletedEventArgs>,
+    IEventHandler<MessageUpdatedEventArgs>
 {
     private readonly ILogger<MessageTrackingService> _logger;
-    private readonly DiscordClient _discordClient;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly List<TrackedMessage> _trackedMessages = [];
 
@@ -24,12 +24,10 @@ internal sealed class MessageTrackingService : BackgroundService
     ///     Initializes a new instance of the <see cref="MessageReportService" /> class.
     /// </summary>
     public MessageTrackingService(ILogger<MessageTrackingService> logger,
-        IDbContextFactory<HammerContext> dbContextFactory,
-        DiscordClient discordClient)
+        IDbContextFactory<HammerContext> dbContextFactory)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
-        _discordClient = discordClient;
     }
 
     /// <summary>
@@ -81,7 +79,7 @@ internal sealed class MessageTrackingService : BackgroundService
     /// <returns>A <see cref="MessageTrackState" /> representing the tracked state of the specified message.</returns>
     public MessageTrackState GetMessageTrackState(DiscordMessage message)
     {
-        return GetMessageTrackState(message.Channel.Guild.Id, message.Channel.Id, message.Id);
+        return GetMessageTrackState(message.Channel!.Guild.Id, message.Channel.Id, message.Id);
     }
 
     /// <summary>
@@ -152,31 +150,13 @@ internal sealed class MessageTrackingService : BackgroundService
     }
 
     /// <inheritdoc />
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _discordClient.GuildAvailable -= DiscordClientOnGuildAvailable;
-        _discordClient.MessageDeleted -= DiscordClientOnMessageDeleted;
-        _discordClient.MessageUpdated -= DiscordClientOnMessageUpdated;
-
-        return base.StopAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _discordClient.GuildAvailable += DiscordClientOnGuildAvailable;
-        _discordClient.MessageDeleted += DiscordClientOnMessageDeleted;
-        _discordClient.MessageUpdated += DiscordClientOnMessageUpdated;
-
-        return Task.CompletedTask;
-    }
-
-    private Task DiscordClientOnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
+    public Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
     {
         return RefreshFromDatabaseAsync(e.Guild);
     }
 
-    private async Task DiscordClientOnMessageDeleted(DiscordClient sender, MessageDeleteEventArgs e)
+    /// <inheritdoc />
+    public async Task HandleEventAsync(DiscordClient sender, MessageDeletedEventArgs e)
     {
         if (GetMessageTrackState(e.Message) != MessageTrackState.Tracked)
         {
@@ -192,9 +172,10 @@ internal sealed class MessageTrackingService : BackgroundService
         await context.SaveChangesAsync();
     }
 
-    private async Task DiscordClientOnMessageUpdated(DiscordClient sender, MessageUpdateEventArgs e)
+    /// <inheritdoc />
+    public async Task HandleEventAsync(DiscordClient sender, MessageUpdatedEventArgs e)
     {
-        if (e.Message.Channel.Guild is null)
+        if (e.Message.Channel?.Guild is null)
         {
             return;
         }
@@ -221,8 +202,12 @@ internal sealed class MessageTrackingService : BackgroundService
 
         foreach (IGrouping<ulong, TrackedMessage> channelGroups in messages.GroupBy(m => m.ChannelId))
         {
-            DiscordChannel channel = guild.GetChannel(channelGroups.Key);
-            if (channel is null)
+            DiscordChannel channel;
+            try
+            {
+                channel = await guild.GetChannelAsync(channelGroups.Key);
+            }
+            catch (NotFoundException)
             {
                 foreach (TrackedMessage trackedMessage in channelGroups)
                 {
@@ -237,15 +222,8 @@ internal sealed class MessageTrackingService : BackgroundService
             {
                 try
                 {
-                    DiscordMessage message = await channel.GetMessageAsync(trackedMessage.Id);
-                    if (message is null)
-                    {
-                        trackedMessage.IsDeleted = true;
-                    }
-                    else
-                    {
-                        _trackedMessages.Add(trackedMessage);
-                    }
+                    await channel.GetMessageAsync(trackedMessage.Id);
+                    _trackedMessages.Add(trackedMessage);
                 }
                 catch (NotFoundException)
                 {

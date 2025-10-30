@@ -1,20 +1,25 @@
+using System.ComponentModel;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Reports;
 
 internal sealed partial class ReportCommands
 {
-    [SlashCommand("viewreport", "Views all reports made against this user.", false)]
-    [SlashRequireGuild]
-    public async Task ViewReportAsync(InteractionContext context, [Option("id", "The ID of the report to view.")] long id)
+    [Command("viewreport")]
+    [Description("Views all reports made against this user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task ViewReportAsync(CommandContext context,
+        [Parameter("id"), Description("The ID of the report to view.")] long id)
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
 
         var embed = new DiscordEmbedBuilder();
 

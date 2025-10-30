@@ -1,11 +1,15 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 
@@ -14,7 +18,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>kick</c> command.
 /// </summary>
-internal sealed class KickCommand : ApplicationCommandModule
+internal sealed class KickCommand
 {
     private readonly ILogger<KickCommand> _logger;
     private readonly BanService _banService;
@@ -45,26 +49,26 @@ internal sealed class KickCommand : ApplicationCommandModule
         _ruleService = ruleService;
     }
 
-    [SlashCommand("kick", "Kicks a member", false)]
-    [SlashRequireGuild]
-    public async Task KickAsync(InteractionContext context,
-        [Option("member", "The member to kick.")]
-        DiscordUser user,
-        [Option("reason", "The reason for the kick.")]
-        string? reason = null,
-        [Option("rule", "The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+    [Command("kick")]
+    [Description("Kicks a member")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task KickAsync(SlashCommandContext context,
+        [Parameter("member"), Description("The member to kick.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the kick.")] string? reason = null,
+        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null,
-        [Option("clearMessageHistory", "Clear the user's recent messages in text channels.")]
+        [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         if (_cooldownService.IsCooldownActive(user, context.Member) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
             DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
-            bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
             if (!result)
             {
                 return;

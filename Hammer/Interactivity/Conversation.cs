@@ -38,7 +38,7 @@ public sealed class Conversation
     /// </summary>
     /// <param name="initialState">The initial state.</param>
     /// <param name="context">The command context.</param>
-    public async Task ConverseAsync(ConversationState initialState, ConversationContext context)
+    public static async Task ConverseAsync(ConversationState initialState, ConversationContext context)
     {
         ConversationState? currentState = initialState;
         do

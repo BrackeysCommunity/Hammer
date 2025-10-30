@@ -1,11 +1,15 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 using X10D.Time;
@@ -15,7 +19,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>ban</c> command.
 /// </summary>
-internal sealed class BanCommand : ApplicationCommandModule
+internal sealed class BanCommand
 {
     private readonly ILogger<BanCommand> _logger;
     private readonly BanService _banService;
@@ -46,34 +50,34 @@ internal sealed class BanCommand : ApplicationCommandModule
         _ruleService = ruleService;
     }
 
-    [SlashCommand("ban", "Temporarily or permanently bans a user.", false)]
-    [SlashRequireGuild]
-    public async Task BanAsync(InteractionContext context,
-        [Option("user", "The user to ban.")] DiscordUser user,
-        [Option("reason", "The reason for the ban.")]
-        string? reason = null,
-        [Option("duration", "The duration of the ban.")]
-        string? durationRaw = null,
-        [Option("rule", "The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))]
+    [Command("ban")]
+    [Description("Temporarily or permanently bans a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task BanAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to ban.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the ban.")] string? reason = null,
+        [Parameter("duration"), Description("The duration of the ban.")] string? durationRaw = null,
+        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null,
-        [Option("clearMessageHistory", "Clear the user's recent messages in text channels.")]
+        [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
-        if (_cooldownService.IsCooldownActive(user, context.Member) &&
+        if (_cooldownService.IsCooldownActive(user, context.Member!) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
             DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
-            bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
             if (!result)
             {
                 return;
             }
         }
 
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         if (await _banService.IsUserBannedAsync(user, guild))
         {
             var responseBuilder = new DiscordWebhookBuilder();
@@ -150,7 +154,12 @@ internal sealed class BanCommand : ApplicationCommandModule
             builder.WithAuthor(user);
             builder.WithColor(DiscordColor.Red);
             builder.WithTitle("Banned user");
-            builder.WithDescription(reason);
+
+            if (!string.IsNullOrWhiteSpace(reason))
+            {
+                builder.WithDescription(reason);
+            }
+
             builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
             reason = reason.WithWhiteSpaceAlternative("None");
 

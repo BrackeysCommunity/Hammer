@@ -1,38 +1,29 @@
-using DSharpPlus;
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Extensions;
-using Hammer.Interactivity;
-using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
 /// <summary>
 ///     Represents a module which implements staff commands.
 /// </summary>
-internal sealed class MessageCommand : ApplicationCommandModule
+internal sealed class MessageCommand
 {
-    private readonly MessageService _messageService;
-
-    /// <summary>
-    ///     Initializes a new instance of the <see cref="MessageCommand" /> class.
-    /// </summary>
-    public MessageCommand(MessageService messageService)
-    {
-        _messageService = messageService;
-    }
-
-    [SlashCommand("message", "Sends a private staff message to a member.", false)]
-    [SlashRequireGuild]
-    public async Task MessageAsync(
-        InteractionContext context,
-        [Option("member", "The member to message.")]
-        DiscordUser user
+    [Command("message")]
+    [Description("Sends a private staff message to a member.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public static async Task MessageAsync(
+        SlashCommandContext context,
+        [Parameter("member"), Description("The member to message.")] DiscordUser user
     )
     {
         var embed = new DiscordEmbedBuilder();
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         DiscordMember? member = await user.GetAsMemberOfAsync(guild);
 
         if (member is null)
@@ -40,56 +31,23 @@ internal sealed class MessageCommand : ApplicationCommandModule
             embed.WithColor(DiscordColor.Red);
             embed.WithTitle("Not In Guild");
             embed.WithDescription($"User {user.Id} ({user.Mention}) was found, but is not in this guild.");
-            await context.CreateResponseAsync(embed, ephemeral: true);
+            await context.RespondAsync(embed, ephemeral: true);
         }
         else
         {
-            var modal = new DiscordModalBuilder(context.Client);
+            var modal = new DiscordModalBuilder();
+            modal.WithCustomId(new CustomIdBuilder().Type(CustomIds.MessageMember).Add("user", user.Id).ToString());
             modal.WithTitle("Send Message");
-            DiscordModalTextInput message = modal.AddInput("Message", isRequired: true, inputStyle: TextInputStyle.Paragraph);
 
-            DiscordModalResponse response =
-                await modal.Build().RespondToAsync(context.Interaction, TimeSpan.FromMinutes(5));
 
-            if (response != DiscordModalResponse.Success)
-            {
-                return;
-            }
+            var messageInput = new DiscordTextInputComponent(
+                customId: "message",
+                required: true,
+                style: DiscordTextInputStyle.Paragraph);
 
-            string content = MentionUtility.ReplaceChannelMentions(guild, message.Value?.Trim() ?? string.Empty);
-            var builder = new DiscordFollowupMessageBuilder();
-            builder.AsEphemeral();
+            modal.AddTextInput(messageInput, "Message");
 
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                embed = new DiscordEmbedBuilder();
-                embed.WithColor(DiscordColor.Red);
-                embed.WithAuthor(user);
-                embed.WithTitle("Message not sent");
-                embed.WithDescription($"An empty message cannot be sent to {user.Mention}");
-                await context.FollowUpAsync(builder.AddEmbed(embed));
-                return;
-            }
-
-            bool success = await _messageService.MessageMemberAsync(member, context.Member, content);
-
-            if (success)
-            {
-                embed.WithColor(DiscordColor.Green);
-                embed.WithAuthor(user);
-                embed.WithTitle("Message Sent");
-            }
-            else
-            {
-                embed.WithColor(DiscordColor.Red);
-                embed.WithAuthor(user);
-                embed.WithTitle("Failed to send message");
-                embed.WithDescription($"The message could not be sent to {user.Mention}. " +
-                                      "This is likely due to DMs being disabled for this user.");
-            }
-
-            embed.AddField("Content", content);
-            await context.FollowUpAsync(builder.AddEmbed(embed));
+            await context.RespondWithModalAsync(modal);
         }
     }
 }

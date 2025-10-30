@@ -1,17 +1,23 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Data;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
 internal sealed partial class InfractionCommand
 {
-    [SlashCommand("stats", "View infraction stats.", false)]
-    [SlashRequireGuild]
-    public async Task StatsAsync(InteractionContext context)
+    [Command("stats")]
+    [Description("View infraction stats.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task StatsAsync(SlashCommandContext context)
     {
-        IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(context.Guild);
+        DiscordGuild guild = context.Guild!;
+        IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild);
 
         if (infractions.Count == 0)
         {
@@ -20,18 +26,18 @@ internal sealed partial class InfractionCommand
             embed.WithTitle("No infractions on record");
             embed.WithDescription("Statistics cannot be generated because there are no infractions on record.");
 
-            await context.CreateResponseAsync(embed, true);
+            await context.RespondAsync(embed, true);
             return;
         }
 
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out _))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out _))
         {
-            await context.CreateResponseAsync("Guild is not configured!", true);
+            await context.RespondAsync("Guild is not configured!", true);
             return;
         }
 
-        await context.DeferAsync();
-        DiscordEmbed result = await _infractionStatisticsService.CreateStatisticsEmbedAsync(context.Guild);
+        await context.DeferResponseAsync();
+        DiscordEmbed result = await _infractionStatisticsService.CreateStatisticsEmbedAsync(guild);
 
         var builder = new DiscordWebhookBuilder();
         builder.AddEmbed(result);

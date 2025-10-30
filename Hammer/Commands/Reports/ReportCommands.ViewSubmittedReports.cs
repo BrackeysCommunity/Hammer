@@ -1,29 +1,33 @@
+using System.ComponentModel;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Reports;
 
 internal sealed partial class ReportCommands
 {
-    [SlashCommand("viewsubmittedreports", "Views all reports submitted by a user.", false)]
-    [SlashRequireGuild]
+    [Command("viewsubmittedreports")]
+    [Description("Views all reports submitted by a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
     public async Task ViewSubmittedReportsAsync(
-        InteractionContext context,
-        [Option("user", "The user whose submitted reports to view.")]
-        DiscordUser user
+        SlashCommandContext context,
+        [Parameter("user"), Description("The user whose submitted reports to view.")] DiscordUser user
     )
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
 
         var list = new List<string>();
 
-        foreach (ReportedMessage reportedMessage in _reportService.EnumerateSubmittedReports(user, context.Guild))
+        foreach (ReportedMessage reportedMessage in _reportService.EnumerateSubmittedReports(user, context.Guild!))
         {
             var id = reportedMessage.MessageId.ToString();
 

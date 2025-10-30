@@ -1,18 +1,22 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Rules;
 
 /// <summary>
 ///     Represents a class which implements the <c>rule</c> command.
 /// </summary>
-internal sealed class RuleCommand : ApplicationCommandModule
+internal sealed class RuleCommand
 {
     private readonly ConfigurationService _configurationService;
     private readonly RuleService _ruleService;
@@ -28,16 +32,20 @@ internal sealed class RuleCommand : ApplicationCommandModule
         _ruleService = ruleService;
     }
 
-    [SlashCommand("rule", "Displays a rule.")]
-    [SlashRequireGuild]
-    public async Task RuleAsync(InteractionContext context,
-        [Option("rule", "The rule to display.", true), Autocomplete(typeof(RuleAutocompleteProvider))] string search,
-        [Option("mention", "The user to mention.")] DiscordUser? mentionUser = null)
+    [Command("rule")]
+    [Description("Displays a rule.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task RuleAsync(SlashCommandContext context,
+        [Parameter("rule"), Description("The rule to display.")]
+        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        string search,
+        [Parameter("mention"), Description("The user to mention.")] DiscordUser? mentionUser = null)
     {
-        DiscordGuild guild = context.Guild;
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        DiscordGuild guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
@@ -47,7 +55,7 @@ internal sealed class RuleCommand : ApplicationCommandModule
         {
             if (!_ruleService.GuildHasRule(guild, ruleId))
             {
-                await context.CreateResponseAsync(_ruleService.CreateRuleNotFoundEmbed(ruleId), true);
+                await context.RespondAsync(RuleService.CreateRuleNotFoundEmbed(ruleId), true);
                 return;
             }
 
@@ -58,7 +66,7 @@ internal sealed class RuleCommand : ApplicationCommandModule
             rule = _ruleService.SearchForRule(guild, search);
             if (rule is null)
             {
-                await context.CreateResponseAsync(_ruleService.CreateRuleNotFoundEmbed(search), true);
+                await context.RespondAsync(RuleService.CreateRuleNotFoundEmbed(search), true);
                 return;
             }
         }
@@ -68,15 +76,15 @@ internal sealed class RuleCommand : ApplicationCommandModule
         embed.WithTitle(string.IsNullOrWhiteSpace(rule.Brief) ? $"Rule #{rule.Id}" : $"Rule #{rule.Id}. {rule.Brief}");
         embed.WithDescription(rule.Description);
 
-        var response  = new DiscordInteractionResponseBuilder();
+        var response = new DiscordInteractionResponseBuilder();
         response.AddEmbed(embed);
-        
+
         if (mentionUser is not null)
         {
             response.WithContent(mentionUser.Mention);
             response.AddMention(new UserMention(mentionUser.Id));
         }
 
-        await context.CreateResponseAsync(response).ConfigureAwait(false);
+        await context.RespondAsync(response).ConfigureAwait(false);
     }
 }

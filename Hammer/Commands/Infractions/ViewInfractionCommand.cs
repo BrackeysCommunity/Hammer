@@ -1,15 +1,18 @@
+using System.ComponentModel;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
-internal sealed class ViewInfractionCommand : ApplicationCommandModule
+internal sealed class ViewInfractionCommand
 {
     private readonly InfractionService _infractionService;
 
@@ -22,14 +25,16 @@ internal sealed class ViewInfractionCommand : ApplicationCommandModule
         _infractionService = infractionService;
     }
 
-    [SlashCommand("viewinfraction", "Views an infraction.", false)]
-    [SlashRequireGuild]
-    public async Task ViewInfractionAsync(InteractionContext context,
-        [Option("infraction", "The infraction to view.")]
+    [Command("viewinfraction")]
+    [Description("Views an infraction.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task ViewInfractionAsync(SlashCommandContext context,
+        [Parameter("infraction"), Description("The infraction to view.")]
         long infractionId
     )
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
 
         Infraction? infraction = _infractionService.GetInfraction(infractionId);

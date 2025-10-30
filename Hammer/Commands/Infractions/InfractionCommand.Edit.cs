@@ -1,27 +1,33 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
 internal sealed partial class InfractionCommand
 {
-    [SlashCommand("edit", "Edits an infraction.", false)]
-    [SlashRequireGuild]
-    public async Task EditAsync(InteractionContext context,
-        [Option("infraction", "The infraction to modify.")]
+    [Command("edit")]
+    [Description("Edits an infraction.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task EditAsync(SlashCommandContext context,
+        [Parameter("infraction"), Description("The infraction to modify.")]
         long infractionId,
-        [Option("reason", "The new reason for the infraction. To remove the reason, enter a single hyphen ( - ).")]
+        [Parameter("reason"), Description("The new reason for the infraction. To remove the reason, enter a single hyphen ( - ).")]
         string? reason = null,
-        [Autocomplete(typeof(RuleAutocompleteProvider))]
-        [Option("rule", "The new rule which was broken. To remove the rule, enter 0.")]
+        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        [Parameter("rule"), Description("The new rule which was broken. To remove the rule, enter 0.")]
         long? ruleId = null
     )
     {
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
         var builder = new DiscordWebhookBuilder();
 
@@ -57,9 +63,10 @@ internal sealed partial class InfractionCommand
         }
 
         Rule? rule = null;
+        DiscordGuild guild = context.Guild!;
         if (ruleId is not null)
         {
-            if (!_ruleService.GuildHasRule(context.Guild, (int)ruleId.Value))
+            if (!_ruleService.GuildHasRule(guild, (int)ruleId.Value))
             {
                 embed.WithColor(0xFF0000);
                 embed.WithTitle("Rule not found");
@@ -69,7 +76,7 @@ internal sealed partial class InfractionCommand
                 return;
             }
 
-            rule = _ruleService.GetRuleById(context.Guild, (int)ruleId.Value);
+            rule = _ruleService.GetRuleById(guild, (int)ruleId.Value);
         }
 
         // D#+ only accepts long, so we must cast because stupidity
@@ -106,11 +113,11 @@ internal sealed partial class InfractionCommand
         embed.WithTitle("Infraction Edited");
         embed.AddField("ID", infraction.Id, true);
         embed.AddField("User", MentionUtility.MentionUser(infraction.UserId), true);
-        embed.AddField("Staff Member", context.Member.Mention, true);
+        embed.AddField("Staff Member", context.Member!.Mention, true);
         embed.AddFieldIf(newRuleId is not null, "Old Rule", oldRuleId, true);
         embed.AddFieldIf(newRuleId is not null, "New Rule", () => newRuleId!.Value, true);
         embed.AddFieldIf(!string.IsNullOrWhiteSpace(reason), "Old Reason", oldReason);
         embed.AddFieldIf(!string.IsNullOrWhiteSpace(reason), "New Reason", () => reason);
-        await _logService.LogAsync(context.Guild, embed);
+        await _logService.LogAsync(guild, embed);
     }
 }

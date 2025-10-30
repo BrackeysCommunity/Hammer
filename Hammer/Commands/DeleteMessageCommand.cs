@@ -1,15 +1,16 @@
-using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
 /// <summary>
 ///     Represents a class which implements the <c>Delete Message</c> context menu.
 /// </summary>
-internal sealed class DeleteMessageCommand : ApplicationCommandModule
+internal sealed class DeleteMessageCommand
 {
     private readonly MessageDeletionService _deletionService;
 
@@ -22,28 +23,19 @@ internal sealed class DeleteMessageCommand : ApplicationCommandModule
         _deletionService = deletionService;
     }
 
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Delete Message", false)]
-    [SlashRequireGuild]
-    public async Task DeleteMessageAsync(ContextMenuContext context)
+    [Command("Delete Message")]
+    [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task DeleteMessageAsync(SlashCommandContext context, DiscordMessage message)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
         var builder = new DiscordWebhookBuilder();
         var embed = new DiscordEmbedBuilder();
 
-        DiscordMessage? message = context.TargetMessage;
-        if (message is null)
-        {
-            embed.WithColor(DiscordColor.Red);
-            embed.WithTitle("Deletion failed");
-            embed.WithDescription("The specified message could not be retrieved.");
-            builder.AddEmbed(embed);
-            await context.EditResponseAsync(builder);
-            return;
-        }
-
         try
         {
-            await _deletionService.DeleteMessageAsync(message, context.Member);
+            await _deletionService.DeleteMessageAsync(message, context.Member!);
         }
         catch (Exception exception)
         {
@@ -58,7 +50,7 @@ internal sealed class DeleteMessageCommand : ApplicationCommandModule
 
         embed.WithColor(DiscordColor.Green);
         embed.WithTitle("Message deleted");
-        embed.WithDescription($"Message {message.Id} by {message.Author.Mention} deleted.");
+        embed.WithDescription($"Message {message.Id} by {message.Author?.Mention} deleted.");
         builder.AddEmbed(embed);
         await context.EditResponseAsync(builder);
     }

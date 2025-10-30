@@ -1,16 +1,20 @@
+using System.ComponentModel;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
 /// <summary>
 ///     Represents a module which implements the <c>messagehistory</c> command.
 /// </summary>
-internal sealed class MessageHistoryCommand : ApplicationCommandModule
+internal sealed class MessageHistoryCommand
 {
     private readonly MessageService _messageService;
     private readonly MessageDeletionService _messageDeletionService;
@@ -24,10 +28,13 @@ internal sealed class MessageHistoryCommand : ApplicationCommandModule
         _messageDeletionService = messageDeletionService;
     }
 
-    [SlashCommand("messagehistory", "Views the message history for a user.", false)]
+    [Command("messagehistory")]
+    [Description("Views the message history for a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
     public async Task MessageHistoryAsync(
-        InteractionContext context,
-        [Option("user", "The user whose message history to view.")] DiscordUser user
+        SlashCommandContext context,
+        [Parameter("user"), Description("The user whose message history to view.")] DiscordUser user
     )
     {
         if (user is null)
@@ -35,14 +42,15 @@ internal sealed class MessageHistoryCommand : ApplicationCommandModule
             throw new ArgumentNullException(nameof(user));
         }
 
-        await context.DeferAsync();
+        await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(DiscordColor.Orange);
         embed.WithTitle("Message History");
         embed.WithAuthor(user);
 
         var staffMessages = new List<string>();
-        await foreach (StaffMessage staffMessage in _messageService.GetStaffMessages(user, context.Guild))
+        DiscordGuild guild = context.Guild!;
+        await foreach (StaffMessage staffMessage in _messageService.GetStaffMessages(user, guild))
         {
             staffMessages.Add($"**ID: {staffMessage.Id}** \u2022 " +
                               $"Sent by {MentionUtility.MentionUser(staffMessage.StaffMemberId)} \u2022 " +
@@ -51,7 +59,7 @@ internal sealed class MessageHistoryCommand : ApplicationCommandModule
 
 
         var deletedMessages = new List<string>();
-        await foreach (DeletedMessage deletedMessage in _messageDeletionService.GetDeletedMessages(user, context.Guild))
+        await foreach (DeletedMessage deletedMessage in _messageDeletionService.GetDeletedMessages(user, guild))
         {
             deletedMessages.Add($"**ID: {deletedMessage.MessageId}** \u2022 " +
                                 $"Sent in {MentionUtility.MentionChannel(deletedMessage.ChannelId)} \u2022 " +

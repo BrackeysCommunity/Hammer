@@ -1,8 +1,11 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 
@@ -11,7 +14,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>unmute</c> command.
 /// </summary>
-internal sealed class UnmuteCommand : ApplicationCommandModule
+internal sealed class UnmuteCommand
 {
     private readonly ILogger<UnmuteCommand> _logger;
     private readonly MuteService _muteService;
@@ -27,15 +30,15 @@ internal sealed class UnmuteCommand : ApplicationCommandModule
         _muteService = muteService;
     }
 
-    [SlashCommand("unmute", "Unmutes a user.", false)]
-    [SlashRequireGuild]
-    public async Task UnmuteAsync(InteractionContext context,
-        [Option("user", "The user to unmute.")]
-        DiscordUser user,
-        [Option("reason", "The reason for the mute revocation.")]
-        string? reason = null)
+    [Command("unmute")]
+    [Description("Unmutes a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task UnmuteAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to unmute.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the mute revocation.")] string? reason = null)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
         var embed = new DiscordEmbedBuilder();
         try

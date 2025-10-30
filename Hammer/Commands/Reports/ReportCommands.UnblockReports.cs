@@ -1,19 +1,25 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Reports;
 
 internal sealed partial class ReportCommands
 {
-    [SlashCommand("unblockreports", "Unblocks a user, allowing them to report messages.", false)]
-    [SlashRequireGuild]
-    public async Task UnblockReportsAsync(InteractionContext context, [Option("user", "The user to unblock.")] DiscordUser user)
+    [Command("unblockreports")]
+    [Description("Unblocks a user, allowing them to report messages.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task UnblockReportsAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to unblock.")] DiscordUser user)
     {
-        await context.DeferAsync(true);
+        await context.DeferResponseAsync(true);
 
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user);
@@ -23,7 +29,7 @@ internal sealed partial class ReportCommands
             embed.WithColor(DiscordColor.Green);
             embed.WithTitle("User Unblocked");
             embed.WithDescription($"{user.Mention} has been unblocked. Their message reports will now be acknowledged.");
-            await _reportService.UnblockUserAsync(user, context.Member);
+            await _reportService.UnblockUserAsync(user, context.Member!);
         }
         else
         {

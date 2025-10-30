@@ -1,18 +1,21 @@
+using System.ComponentModel;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
 /// <summary>
 ///     Represents a class which implements the <c>userinfo</c> command.
 /// </summary>
-internal sealed class UserInfoCommand : ApplicationCommandModule
+internal sealed class UserInfoCommand
 {
     private readonly ConfigurationService _configurationService;
     private readonly AltAccountService _altAccountService;
@@ -32,42 +35,46 @@ internal sealed class UserInfoCommand : ApplicationCommandModule
         _infractionService = infractionService;
     }
 
-    [SlashCommand("userinfo", "Displays information about a user.")]
-    [SlashRequireGuild]
-    public async Task UserInfoAsync(InteractionContext context,
-        [Option("user", "The user whose information to view.", true)]
-        DiscordUser user)
+    [Command("userinfo")]
+    [Description("Displays information about a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task UserInfoAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user whose information to view.")] DiscordUser user)
     {
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         GuildConfiguration? configuration = _configurationService.GetGuildConfiguration(guild);
         if (configuration is null)
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        bool staffRequested = context.Member.IsStaffMember(configuration);
+        bool staffRequested = context.Member!.IsStaffMember(configuration);
         DiscordMember? member = await user.GetAsMemberOfAsync(guild);
         DiscordEmbed embed = CreateUserInfoEmbed(user, member, staffRequested, guild);
 
-        await context.CreateResponseAsync(embed);
+        await context.RespondAsync(embed);
     }
 
-    [ContextMenu(ApplicationCommandType.UserContextMenu, "User Information")]
-    [SlashRequireGuild]
-    public async Task UserInfoAsync(ContextMenuContext context)
+    [Command("User Information")]
+    [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task UserInfoContextMenuAsync(SlashCommandContext context, DiscordUser user)
     {
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         GuildConfiguration? configuration = _configurationService.GetGuildConfiguration(guild);
         if (configuration is null)
         {
-            await context.CreateResponseAsync("This guild is not configured.", true);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        bool staffRequested = context.Member.IsStaffMember(configuration);
-        DiscordEmbed embed = CreateUserInfoEmbed(context.TargetUser, context.TargetMember, staffRequested, guild);
-        await context.CreateResponseAsync(embed, true);
+        bool staffRequested = context.Member!.IsStaffMember(configuration);
+        var member = await user.GetAsMemberOfAsync(guild);
+        DiscordEmbed embed = CreateUserInfoEmbed(user, member, staffRequested, guild);
+        await context.RespondAsync(embed, true);
     }
 
     private DiscordEmbed CreateUserInfoEmbed(DiscordUser user, DiscordMember? member, bool staffRequested, DiscordGuild guild)
@@ -83,9 +90,8 @@ internal sealed class UserInfoCommand : ApplicationCommandModule
             return embed;
         }
 
-        // ReSharper disable ConditionIsAlwaysTrueOrFalse
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
-        embed.WithColor(member?.Color ?? DiscordColor.Gray);
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
+        embed.WithColor(member?.Color.PrimaryColor ?? DiscordColor.Gray);
         embed.WithTitle("User Information");
         embed.WithThumbnail(user.AvatarUrl);
 
@@ -123,7 +129,6 @@ internal sealed class UserInfoCommand : ApplicationCommandModule
         {
             embed.WithFooter("⚠️ This user is not currently in the server.");
         }
-        // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
         return embed;
     }

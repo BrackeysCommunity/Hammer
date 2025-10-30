@@ -1,4 +1,4 @@
-﻿namespace Hammer.Data;
+namespace Hammer.Data;
 
 /// <summary>
 ///     Represents a message sent from a staff member to a community member.

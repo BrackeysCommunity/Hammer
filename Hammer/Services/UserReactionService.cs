@@ -1,17 +1,16 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using Hammer.Configuration;
-using Microsoft.Extensions.Hosting;
 
 namespace Hammer.Services;
 
 /// <summary>
 ///     Represents a service which listens for user reactions.
 /// </summary>
-internal sealed class UserReactionService : BackgroundService
+internal sealed class UserReactionService : IEventHandler<MessageReactionAddedEventArgs>
 {
     private readonly ConfigurationService _configurationService;
-    private readonly DiscordClient _discordClient;
     private readonly MessageReportService _messageReportService;
 
     /// <summary>
@@ -19,30 +18,15 @@ internal sealed class UserReactionService : BackgroundService
     /// </summary>
     public UserReactionService(
         ConfigurationService configurationService,
-        DiscordClient discordClient,
         MessageReportService messageReportService
     )
     {
         _configurationService = configurationService;
-        _discordClient = discordClient;
         _messageReportService = messageReportService;
     }
 
     /// <inheritdoc />
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _discordClient.MessageReactionAdded -= DiscordClientOnMessageReactionAdded;
-        return base.StopAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _discordClient.MessageReactionAdded += DiscordClientOnMessageReactionAdded;
-        return Task.CompletedTask;
-    }
-
-    private async Task DiscordClientOnMessageReactionAdded(DiscordClient sender, MessageReactionAddEventArgs e)
+    public async Task HandleEventAsync(DiscordClient sender, MessageReactionAddedEventArgs e)
     {
         if (e.Guild is not { } guild || e.User.IsBot)
         {

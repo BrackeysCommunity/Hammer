@@ -22,7 +22,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which handles temporary mutes.
 /// </summary>
-internal sealed class MuteService : BackgroundService
+internal sealed class MuteService : BackgroundService, IEventHandler<GuildMemberAddedEventArgs>
 {
     private static readonly TimeSpan QueryInterval = TimeSpan.FromSeconds(30);
     private readonly ConcurrentDictionary<DiscordGuild, DiscordRole> _mutedRoles = new();
@@ -443,25 +443,7 @@ internal sealed class MuteService : BackgroundService
     }
 
     /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _discordClient.GuildMemberAdded += DiscordClientOnGuildMemberAdded;
-
-        _timer.Start();
-        return UpdateFromDatabaseAsync();
-    }
-
-    private async Task UpdateFromDatabaseAsync()
-    {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-        lock (_mutes)
-        {
-            _mutes.Clear();
-            _mutes.AddRange(context.Mutes);
-        }
-    }
-
-    private Task DiscordClientOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs e)
+    public Task HandleEventAsync(DiscordClient sender, GuildMemberAddedEventArgs e)
     {
         DiscordMember member = e.Member;
         DiscordGuild guild = e.Guild;
@@ -479,6 +461,23 @@ internal sealed class MuteService : BackgroundService
         }
 
         return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _timer.Start();
+        return UpdateFromDatabaseAsync();
+    }
+
+    private async Task UpdateFromDatabaseAsync()
+    {
+        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        lock (_mutes)
+        {
+            _mutes.Clear();
+            _mutes.AddRange(context.Mutes);
+        }
     }
 
     private async Task CreateMuteAsync(DiscordUser user, DiscordGuild guild, DateTimeOffset? expirationTime)

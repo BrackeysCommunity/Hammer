@@ -1,49 +1,35 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
-using Microsoft.Extensions.Hosting;
 
 namespace Hammer.Services;
 
 /// <summary>
 ///     Represents a service which listens for staff reactions.
 /// </summary>
-internal sealed class StaffReactionService : BackgroundService
+internal sealed class StaffReactionService : IEventHandler<MessageReactionAddedEventArgs>
 {
     private readonly ConfigurationService _configurationService;
     private readonly MessageDeletionService _deletionService;
-    private readonly DiscordClient _discordClient;
     private readonly InfractionService _infractionService;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="StaffReactionService" /> class.
     /// </summary>
-    public StaffReactionService(DiscordClient discordClient, ConfigurationService configurationService,
-        InfractionService infractionService, MessageDeletionService deletionService)
+    public StaffReactionService(ConfigurationService configurationService,
+        InfractionService infractionService,
+        MessageDeletionService deletionService)
     {
-        _discordClient = discordClient;
         _configurationService = configurationService;
         _infractionService = infractionService;
         _deletionService = deletionService;
     }
 
     /// <inheritdoc />
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _discordClient.MessageReactionAdded -= DiscordClientOnMessageReactionAdded;
-        return base.StopAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _discordClient.MessageReactionAdded += DiscordClientOnMessageReactionAdded;
-        return Task.CompletedTask;
-    }
-
-    private async Task DiscordClientOnMessageReactionAdded(DiscordClient sender, MessageReactionAddEventArgs e)
+    public async Task HandleEventAsync(DiscordClient sender, MessageReactionAddedEventArgs e)
     {
         if (e.Guild is not { } guild || e.User.IsBot)
         {

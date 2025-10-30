@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -15,14 +16,13 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which handles message reports from users.
 /// </summary>
-internal sealed class MessageReportService : BackgroundService
+internal sealed class MessageReportService : BackgroundService, IEventHandler<GuildAvailableEventArgs>
 {
     private readonly ILogger<MessageReportService> _logger;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly List<BlockedReporter> _blockedReporters = [];
     private readonly ConfigurationService _configurationService;
     private readonly DiscordLogService _logService;
-    private readonly DiscordClient _discordClient;
     private readonly MessageTrackingService _messageTrackingService;
     private readonly List<ReportedMessage> _reportedMessages = [];
 
@@ -32,7 +32,6 @@ internal sealed class MessageReportService : BackgroundService
     public MessageReportService(
         ILogger<MessageReportService> logger,
         IDbContextFactory<HammerContext> dbContextFactory,
-        DiscordClient discordClient,
         ConfigurationService configurationService,
         DiscordLogService logService,
         MessageTrackingService messageTrackingService
@@ -40,7 +39,6 @@ internal sealed class MessageReportService : BackgroundService
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
-        _discordClient = discordClient;
         _configurationService = configurationService;
         _logService = logService;
         _messageTrackingService = messageTrackingService;
@@ -444,13 +442,6 @@ internal sealed class MessageReportService : BackgroundService
         return true;
     }
 
-    /// <inheritdoc />
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _discordClient.GuildAvailable -= OnGuildAvailable;
-        return base.StopAsync(cancellationToken);
-    }
-
     /// <summary>
     ///     Returns the count of reports on a specified message.
     /// </summary>
@@ -529,10 +520,10 @@ internal sealed class MessageReportService : BackgroundService
         _blockedReporters.AddRange(context.BlockedReporters);
 
         _reportedMessages.Clear();
-        _discordClient.GuildAvailable += OnGuildAvailable;
     }
 
-    private async Task OnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
+    /// <inheritdoc />
+    public async Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
     {
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 

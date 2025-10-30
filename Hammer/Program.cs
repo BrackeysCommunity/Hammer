@@ -31,6 +31,16 @@ builder.Logging.AddSerilog();
 builder.Services.AddSingleton<ConfigurationService>();
 const DiscordIntents intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers | DiscordIntents.MessageContents;
 builder.Services.AddDiscordClient(Environment.GetEnvironmentVariable("DISCORD_TOKEN")!, intents);
+builder.Services.ConfigureEventHandlers(events =>
+{
+    events.AddEventHandlers<DiscordLogService>(ServiceLifetime.Singleton);
+    events.AddEventHandlers<InfractionService>(ServiceLifetime.Singleton);
+    events.AddEventHandlers<MessageTrackingService>(ServiceLifetime.Singleton);
+    events.AddEventHandlers<ModalResponseService>();
+    events.AddEventHandlers<MuteService>(ServiceLifetime.Singleton);
+    events.AddEventHandlers<StaffReactionService>();
+    events.AddEventHandlers<UserReactionService>();
+});
 
 builder.Services.AddDbContextFactory<HammerContext>((services, optionsBuilder) =>
 {
@@ -108,16 +118,10 @@ builder.Services.AddSingleton<MessageService>();
 builder.Services.AddSingleton<MessageDeletionService>();
 builder.Services.AddSingleton<WarningService>();
 
-builder.Services.AddHostedService<StaffReactionService>();
-builder.Services.AddHostedService<UserReactionService>();
-
 builder.Services.AddHostedSingleton<AltAccountService>();
 builder.Services.AddHostedSingleton<BanService>();
-builder.Services.AddHostedSingleton<DiscordLogService>();
-builder.Services.AddHostedSingleton<InfractionService>();
 builder.Services.AddHostedSingleton<InfractionCooldownService>();
 builder.Services.AddHostedSingleton<MessageReportService>();
-builder.Services.AddHostedSingleton<MessageTrackingService>();
 builder.Services.AddHostedSingleton<MuteService>();
 builder.Services.AddHostedSingleton<RuleService>();
 

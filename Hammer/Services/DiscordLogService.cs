@@ -1,16 +1,16 @@
 using System.Diagnostics.CodeAnalysis;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using Hammer.Configuration;
 using Hammer.Data;
-using Microsoft.Extensions.Hosting;
 
 namespace Hammer.Services;
 
 /// <summary>
 ///     Represents a service which can send embeds to a log channel.
 /// </summary>
-internal sealed class DiscordLogService : BackgroundService
+internal sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
 {
     private readonly DiscordClient _discordClient;
     private readonly ConfigurationService _configurationService;
@@ -25,6 +25,31 @@ internal sealed class DiscordLogService : BackgroundService
     {
         _discordClient = discordClient;
         _configurationService = configurationService;
+    }
+
+    /// <inheritdoc />
+    public async Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
+    {
+        if (!_configurationService.TryGetGuildConfiguration(e.Guild, out GuildConfiguration? configuration))
+        {
+            return;
+        }
+
+        ulong logChannel = configuration.LogChannel;
+        if (logChannel == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            DiscordChannel channel = await _discordClient.GetChannelAsync(logChannel);
+            _logChannels[e.Guild] = channel;
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     /// <summary>
@@ -58,15 +83,16 @@ internal sealed class DiscordLogService : BackgroundService
                 embed = new DiscordEmbedBuilder(embed).WithTimestamp(DateTimeOffset.UtcNow);
             }
 
-            await logChannel.SendMessageAsync(BuildMentionString(guild, notificationOptions), embed: embed);
+            string? mentionString = BuildMentionString(guild, notificationOptions);
+            if (mentionString is null)
+            {
+                await logChannel.SendMessageAsync(embed);
+            }
+            else
+            {
+                await logChannel.SendMessageAsync(mentionString, embed);
+            }
         }
-    }
-
-    /// <inheritdoc />
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _discordClient.GuildAvailable -= OnGuildAvailable;
-        return base.StopAsync(cancellationToken);
     }
 
     /// <summary>
@@ -91,20 +117,12 @@ internal sealed class DiscordLogService : BackgroundService
             return false;
         }
 
-        if (!_logChannels.TryGetValue(guild, out channel))
+        if (!_logChannels.TryGetValue(guild, out channel) && guild.Channels.TryGetValue(configuration.LogChannel, out channel))
         {
-            channel = guild.GetChannel(configuration.LogChannel);
             _logChannels.Add(guild, channel);
         }
 
         return channel is not null;
-    }
-
-    /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _discordClient.GuildAvailable += OnGuildAvailable;
-        return Task.CompletedTask;
     }
 
     private string? BuildMentionString(DiscordGuild guild, StaffNotificationOptions notificationOptions)
@@ -125,8 +143,8 @@ internal sealed class DiscordLogService : BackgroundService
         }
 
         RoleConfiguration roleConfiguration = configuration.Roles;
-        DiscordRole? administratorRole = logChannel.Guild.GetRole(roleConfiguration.AdministratorRoleId);
-        DiscordRole? moderatorRole = logChannel.Guild.GetRole(roleConfiguration.ModeratorRoleId);
+        DiscordRole administratorRole = logChannel.Guild.Roles[roleConfiguration.AdministratorRoleId];
+        DiscordRole moderatorRole = logChannel.Guild.Roles[roleConfiguration.ModeratorRoleId];
 
         var mentions = new List<string>();
 
@@ -151,33 +169,5 @@ internal sealed class DiscordLogService : BackgroundService
         }
 
         return string.Join(' ', mentions);
-    }
-
-    private async Task OnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
-    {
-        if (!_configurationService.TryGetGuildConfiguration(e.Guild, out GuildConfiguration? configuration))
-        {
-            return;
-        }
-
-        ulong logChannel = configuration.LogChannel;
-        if (logChannel == 0)
-        {
-            return;
-        }
-
-        try
-        {
-            DiscordChannel? channel = await _discordClient.GetChannelAsync(logChannel);
-
-            if (channel is not null)
-            {
-                _logChannels[e.Guild] = channel;
-            }
-        }
-        catch
-        {
-            // ignored
-        }
     }
 }

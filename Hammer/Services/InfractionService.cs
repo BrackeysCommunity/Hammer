@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -10,7 +11,6 @@ using Hammer.Resources;
 using Humanizer;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 using TimestampFormat = DSharpPlus.TimestampFormat;
@@ -22,7 +22,7 @@ namespace Hammer.Services;
 /// </summary>
 /// <seealso cref="BanService" />
 /// <seealso cref="MuteService" />
-internal sealed class InfractionService : BackgroundService
+internal sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, IEventHandler<GuildUnavailableEventArgs>
 {
     private readonly ConcurrentDictionary<ulong, List<Infraction>> _infractionCache = new();
     private readonly ConcurrentDictionary<long, Infraction> _infractionIdCache = new();
@@ -968,22 +968,6 @@ internal sealed class InfractionService : BackgroundService
         context.SaveChanges();
     }
 
-    /// <inheritdoc />
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _discordClient.GuildAvailable -= OnGuildAvailable;
-        _discordClient.GuildUnavailable -= OnGuildUnavailable;
-        return base.StopAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _discordClient.GuildAvailable += OnGuildAvailable;
-        _discordClient.GuildUnavailable += OnGuildUnavailable;
-        return Task.CompletedTask;
-    }
-
     private void LoadGuildInfractions(DiscordGuild guild)
     {
         if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
@@ -1040,16 +1024,18 @@ internal sealed class InfractionService : BackgroundService
         }
     }
 
-    private Task OnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
+    /// <inheritdoc />
+    public Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
     {
         LoadGuildInfractions(e.Guild);
         UpdateInfractionRules(e.Guild);
         return Task.CompletedTask;
     }
 
-    private Task OnGuildUnavailable(DiscordClient sender, GuildDeleteEventArgs args)
+    /// <inheritdoc />
+    public Task HandleEventAsync(DiscordClient sender, GuildUnavailableEventArgs e)
     {
-        if (_infractionCache.TryRemove(args.Guild.Id, out List<Infraction>? infractions))
+        if (_infractionCache.TryRemove(e.Guild.Id, out List<Infraction>? infractions))
         {
             infractions.Clear();
         }

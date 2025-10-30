@@ -1,9 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Timers;
-using DSharpPlus;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.SlashCommands;
 using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
@@ -42,15 +41,24 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="user" /> is <see langword="null" />.</exception>
     public bool IsCooldownActive(DiscordUser user, DiscordMember staffMember)
     {
-        ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(staffMember);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
 
         lock (_hotInfractions)
         {
             foreach ((Infraction infraction, _) in _hotInfractions.OrderByDescending(p => p.Value))
             {
                 if (infraction.UserId == user.Id)
+                {
                     return infraction.StaffMemberId != staffMember.Id;
+                }
             }
         }
 
@@ -65,8 +73,8 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <param name="infraction">The recently-issued infraction.</param>
     /// <param name="infractionEmbed">The infraction embed to display.</param>
     /// <returns><see langword="true" /> if the user confirmed the infraction; otherwise, <see langword="false" />.</returns>
-    public async Task<bool> ShowConfirmationAsync(
-        InteractionContext context,
+    public static async Task<bool> ShowConfirmationAsync(
+        SlashCommandContext context,
         DiscordUser user,
         Infraction infraction,
         DiscordEmbed infractionEmbed
@@ -80,12 +88,12 @@ internal sealed class InfractionCooldownService : BackgroundService
         builder.WithContent(content);
         builder.AddEmbed(infractionEmbed);
 
-        var proceed = new DiscordButtonComponent(ButtonStyle.Success, "infr-proceed", "Proceed");
-        var cancel = new DiscordButtonComponent(ButtonStyle.Danger, "infr-cancel", "Cancel");
-        builder.AddComponents(proceed, cancel);
+        var proceed = new DiscordButtonComponent(DiscordButtonStyle.Success, "infr-proceed", "Proceed");
+        var cancel = new DiscordButtonComponent(DiscordButtonStyle.Danger, "infr-cancel", "Cancel");
+        builder.AddActionRowComponent(proceed, cancel);
 
-        DiscordMessage message = await context.EditResponseAsync(builder).ConfigureAwait(false);
-        var result = await message.WaitForButtonAsync(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+        DiscordMessage message = await context.EditResponseAsync(builder);
+        var result = await message.WaitForButtonAsync(TimeSpan.FromMinutes(1));
 
         if (result.TimedOut)
         {
@@ -93,7 +101,7 @@ internal sealed class InfractionCooldownService : BackgroundService
             embed.WithColor(DiscordColor.Red);
             embed.WithTitle("Infraction cancelled");
             embed.WithDescription("Confirmation took too long. No action was performed on the user.");
-            await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed)).ConfigureAwait(false);
+            await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
             return false;
         }
 
@@ -107,7 +115,7 @@ internal sealed class InfractionCooldownService : BackgroundService
                 embed.WithColor(DiscordColor.Red);
                 embed.WithTitle("Infraction cancelled");
                 embed.WithDescription("Infraction has been cancelled. No action was performed on the user.");
-                await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed)).ConfigureAwait(false);
+                await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
                 return false;
 
             default:
@@ -124,17 +132,24 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <exception cref="InvalidOperationException"><paramref name="infraction" /> is already on a cooldown.</exception>
     public void StartCooldown(Infraction infraction)
     {
-        ArgumentNullException.ThrowIfNull(infraction);
+        if (infraction is null)
+        {
+            throw new ArgumentNullException(nameof(infraction));
+        }
 
         lock (_hotInfractions)
         {
             if (_hotInfractions.ContainsKey(infraction))
+            {
                 throw new InvalidOperationException("Infraction is already on cooldown.");
+            }
 
             foreach (Infraction current in _hotInfractions.Keys.ToArray())
             {
                 if (current.UserId == infraction.UserId)
+                {
                     _hotInfractions.Remove(current);
+                }
             }
 
             _hotInfractions.Add(infraction, DateTimeOffset.Now);
@@ -161,7 +176,9 @@ internal sealed class InfractionCooldownService : BackgroundService
             foreach (Infraction infraction in _hotInfractions.Keys.ToArray())
             {
                 if (infraction.UserId == userId)
+                {
                     _hotInfractions.Remove(infraction);
+                }
             }
         }
     }
@@ -173,14 +190,19 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="user" /> is <see langword="null" />.</exception>
     public void StopCooldown(DiscordUser user)
     {
-        ArgumentNullException.ThrowIfNull(user);
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
 
         lock (_hotInfractions)
         {
             foreach (Infraction infraction in _hotInfractions.Keys.ToArray())
             {
                 if (infraction.UserId == user.Id)
+                {
                     _hotInfractions.Remove(infraction);
+                }
             }
         }
     }
@@ -201,7 +223,10 @@ internal sealed class InfractionCooldownService : BackgroundService
         infraction = null;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (user is null) return false;
+        if (user is null)
+        {
+            return false;
+        }
 
         lock (_hotInfractions)
         {
@@ -232,7 +257,7 @@ internal sealed class InfractionCooldownService : BackgroundService
     {
         lock (_hotInfractions)
         {
-            foreach ((Infraction? infraction, DateTimeOffset cooldownStart) in _hotInfractions.ToArray())
+            foreach ((Infraction infraction, DateTimeOffset cooldownStart) in _hotInfractions.ToArray())
             {
                 if (DateTimeOffset.Now - cooldownStart > TimeSpan.FromMinutes(30))
                 {

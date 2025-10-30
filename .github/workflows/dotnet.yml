@@ -18,9 +18,6 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
-      - name: Add NuGet source
-        run: dotnet nuget add source --username oliverbooth --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/oliverbooth/index.json"
-
       - name: Restore dependencies
         run: dotnet restore
 

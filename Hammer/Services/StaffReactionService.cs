@@ -1,69 +1,60 @@
-﻿using DSharpPlus;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
-using Microsoft.Extensions.Hosting;
 
 namespace Hammer.Services;
 
 /// <summary>
 ///     Represents a service which listens for staff reactions.
 /// </summary>
-internal sealed class StaffReactionService : BackgroundService
+internal sealed class StaffReactionService : IEventHandler<MessageReactionAddedEventArgs>
 {
     private readonly ConfigurationService _configurationService;
     private readonly MessageDeletionService _deletionService;
-    private readonly DiscordClient _discordClient;
     private readonly InfractionService _infractionService;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="StaffReactionService" /> class.
     /// </summary>
-    public StaffReactionService(DiscordClient discordClient, ConfigurationService configurationService,
-        InfractionService infractionService, MessageDeletionService deletionService)
+    public StaffReactionService(ConfigurationService configurationService,
+        InfractionService infractionService,
+        MessageDeletionService deletionService)
     {
-        _discordClient = discordClient;
         _configurationService = configurationService;
         _infractionService = infractionService;
         _deletionService = deletionService;
     }
 
     /// <inheritdoc />
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _discordClient.MessageReactionAdded -= DiscordClientOnMessageReactionAdded;
-        return base.StopAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _discordClient.MessageReactionAdded += DiscordClientOnMessageReactionAdded;
-        return Task.CompletedTask;
-    }
-
-    private async Task DiscordClientOnMessageReactionAdded(DiscordClient sender, MessageReactionAddEventArgs e)
+    public async Task HandleEventAsync(DiscordClient sender, MessageReactionAddedEventArgs e)
     {
         if (e.Guild is not { } guild || e.User.IsBot)
+        {
             return;
+        }
 
         DiscordMessage message = e.Message;
 
         if (message.Author is null)
         {
             // not cached! fetch new message
-            message = await message.Channel.GetMessageAsync(message.Id).ConfigureAwait(false);
+            message = await message.Channel!.GetMessageAsync(message.Id);
         }
 
-        DiscordUser author = message.Author;
+        DiscordUser author = message.Author!;
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
+        {
             return;
+        }
 
-        var staffMember = (DiscordMember) e.User;
+        var staffMember = (DiscordMember)e.User;
         if (!staffMember.IsStaffMember(configuration))
+        {
             return;
+        }
 
         ReactionConfiguration reactionConfiguration = configuration.Reactions;
         DiscordEmoji emoji = e.Emoji;
@@ -71,12 +62,12 @@ internal sealed class StaffReactionService : BackgroundService
 
         if (reaction == reactionConfiguration.GagReaction)
         {
-            await message.DeleteReactionAsync(emoji, staffMember).ConfigureAwait(false);
-            await _infractionService.GagAsync(author, staffMember, message).ConfigureAwait(false);
+            await message.DeleteReactionAsync(emoji, staffMember);
+            await _infractionService.GagAsync(author, staffMember, message);
         }
         else if (reaction == reactionConfiguration.HistoryReaction)
         {
-            await message.DeleteReactionAsync(emoji, staffMember).ConfigureAwait(false);
+            await message.DeleteReactionAsync(emoji, staffMember);
 
             var builder = new DiscordMessageBuilder();
             var response = new InfractionHistoryResponse(_infractionService, author, staffMember, guild, true);
@@ -87,12 +78,12 @@ internal sealed class StaffReactionService : BackgroundService
                 builder.AddEmbed(embed);
             }
 
-            await staffMember.SendMessageAsync(builder).ConfigureAwait(false);
+            await staffMember.SendMessageAsync(builder);
         }
         else if (reaction == reactionConfiguration.DeleteMessageReaction)
         {
-            await message.DeleteReactionAsync(emoji, staffMember).ConfigureAwait(false);
-            await _deletionService.DeleteMessageAsync(message, staffMember).ConfigureAwait(false);
+            await message.DeleteReactionAsync(emoji, staffMember);
+            await _deletionService.DeleteMessageAsync(message, staffMember);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -9,14 +9,34 @@ namespace Hammer.Data.EntityConfigurations;
 /// </summary>
 internal sealed class TemporaryBanConfiguration : IEntityTypeConfiguration<TemporaryBan>
 {
+    private readonly bool _isMySql;
+
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TemporaryBanConfiguration" /> class.
+    /// </summary>
+    /// <param name="isMySql">
+    ///     <see langword="true" /> if this configuration should use MySQL configuration, otherwise <see langword="false" />.
+    /// </param>
+    public TemporaryBanConfiguration(bool isMySql)
+    {
+        _isMySql = isMySql;
+    }
+
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<TemporaryBan> builder)
     {
-        builder.ToTable(nameof(TemporaryBan));
-        builder.HasKey(e => new {e.UserId, e.GuildId});
+        builder.ToTable("TemporaryBan");
+        builder.HasKey(e => new { e.UserId, e.GuildId });
 
-        builder.Property(e => e.GuildId);
-        builder.Property(e => e.UserId);
-        builder.Property(e => e.ExpiresAt).HasConversion<DateTimeOffsetToBytesConverter>();
+        builder.Property(e => e.GuildId).HasColumnOrder(1);
+        builder.Property(e => e.UserId).HasColumnOrder(2);
+        if (_isMySql)
+        {
+            builder.Property(e => e.ExpiresAt).HasColumnOrder(3).HasColumnType("DATETIME(6)");
+        }
+        else
+        {
+            builder.Property(e => e.ExpiresAt).HasColumnOrder(3).HasConversion<DateTimeOffsetToBytesConverter>();
+        }
     }
 }

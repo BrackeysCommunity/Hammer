@@ -1,15 +1,18 @@
-﻿using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
 /// <summary>
 ///     Represents a class which implements the <c>selfhistory</c> command.
 /// </summary>
-internal sealed class SelfHistoryCommand : ApplicationCommandModule
+internal sealed class SelfHistoryCommand
 {
     private readonly InfractionService _infractionService;
 
@@ -22,14 +25,16 @@ internal sealed class SelfHistoryCommand : ApplicationCommandModule
         _infractionService = infractionService;
     }
 
-    [SlashCommand("selfhistory", "View your own infraction history.")]
-    [SlashRequireGuild]
-    public async Task SelfHistoryAsync(InteractionContext context)
+    [Command("selfhistory")]
+    [Description("View your own infraction history.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task SelfHistoryAsync(SlashCommandContext context)
     {
-        await context.DeferAsync(true).ConfigureAwait(false);
+        await context.DeferResponseAsync(true);
 
         var builder = new DiscordWebhookBuilder();
-        var response = new InfractionHistoryResponse(_infractionService, context.User, context.User, context.Guild, false);
+        var response = new InfractionHistoryResponse(_infractionService, context.User, context.User, context.Guild!, false);
 
         for (var pageIndex = 0; pageIndex < response.Pages; pageIndex++)
         {
@@ -37,6 +42,6 @@ internal sealed class SelfHistoryCommand : ApplicationCommandModule
             builder.AddEmbed(embed);
         }
 
-        await context.EditResponseAsync(builder).ConfigureAwait(false);
+        await context.EditResponseAsync(builder);
     }
 }

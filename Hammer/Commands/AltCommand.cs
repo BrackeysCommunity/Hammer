@@ -1,15 +1,19 @@
+using System.ComponentModel;
 using System.Text;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
-[SlashCommandGroup("alt", "Commands for managing alt accounts.", false)]
-internal sealed class AltCommand : ApplicationCommandModule
+[Command("alt")]
+[Description("Commands for managing alt accounts.")]
+internal sealed class AltCommand
 {
     private readonly AltAccountService _altAccountService;
 
@@ -22,63 +26,64 @@ internal sealed class AltCommand : ApplicationCommandModule
         _altAccountService = altAccountService;
     }
 
-    [SlashCommand("add", "Adds an alt account to a user.", false)]
-    [SlashRequireGuild]
-    public async Task AddAltAsync(InteractionContext context,
-        [Option("user", "The user to add an alt account to.")]
-        DiscordUser user,
-        [Option("alt", "The alt account to add.")]
-        DiscordUser alt)
+    [Command("add")]
+    [Description("Adds an alt account to a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task AddAltAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to add an alt account to.")] DiscordUser user,
+        [Parameter("alt"), Description("The alt account to add.")] DiscordUser alt)
     {
-        await context.DeferAsync().ConfigureAwait(false);
-        await _altAccountService.AddAltAsync(user, alt, context.Member).ConfigureAwait(false);
+        await context.DeferResponseAsync();
+        _altAccountService.AddAlt(user, alt, context.Member);
 
         DiscordUser olderAccount = user.CreationTimestamp > alt.CreationTimestamp ? alt : user;
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(DiscordColor.Green);
         embed.WithTitle("Alt account registered");
         embed.WithDescription("The following users have been registered as alts of each other.");
         embed.AddField("Main Account", user.Mention + (olderAccount == user ? " (older)" : " (newer)"), true);
         embed.AddField("Alt Account", alt.Mention + (olderAccount == alt ? " (older)" : " (newer)"), true);
 
-        await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())).ConfigureAwait(false);
+        await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
     }
 
-    [SlashCommand("remove", "Removes an alt account from a user.", false)]
-    [SlashRequireGuild]
-    public async Task RemoveAltAsync(InteractionContext context,
-        [Option("user", "The user to remove an alt account from.")]
-        DiscordUser user,
-        [Option("alt", "The alt account to remove.")]
-        DiscordUser alt)
+    [Command("remove")]
+    [Description("Removes an alt account from a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task RemoveAltAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to remove an alt account from.")] DiscordUser user,
+        [Parameter("alt"), Description("The alt account to remove.")] DiscordUser alt)
     {
-        await context.DeferAsync().ConfigureAwait(false);
-        await _altAccountService.RemoveAltAsync(user, alt, context.Member).ConfigureAwait(false);
+        await context.DeferResponseAsync();
+        _altAccountService.RemoveAlt(user, alt, context.Member!);
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(DiscordColor.Orange);
         embed.WithTitle("Alt account unregistered");
         embed.WithDescription("The following users have been registered as alts of each other.");
         embed.AddField("Main Account", user.Mention, true);
         embed.AddField("Alt Account", alt.Mention, true);
 
-        await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())).ConfigureAwait(false);
+        await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
     }
 
-    [SlashCommand("view", "Views the alt accounts for a user.", false)]
-    [SlashRequireGuild]
-    public async Task ViewAltsAsync(InteractionContext context,
-        [Option("user", "The user to add an alt account to.")]
-        DiscordUser user)
+    [Command("view")]
+    [Description("Views the alt accounts for a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task ViewAltsAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to add an alt account to.")] DiscordUser user)
     {
-        await context.DeferAsync().ConfigureAwait(false);
+        await context.DeferResponseAsync();
         IReadOnlyCollection<ulong> altAccounts = _altAccountService.GetAltsFor(user.Id);
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(DiscordColor.Blurple);
         embed.WithTitle("Known alt accounts");
 
@@ -99,6 +104,6 @@ internal sealed class AltCommand : ApplicationCommandModule
             embed.WithDescription("✅ No alt accounts are known for this user.");
         }
 
-        await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build())).ConfigureAwait(false);
+        await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
     }
 }

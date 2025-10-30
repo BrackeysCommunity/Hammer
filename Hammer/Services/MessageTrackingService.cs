@@ -5,7 +5,6 @@ using DSharpPlus.Exceptions;
 using Hammer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Hammer.Services;
@@ -13,23 +12,22 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which tracks specific user messages.
 /// </summary>
-internal sealed class MessageTrackingService : BackgroundService
+internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEventArgs>,
+    IEventHandler<MessageDeletedEventArgs>,
+    IEventHandler<MessageUpdatedEventArgs>
 {
     private readonly ILogger<MessageTrackingService> _logger;
-    private readonly DiscordClient _discordClient;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
-    private readonly List<TrackedMessage> _trackedMessages = new();
+    private readonly List<TrackedMessage> _trackedMessages = [];
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="MessageReportService" /> class.
     /// </summary>
     public MessageTrackingService(ILogger<MessageTrackingService> logger,
-        IDbContextFactory<HammerContext> dbContextFactory,
-        DiscordClient discordClient)
+        IDbContextFactory<HammerContext> dbContextFactory)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
-        _discordClient = discordClient;
     }
 
     /// <summary>
@@ -40,10 +38,12 @@ internal sealed class MessageTrackingService : BackgroundService
     /// <returns>An enumerable collection of <see cref="TrackedMessage" /> instances.</returns>
     public async IAsyncEnumerable<TrackedMessage> EnumerateTrackedMessagesAsync(DiscordUser user, DiscordGuild guild)
     {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
         foreach (TrackedMessage message in context.TrackedMessages.Where(m => m.AuthorId == user.Id && m.GuildId == guild.Id))
+        {
             yield return message;
+        }
     }
 
     /// <summary>
@@ -59,8 +59,15 @@ internal sealed class MessageTrackingService : BackgroundService
                                                                     && m.ChannelId == channelId
                                                                     && m.GuildId == guildId);
 
-        if (trackedMessage is null) return MessageTrackState.NotTracked;
-        if (trackedMessage.IsDeleted) return MessageTrackState.Tracked | MessageTrackState.Deleted;
+        if (trackedMessage is null)
+        {
+            return MessageTrackState.NotTracked;
+        }
+
+        if (trackedMessage.IsDeleted)
+        {
+            return MessageTrackState.Tracked | MessageTrackState.Deleted;
+        }
 
         return MessageTrackState.Tracked;
     }
@@ -72,7 +79,7 @@ internal sealed class MessageTrackingService : BackgroundService
     /// <returns>A <see cref="MessageTrackState" /> representing the tracked state of the specified message.</returns>
     public MessageTrackState GetMessageTrackState(DiscordMessage message)
     {
-        return GetMessageTrackState(message.Channel.Guild.Id, message.Channel.Id, message.Id);
+        return GetMessageTrackState(message.Channel!.Guild.Id, message.Channel.Id, message.Id);
     }
 
     /// <summary>
@@ -88,25 +95,32 @@ internal sealed class MessageTrackingService : BackgroundService
     {
         TrackedMessage? trackedMessage = _trackedMessages.Find(m => m.Id == message.Id);
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
 
         if (trackedMessage is null)
         {
-            trackedMessage = await context.TrackedMessages.FirstOrDefaultAsync(m => m.Id == message.Id).ConfigureAwait(false);
+            trackedMessage = await context.TrackedMessages.FirstOrDefaultAsync(m => m.Id == message.Id);
 
             if (trackedMessage is null)
             {
                 trackedMessage = TrackedMessage.FromDiscordMessage(message);
                 trackedMessage.IsDeleted = deleted;
-                if (deleted) trackedMessage.DeletionTimestamp = DateTimeOffset.UtcNow;
+                if (deleted)
+                {
+                    trackedMessage.DeletionTimestamp = DateTimeOffset.UtcNow;
+                }
 
-                EntityEntry<TrackedMessage> entry = await context.AddAsync(trackedMessage).ConfigureAwait(false);
+                EntityEntry<TrackedMessage> entry = await context.AddAsync(trackedMessage);
                 trackedMessage = entry.Entity;
             }
             else
             {
                 trackedMessage.IsDeleted = deleted;
-                if (deleted) trackedMessage.DeletionTimestamp = DateTimeOffset.UtcNow;
+                if (deleted)
+                {
+                    trackedMessage.DeletionTimestamp = DateTimeOffset.UtcNow;
+                }
+
                 context.Update(trackedMessage);
             }
 
@@ -115,13 +129,17 @@ internal sealed class MessageTrackingService : BackgroundService
         else
         {
             trackedMessage.IsDeleted = deleted;
-            if (deleted) trackedMessage.DeletionTimestamp = DateTimeOffset.UtcNow;
+            if (deleted)
+            {
+                trackedMessage.DeletionTimestamp = DateTimeOffset.UtcNow;
+            }
+
             context.Update(trackedMessage);
         }
 
         try
         {
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync();
         }
         catch (Exception exception)
         {
@@ -132,70 +150,69 @@ internal sealed class MessageTrackingService : BackgroundService
     }
 
     /// <inheritdoc />
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _discordClient.GuildAvailable -= DiscordClientOnGuildAvailable;
-        _discordClient.MessageDeleted -= DiscordClientOnMessageDeleted;
-        _discordClient.MessageUpdated -= DiscordClientOnMessageUpdated;
-
-        return base.StopAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _discordClient.GuildAvailable += DiscordClientOnGuildAvailable;
-        _discordClient.MessageDeleted += DiscordClientOnMessageDeleted;
-        _discordClient.MessageUpdated += DiscordClientOnMessageUpdated;
-
-        return Task.CompletedTask;
-    }
-
-    private Task DiscordClientOnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
+    public Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
     {
         return RefreshFromDatabaseAsync(e.Guild);
     }
 
-    private async Task DiscordClientOnMessageDeleted(DiscordClient sender, MessageDeleteEventArgs e)
+    /// <inheritdoc />
+    public async Task HandleEventAsync(DiscordClient sender, MessageDeletedEventArgs e)
     {
         if (GetMessageTrackState(e.Message) != MessageTrackState.Tracked)
+        {
             return;
+        }
 
-        TrackedMessage trackedMessage = await GetTrackedMessageAsync(e.Message).ConfigureAwait(false);
+        TrackedMessage trackedMessage = await GetTrackedMessageAsync(e.Message);
         trackedMessage.IsDeleted = true;
         trackedMessage.DeletionTimestamp = DateTimeOffset.UtcNow;
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         context.Update(trackedMessage);
-        await context.SaveChangesAsync().ConfigureAwait(false);
+        await context.SaveChangesAsync();
     }
 
-    private async Task DiscordClientOnMessageUpdated(DiscordClient sender, MessageUpdateEventArgs e)
+    /// <inheritdoc />
+    public async Task HandleEventAsync(DiscordClient sender, MessageUpdatedEventArgs e)
     {
-        if (e.Message.Channel.Guild is null) return;
-        if (GetMessageTrackState(e.Message) != MessageTrackState.Tracked) return;
+        if (e.Message.Channel?.Guild is null)
+        {
+            return;
+        }
 
-        TrackedMessage trackedMessage = await GetTrackedMessageAsync(e.Message).ConfigureAwait(false);
+        if (GetMessageTrackState(e.Message) != MessageTrackState.Tracked)
+        {
+            return;
+        }
+
+        TrackedMessage trackedMessage = await GetTrackedMessageAsync(e.Message);
         trackedMessage.Content = e.Message.Content;
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         context.Update(trackedMessage);
-        await context.SaveChangesAsync().ConfigureAwait(false);
+        await context.SaveChangesAsync();
     }
 
     private async Task RefreshFromDatabaseAsync(DiscordGuild guild)
     {
         ulong guildId = guild.Id;
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         IEnumerable<TrackedMessage> messages = context.TrackedMessages.Where(m => m.GuildId == guildId).AsEnumerable();
 
         foreach (IGrouping<ulong, TrackedMessage> channelGroups in messages.GroupBy(m => m.ChannelId))
         {
-            DiscordChannel channel = guild.GetChannel(channelGroups.Key);
-            if (channel is null)
+            DiscordChannel channel;
+            try
             {
-                foreach (TrackedMessage trackedMessage in channelGroups) trackedMessage.IsDeleted = true;
+                channel = await guild.GetChannelAsync(channelGroups.Key);
+            }
+            catch (NotFoundException)
+            {
+                foreach (TrackedMessage trackedMessage in channelGroups)
+                {
+                    trackedMessage.IsDeleted = true;
+                }
 
                 context.UpdateRange(channelGroups);
                 continue;
@@ -205,9 +222,8 @@ internal sealed class MessageTrackingService : BackgroundService
             {
                 try
                 {
-                    DiscordMessage message = await channel.GetMessageAsync(trackedMessage.Id).ConfigureAwait(false);
-                    if (message is null) trackedMessage.IsDeleted = true;
-                    else _trackedMessages.Add(trackedMessage);
+                    await channel.GetMessageAsync(trackedMessage.Id);
+                    _trackedMessages.Add(trackedMessage);
                 }
                 catch (NotFoundException)
                 {
@@ -218,6 +234,6 @@ internal sealed class MessageTrackingService : BackgroundService
             context.UpdateRange(channelGroups);
         }
 
-        await context.SaveChangesAsync().ConfigureAwait(false);
+        await context.SaveChangesAsync();
     }
 }

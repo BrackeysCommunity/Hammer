@@ -1,20 +1,26 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
 internal sealed partial class InfractionCommand
 {
-    [SlashCommand("delete", "Deletes an infraction.", false)]
-    [SlashRequireGuild]
-    public async Task DeleteAsync(InteractionContext context,
-        [Option("infraction", "The infraction to delete.")] long infractionId
+    [Command("delete")]
+    [Description("Deletes an infraction.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task DeleteAsync(SlashCommandContext context,
+        [Parameter("infraction"), Description("The infraction to delete.")]
+        long infractionId
     )
     {
-        await context.DeferAsync().ConfigureAwait(false);
+        await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
 
         Infraction? infraction = _infractionService.GetInfraction(infractionId);
@@ -35,7 +41,7 @@ internal sealed partial class InfractionCommand
 
         var builder = new DiscordWebhookBuilder();
         builder.AddEmbed(embed);
-        await context.EditResponseAsync(builder).ConfigureAwait(false);
+        await context.EditResponseAsync(builder);
 
         if (infraction is not null)
         {
@@ -45,8 +51,8 @@ internal sealed partial class InfractionCommand
             embed.AddField("ID", infraction.Id, true);
             embed.AddField("User", MentionUtility.MentionUser(infraction.UserId), true);
             embed.AddField("Type", infraction.Type, true);
-            embed.AddField("Staff Member", context.Member.Mention, true);
-            await _logService.LogAsync(context.Guild, embed).ConfigureAwait(false);
+            embed.AddField("Staff Member", context.Member!.Mention, true);
+            await _logService.LogAsync(context.Guild!, embed);
         }
     }
 }

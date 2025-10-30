@@ -1,20 +1,17 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Hammer.Configuration;
 using Hammer.Data;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 
 namespace Hammer.Services;
 
 /// <summary>
 ///     Represents a service which can send embeds to a log channel.
 /// </summary>
-internal sealed class DiscordLogService : BackgroundService
+internal sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
 {
-    private readonly IConfiguration _configuration;
     private readonly DiscordClient _discordClient;
     private readonly ConfigurationService _configurationService;
     private readonly Dictionary<DiscordGuild, DiscordChannel> _logChannels = new();
@@ -22,14 +19,37 @@ internal sealed class DiscordLogService : BackgroundService
     /// <summary>
     ///     Initializes a new instance of the <see cref="DiscordLogService" /> class.
     /// </summary>
-    /// <param name="configuration">The configuration.</param>
     /// <param name="discordClient">The Discord client.</param>
     /// <param name="configurationService">The configuration service.</param>
-    public DiscordLogService(IConfiguration configuration, DiscordClient discordClient, ConfigurationService configurationService)
+    public DiscordLogService(ConfigurationService configurationService, DiscordClient discordClient)
     {
-        _configuration = configuration;
         _discordClient = discordClient;
         _configurationService = configurationService;
+    }
+
+    /// <inheritdoc />
+    public async Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
+    {
+        if (!_configurationService.TryGetGuildConfiguration(e.Guild, out GuildConfiguration? configuration))
+        {
+            return;
+        }
+
+        ulong logChannel = configuration.LogChannel;
+        if (logChannel == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            DiscordChannel channel = await _discordClient.GetChannelAsync(logChannel);
+            _logChannels[e.Guild] = channel;
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     /// <summary>
@@ -46,23 +66,33 @@ internal sealed class DiscordLogService : BackgroundService
     public async Task LogAsync(DiscordGuild guild, DiscordEmbed embed,
         StaffNotificationOptions notificationOptions = StaffNotificationOptions.None)
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        ArgumentNullException.ThrowIfNull(embed);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (embed is null)
+        {
+            throw new ArgumentNullException(nameof(embed));
+        }
 
         if (_logChannels.TryGetValue(guild, out DiscordChannel? logChannel))
         {
             if (embed.Timestamp is null)
+            {
                 embed = new DiscordEmbedBuilder(embed).WithTimestamp(DateTimeOffset.UtcNow);
+            }
 
-            await logChannel.SendMessageAsync(BuildMentionString(guild, notificationOptions), embed: embed).ConfigureAwait(false);
+            string? mentionString = BuildMentionString(guild, notificationOptions);
+            if (mentionString is null)
+            {
+                await logChannel.SendMessageAsync(embed);
+            }
+            else
+            {
+                await logChannel.SendMessageAsync(mentionString, embed);
+            }
         }
-    }
-
-    /// <inheritdoc />
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _discordClient.GuildAvailable -= OnGuildAvailable;
-        return base.StopAsync(cancellationToken);
     }
 
     /// <summary>
@@ -76,7 +106,10 @@ internal sealed class DiscordLogService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public bool TryGetLogChannel(DiscordGuild guild, [NotNullWhen(true)] out DiscordChannel? channel)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
         {
@@ -84,57 +117,57 @@ internal sealed class DiscordLogService : BackgroundService
             return false;
         }
 
-        if (!_logChannels.TryGetValue(guild, out channel))
+        if (!_logChannels.TryGetValue(guild, out channel) && guild.Channels.TryGetValue(configuration.LogChannel, out channel))
         {
-            channel = guild.GetChannel(configuration.LogChannel);
             _logChannels.Add(guild, channel);
         }
 
         return channel is not null;
     }
 
-    /// <inheritdoc />
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _discordClient.GuildAvailable += OnGuildAvailable;
-        return Task.CompletedTask;
-    }
-
     private string? BuildMentionString(DiscordGuild guild, StaffNotificationOptions notificationOptions)
     {
-        if (!TryGetLogChannel(guild, out DiscordChannel? logChannel)) return null;
-        if (notificationOptions == StaffNotificationOptions.None) return null;
-        if (!_configurationService.TryGetGuildConfiguration(logChannel.Guild, out GuildConfiguration? configuration)) return null;
+        if (!TryGetLogChannel(guild, out DiscordChannel? logChannel))
+        {
+            return null;
+        }
+
+        if (notificationOptions == StaffNotificationOptions.None)
+        {
+            return null;
+        }
+
+        if (!_configurationService.TryGetGuildConfiguration(logChannel.Guild, out GuildConfiguration? configuration))
+        {
+            return null;
+        }
 
         RoleConfiguration roleConfiguration = configuration.Roles;
-        DiscordRole? administratorRole = logChannel.Guild.GetRole(roleConfiguration.AdministratorRoleId);
-        DiscordRole? moderatorRole = logChannel.Guild.GetRole(roleConfiguration.ModeratorRoleId);
+        DiscordRole administratorRole = logChannel.Guild.Roles[roleConfiguration.AdministratorRoleId];
+        DiscordRole moderatorRole = logChannel.Guild.Roles[roleConfiguration.ModeratorRoleId];
 
         var mentions = new List<string>();
 
-        if ((notificationOptions & StaffNotificationOptions.Administrator) != 0) mentions.Add(administratorRole.Mention);
-        if ((notificationOptions & StaffNotificationOptions.Moderator) != 0) mentions.Add(moderatorRole.Mention);
-        if ((notificationOptions & StaffNotificationOptions.Here) != 0) mentions.Add("@here");
-        if ((notificationOptions & StaffNotificationOptions.Everyone) != 0) mentions.Add("@everyone");
+        if ((notificationOptions & StaffNotificationOptions.Administrator) != 0)
+        {
+            mentions.Add(administratorRole.Mention);
+        }
+
+        if ((notificationOptions & StaffNotificationOptions.Moderator) != 0)
+        {
+            mentions.Add(moderatorRole.Mention);
+        }
+
+        if ((notificationOptions & StaffNotificationOptions.Here) != 0)
+        {
+            mentions.Add("@here");
+        }
+
+        if ((notificationOptions & StaffNotificationOptions.Everyone) != 0)
+        {
+            mentions.Add("@everyone");
+        }
 
         return string.Join(' ', mentions);
-    }
-
-    private async Task OnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
-    {
-        var logChannel = _configuration.GetSection(e.Guild.Id.ToString())?.GetSection("logChannel")?.Get<ulong>();
-        if (!logChannel.HasValue) return;
-
-        try
-        {
-            DiscordChannel? channel = await _discordClient.GetChannelAsync(logChannel.Value).ConfigureAwait(false);
-
-            if (channel is not null)
-                _logChannels[e.Guild] = channel;
-        }
-        catch
-        {
-            // ignored
-        }
     }
 }

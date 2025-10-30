@@ -1,7 +1,8 @@
 using DSharpPlus;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
@@ -12,15 +13,14 @@ namespace Hammer.AutocompleteProviders;
 /// <summary>
 ///     Provides autocomplete suggestions for infractions.
 /// </summary>
-internal sealed class InfractionAutocompleteProvider : IAutocompleteProvider
+internal sealed class InfractionAutoCompleteProvider : IAutoCompleteProvider
 {
-    /// <inheritdoc />
-    public Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext context)
+    public ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context)
     {
-        var infractionService = context.Services.GetRequiredService<InfractionService>();
-        IEnumerable<Infraction> infractions = infractionService.EnumerateInfractions(context.Guild);
+        var infractionService = context.ServiceProvider.GetRequiredService<InfractionService>();
+        IEnumerable<Infraction> infractions = infractionService.EnumerateInfractions(context.Guild!);
 
-        return Task.FromResult(infractions.OrderByDescending(i => i.IssuedAt).Take(10).Select(infraction =>
+        return ValueTask.FromResult(infractions.OrderByDescending(i => i.IssuedAt).Take(10).Select(infraction =>
         {
             string summary = GetInfractionSummary(context.Client, infraction);
             return new DiscordAutoCompleteChoice(summary, infraction.Id);
@@ -29,10 +29,10 @@ internal sealed class InfractionAutocompleteProvider : IAutocompleteProvider
 
     private static string GetInfractionSummary(DiscordClient client, Infraction infraction)
     {
-        string userString = $"User {infraction.UserId}";
+        var userString = $"User {infraction.UserId}";
         try
         {
-            DiscordUser? user = client.GetUserAsync(infraction.UserId).GetAwaiter().GetResult();
+            DiscordUser user = client.GetUserAsync(infraction.UserId).GetAwaiter().GetResult();
             userString = user.GetUsernameWithDiscriminator();
         }
         catch (NotFoundException)

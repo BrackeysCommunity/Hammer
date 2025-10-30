@@ -1,11 +1,15 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 
@@ -14,7 +18,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>kick</c> command.
 /// </summary>
-internal sealed class KickCommand : ApplicationCommandModule
+internal sealed class KickCommand
 {
     private readonly ILogger<KickCommand> _logger;
     private readonly BanService _banService;
@@ -45,23 +49,30 @@ internal sealed class KickCommand : ApplicationCommandModule
         _ruleService = ruleService;
     }
 
-    [SlashCommand("kick", "Kicks a member", false)]
-    [SlashRequireGuild]
-    public async Task KickAsync(InteractionContext context,
-        [Option("member", "The member to kick.")] DiscordUser user,
-        [Option("reason", "The reason for the kick.")] string? reason = null,
-        [Option("rule", "The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))] string? ruleSearch = null,
-        [Option("clearMessageHistory", "Clear the user's recent messages in text channels.")] bool clearMessageHistory = false)
+    [Command("kick")]
+    [Description("Kicks a member")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task KickAsync(SlashCommandContext context,
+        [Parameter("member"), Description("The member to kick.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the kick.")] string? reason = null,
+        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        string? ruleSearch = null,
+        [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
+        bool clearMessageHistory = false)
     {
-        await context.DeferAsync(true).ConfigureAwait(false);
+        await context.DeferResponseAsync(true);
 
         if (_cooldownService.IsCooldownActive(user, context.Member) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
-            DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction).ConfigureAwait(false);
-            bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed).ConfigureAwait(false);
-            if (!result) return;
+            DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
+            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            if (!result)
+            {
+                return;
+            }
         }
 
         var builder = new DiscordEmbedBuilder();
@@ -69,9 +80,10 @@ internal sealed class KickCommand : ApplicationCommandModule
         var importantNotes = new List<string>();
         DiscordMember member;
 
+        DiscordGuild guild = context.Guild;
         try
         {
-            member = await context.Guild.GetMemberAsync(user.Id).ConfigureAwait(false);
+            member = await guild.GetMemberAsync(user.Id);
         }
         catch (NotFoundException)
         {
@@ -80,7 +92,7 @@ internal sealed class KickCommand : ApplicationCommandModule
             builder.WithTitle("⚠️ Not in guild");
             builder.WithDescription($"The user {user.Mention} is not in this guild.");
             message.AddEmbed(builder);
-            await context.EditResponseAsync(message).ConfigureAwait(false);
+            await context.EditResponseAsync(message);
 
             _logger.LogInformation("{StaffMember} attempted to kick non-member {User}", context.Member, user);
             return;
@@ -93,9 +105,9 @@ internal sealed class KickCommand : ApplicationCommandModule
             {
                 if (int.TryParse(ruleSearch, out int ruleId))
                 {
-                    if (_ruleService.GuildHasRule(context.Guild, ruleId))
+                    if (_ruleService.GuildHasRule(guild, ruleId))
                     {
-                        rule = _ruleService.GetRuleById(context.Guild, ruleId)!;
+                        rule = _ruleService.GetRuleById(guild, ruleId);
                     }
                     else
                     {
@@ -104,7 +116,7 @@ internal sealed class KickCommand : ApplicationCommandModule
                 }
                 else
                 {
-                    rule = _ruleService.SearchForRule(context.Guild, ruleSearch);
+                    rule = _ruleService.SearchForRule(guild, ruleSearch);
                     if (rule is null)
                     {
                         importantNotes.Add("The specified rule does not exist - it will be omitted from the infraction.");
@@ -113,13 +125,17 @@ internal sealed class KickCommand : ApplicationCommandModule
             }
 
             (infraction, bool dmSuccess) =
-                await _banService.KickAsync(member, context.Member!, reason, rule, clearMessageHistory).ConfigureAwait(false);
+                await _banService.KickAsync(member, context.Member!, reason, rule, clearMessageHistory);
 
             if (!dmSuccess)
+            {
                 importantNotes.Add("The kick was successfully issued, but the user could not be DM'd.");
+            }
 
             if (importantNotes.Count > 0)
+            {
                 builder.AddField("⚠️ Important Notes", string.Join("\n", importantNotes.Select(n => $"• {n}")));
+            }
 
             builder.WithAuthor(member);
             builder.WithColor(DiscordColor.Red);
@@ -141,6 +157,6 @@ internal sealed class KickCommand : ApplicationCommandModule
         }
 
         message.AddEmbed(builder);
-        await context.EditResponseAsync(message).ConfigureAwait(false);
+        await context.EditResponseAsync(message);
     }
 }

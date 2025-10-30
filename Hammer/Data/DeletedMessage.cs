@@ -1,4 +1,4 @@
-﻿using DSharpPlus.Entities;
+using DSharpPlus.Entities;
 
 namespace Hammer.Data;
 
@@ -7,6 +7,12 @@ namespace Hammer.Data;
 /// </summary>
 internal sealed class DeletedMessage : IEquatable<DeletedMessage>
 {
+    /// <summary>
+    ///     Gets the name of the bot that added this message to the database.
+    /// </summary>
+    /// <value>The name of the bot that added this message.</value>
+    public string AddedByBot { get; internal set; } = "Hammer";
+
     /// <summary>
     ///     Gets the attachments of the deleted message.
     /// </summary>
@@ -113,8 +119,16 @@ internal sealed class DeletedMessage : IEquatable<DeletedMessage>
     /// <inheritdoc />
     public bool Equals(DeletedMessage? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return MessageId == other.MessageId;
     }
 

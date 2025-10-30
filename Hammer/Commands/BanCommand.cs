@@ -1,11 +1,15 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 using X10D.Time;
@@ -15,7 +19,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a module which implements the <c>ban</c> command.
 /// </summary>
-internal sealed class BanCommand : ApplicationCommandModule
+internal sealed class BanCommand
 {
     private readonly ILogger<BanCommand> _logger;
     private readonly BanService _banService;
@@ -46,27 +50,35 @@ internal sealed class BanCommand : ApplicationCommandModule
         _ruleService = ruleService;
     }
 
-    [SlashCommand("ban", "Temporarily or permanently bans a user.", false)]
-    [SlashRequireGuild]
-    public async Task BanAsync(InteractionContext context,
-        [Option("user", "The user to ban.")] DiscordUser user,
-        [Option("reason", "The reason for the ban.")] string? reason = null,
-        [Option("duration", "The duration of the ban.")] string? durationRaw = null,
-        [Option("rule", "The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))] string? ruleSearch = null,
-        [Option("clearMessageHistory", "Clear the user's recent messages in text channels.")] bool clearMessageHistory = false)
+    [Command("ban")]
+    [Description("Temporarily or permanently bans a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task BanAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to ban.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the ban.")] string? reason = null,
+        [Parameter("duration"), Description("The duration of the ban.")] string? durationRaw = null,
+        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        string? ruleSearch = null,
+        [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
+        bool clearMessageHistory = false)
     {
-        await context.DeferAsync(true).ConfigureAwait(false);
+        await context.DeferResponseAsync(true);
 
-        if (_cooldownService.IsCooldownActive(user, context.Member) &&
+        if (_cooldownService.IsCooldownActive(user, context.Member!) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
-            DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction).ConfigureAwait(false);
-            bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed).ConfigureAwait(false);
-            if (!result) return;
+            DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
+            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            if (!result)
+            {
+                return;
+            }
         }
 
-        if (await _banService.IsUserBannedAsync(user, context.Guild).ConfigureAwait(false))
+        DiscordGuild guild = context.Guild!;
+        if (await _banService.IsUserBannedAsync(user, guild))
         {
             var responseBuilder = new DiscordWebhookBuilder();
             var embed = new DiscordEmbedBuilder();
@@ -75,7 +87,7 @@ internal sealed class BanCommand : ApplicationCommandModule
             embed.WithDescription($"{user.Mention} ({user.Id:0}) is already banned. " +
                                   "If you are trying to replace a temporary ban with a permanent one, " +
                                   "please unban the member first before running `/ban` again.");
-            await context.EditResponseAsync(responseBuilder.AddEmbed(embed)).ConfigureAwait(false);
+            await context.EditResponseAsync(responseBuilder.AddEmbed(embed));
             return;
         }
 
@@ -94,7 +106,7 @@ internal sealed class BanCommand : ApplicationCommandModule
                 embed.WithTitle("⚠️ Error parsing duration");
                 embed.WithDescription($"The duration `{durationRaw}` is not a valid duration. " +
                                       "Accepted format is `#y #mo #w #d #h #m #s #ms`");
-                await context.EditResponseAsync(responseBuilder.AddEmbed(embed)).ConfigureAwait(false);
+                await context.EditResponseAsync(responseBuilder.AddEmbed(embed));
                 return;
             }
         }
@@ -108,9 +120,9 @@ internal sealed class BanCommand : ApplicationCommandModule
         {
             if (int.TryParse(ruleSearch, out int ruleId))
             {
-                if (_ruleService.GuildHasRule(context.Guild, ruleId))
+                if (_ruleService.GuildHasRule(guild, ruleId))
                 {
-                    rule = _ruleService.GetRuleById(context.Guild, ruleId)!;
+                    rule = _ruleService.GetRuleById(guild, ruleId);
                 }
                 else
                 {
@@ -119,7 +131,7 @@ internal sealed class BanCommand : ApplicationCommandModule
             }
             else
             {
-                rule = _ruleService.SearchForRule(context.Guild, ruleSearch);
+                rule = _ruleService.SearchForRule(guild, ruleSearch);
                 if (rule is null)
                 {
                     importantNotes.Add("The specified rule does not exist - it will be omitted from the infraction.");
@@ -132,15 +144,22 @@ internal sealed class BanCommand : ApplicationCommandModule
             : _banService.TemporaryBanAsync(user, context.Member!, reason, duration.Value, rule, clearMessageHistory);
         try
         {
-            (infraction, bool dmSuccess) = await infractionTask.ConfigureAwait(false);
+            (infraction, bool dmSuccess) = await infractionTask;
 
             if (!dmSuccess)
+            {
                 importantNotes.Add("The ban was successfully issued, but the user could not be DM'd.");
+            }
 
             builder.WithAuthor(user);
             builder.WithColor(DiscordColor.Red);
             builder.WithTitle("Banned user");
-            builder.WithDescription(reason);
+
+            if (!string.IsNullOrWhiteSpace(reason))
+            {
+                builder.WithDescription(reason);
+            }
+
             builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
             reason = reason.WithWhiteSpaceAlternative("None");
 
@@ -158,7 +177,9 @@ internal sealed class BanCommand : ApplicationCommandModule
             }
 
             if (importantNotes.Count > 0)
+            {
                 builder.AddField("⚠️ Important Notes", string.Join("\n", importantNotes.Select(n => $"• {n}")));
+            }
         }
         catch (Exception exception)
         {
@@ -171,6 +192,6 @@ internal sealed class BanCommand : ApplicationCommandModule
         }
 
         message.AddEmbed(builder);
-        await context.EditResponseAsync(message).ConfigureAwait(false);
+        await context.EditResponseAsync(message);
     }
 }

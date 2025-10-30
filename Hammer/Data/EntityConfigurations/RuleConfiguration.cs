@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Hammer.Data.EntityConfigurations;
@@ -8,15 +8,22 @@ namespace Hammer.Data.EntityConfigurations;
 /// </summary>
 internal sealed class RuleConfiguration : IEntityTypeConfiguration<Rule>
 {
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="RuleConfiguration" /> class.
+    /// </summary>
+    public RuleConfiguration()
+    {
+    }
+
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Rule> builder)
     {
-        builder.ToTable(nameof(Rule));
-        builder.HasKey(e => new {e.Id, e.GuildId});
+        builder.ToTable("Rule");
+        builder.HasKey(e => new { e.Id, e.GuildId });
 
-        builder.Property(e => e.Id);
-        builder.Property(e => e.GuildId);
-        builder.Property(e => e.Brief);
-        builder.Property(e => e.Description);
+        builder.Property(e => e.Id).HasColumnOrder(1);
+        builder.Property(e => e.GuildId).HasColumnOrder(2);
+        builder.Property(e => e.Brief).HasColumnOrder(3).HasMaxLength(255);
+        builder.Property(e => e.Description).HasColumnOrder(4).HasMaxLength(1024);
     }
 }

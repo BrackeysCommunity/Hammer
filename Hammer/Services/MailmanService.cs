@@ -34,18 +34,29 @@ internal sealed class MailmanService
     /// <exception cref="ArgumentNullException"><paramref name="infraction" /> is <see langword="null" />.</exception>
     public async Task<DiscordMessage?> SendInfractionAsync(Infraction infraction, int infractionCount, InfractionOptions options)
     {
-        ArgumentNullException.ThrowIfNull(infraction);
+        if (infraction is null)
+        {
+            throw new ArgumentNullException(nameof(infraction));
+        }
 
-        if (!_discordClient.Guilds.TryGetValue(infraction.GuildId, out DiscordGuild? guild)) return null;
+        if (!_discordClient.Guilds.TryGetValue(infraction.GuildId, out DiscordGuild? guild))
+        {
+            return null;
+        }
 
-        DiscordMember? member = await guild.GetMemberOrNullAsync(infraction.UserId).ConfigureAwait(false);
-        if (member is null) return null; // bots can only DM members
+        DiscordMember? member = await guild.GetMemberOrNullAsync(infraction.UserId);
+        if (member is null)
+        {
+            return null; // bots can only DM members
+        }
 
         try
         {
             DiscordEmbed? embed = CreatePrivateEmbed(infraction, infractionCount, options, member);
             if (embed is not null)
-                return await member.SendMessageAsync(embed).ConfigureAwait(false);
+            {
+                return await member.SendMessageAsync(embed);
+            }
 
             // user does not exist, or guild is invalid
             return null;
@@ -59,20 +70,30 @@ internal sealed class MailmanService
 
     private DiscordEmbed? CreatePrivateEmbed(Infraction infraction, int count, InfractionOptions options, DiscordMember? member)
     {
-        if (member is null) return null;
-        if (!_discordClient.Guilds.TryGetValue(infraction.GuildId, out DiscordGuild? guild)) return null;
+        if (member is null)
+        {
+            return null;
+        }
+
+        if (!_discordClient.Guilds.TryGetValue(infraction.GuildId, out DiscordGuild? guild))
+        {
+            return null;
+        }
 
         string? description = infraction.Type.GetEmbedMessage();
         string reason = infraction.Reason.WithWhiteSpaceAlternative(Formatter.Italic("No reason given."));
         var embed = new DiscordEmbedBuilder();
+        string iconUrl = guild.GetIconUrl(MediaFormat.Png) ?? guild.IconUrl;
 
         embed.WithColor(0xFF0000);
         embed.WithTitle(infraction.Type.Humanize());
-        embed.WithDescription(string.IsNullOrWhiteSpace(description)
-            ? null
-            : description.FormatSmart(new {user = member, guild}));
-        embed.WithThumbnail(guild.IconUrl);
-        embed.WithFooter(guild.Name, guild.IconUrl);
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            embed.WithDescription(description.FormatSmart(new { user = member, guild }));
+        }
+
+        embed.WithThumbnail(iconUrl);
+        embed.WithFooter(guild.Name, iconUrl);
         embed.AddField("Reason", reason);
         embed.AddFieldIf(infraction.RuleId.HasValue, "Rule Broken", () => $"{infraction.RuleId} - {infraction.RuleText}", true);
 
@@ -94,8 +115,10 @@ internal sealed class MailmanService
 
         embed.AddField("Total Infractions", count, true);
 
-        if (infraction.Type is not InfractionType.Ban or InfractionType.TemporaryBan)
+        if (infraction.Type is not InfractionType.Ban and not InfractionType.TemporaryBan)
+        {
             embed.AddModMailNotice();
+        }
 
         return embed;
     }

@@ -1,10 +1,14 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 
@@ -13,7 +17,7 @@ namespace Hammer.Commands;
 /// <summary>
 ///     Represents a class which implements the <c>warn</c> command.
 /// </summary>
-internal sealed class WarnCommand : ApplicationCommandModule
+internal sealed class WarnCommand
 {
     private readonly ILogger<WarnCommand> _logger;
     private readonly InfractionCooldownService _cooldownService;
@@ -44,22 +48,29 @@ internal sealed class WarnCommand : ApplicationCommandModule
         _warningService = warningService;
     }
 
-    [SlashCommand("warn", "Issues a warning to a user.", false)]
-    [SlashRequireGuild]
-    public async Task WarnAsync(InteractionContext context,
-        [Option("user", "The user to warn.")] DiscordUser user,
-        [Option("reason", "The reason for the warning.")] string reason,
-        [Option("rule", "The rule which was broken."), Autocomplete(typeof(RuleAutocompleteProvider))] string? ruleSearch = null)
+    [Command("warn")]
+    [Description("Issues a warning to a user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task WarnAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user to warn.")] DiscordUser user,
+        [Parameter("reason"), Description("The reason for the warning.")] string reason,
+        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        string? ruleSearch = null)
     {
-        await context.DeferAsync(true).ConfigureAwait(false);
+        await context.DeferResponseAsync(true);
 
-        if (_cooldownService.IsCooldownActive(user, context.Member) &&
+        DiscordMember member = context.Member!;
+        if (_cooldownService.IsCooldownActive(user, member) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
-            DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction).ConfigureAwait(false);
-            bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed).ConfigureAwait(false);
-            if (!result) return;
+            DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
+            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            if (!result)
+            {
+                return;
+            }
         }
 
         var builder = new DiscordEmbedBuilder();
@@ -71,11 +82,12 @@ internal sealed class WarnCommand : ApplicationCommandModule
             Rule? rule = null;
             if (!string.IsNullOrWhiteSpace(ruleSearch))
             {
+                DiscordGuild guild = context.Guild!;
                 if (int.TryParse(ruleSearch, out int ruleId))
                 {
-                    if (_ruleService.GuildHasRule(context.Guild, ruleId))
+                    if (_ruleService.GuildHasRule(guild, ruleId))
                     {
-                        rule = _ruleService.GetRuleById(context.Guild, ruleId)!;
+                        rule = _ruleService.GetRuleById(guild, ruleId);
                     }
                     else
                     {
@@ -84,7 +96,7 @@ internal sealed class WarnCommand : ApplicationCommandModule
                 }
                 else
                 {
-                    rule = _ruleService.SearchForRule(context.Guild, ruleSearch);
+                    rule = _ruleService.SearchForRule(guild, ruleSearch);
                     if (rule is null)
                     {
                         importantNotes.Add("The specified rule does not exist - it will be omitted from the infraction.");
@@ -93,13 +105,17 @@ internal sealed class WarnCommand : ApplicationCommandModule
             }
 
             (infraction, bool dmSuccess) =
-                await _warningService.WarnAsync(user, context.Member, reason, rule).ConfigureAwait(false);
+                await _warningService.WarnAsync(user, member, reason, rule);
 
             if (!dmSuccess)
+            {
                 importantNotes.Add("The warning was successfully issued, but the user could not be DM'd.");
+            }
 
             if (importantNotes.Count > 0)
+            {
                 builder.AddField("⚠️ Important Notes", string.Join("\n", importantNotes.Select(n => $"• {n}")));
+            }
 
             builder.WithAuthor(user);
             builder.WithColor(DiscordColor.Orange);
@@ -108,7 +124,7 @@ internal sealed class WarnCommand : ApplicationCommandModule
             builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
 
             reason = reason.WithWhiteSpaceAlternative("None");
-            _logger.LogInformation("{StaffMember} warned {User}. Reason: {Reason}", context.Member, user, reason);
+            _logger.LogInformation("{StaffMember} warned {User}. Reason: {Reason}", member, user, reason);
         }
         catch (Exception exception)
         {
@@ -120,6 +136,6 @@ internal sealed class WarnCommand : ApplicationCommandModule
             builder.WithFooter("See log for further details.");
         }
 
-        await context.EditResponseAsync(message.AddEmbed(builder)).ConfigureAwait(false);
+        await context.EditResponseAsync(message.AddEmbed(builder));
     }
 }

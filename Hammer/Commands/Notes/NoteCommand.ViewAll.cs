@@ -1,48 +1,59 @@
-using System.Runtime.CompilerServices;
+using System.ComponentModel;
 using System.Text;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Hammer.Commands.Notes;
 
 internal sealed partial class NoteCommand
 {
-    [SlashCommand("viewall", "Views all notes for a given user.", false)]
-    [SlashRequireGuild]
-    public async Task ViewAllAsync(InteractionContext context,
-        [Option("user", "The user whose notes to view.")] DiscordUser user)
+    [Command("viewall")]
+    [Description("Views all notes for a given user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task ViewAllAsync(SlashCommandContext context,
+        [Parameter("user"), Description("The user whose notes to view.")] DiscordUser user)
     {
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        DiscordGuild guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
-            await context.CreateResponseAsync("This guild is not configured.", true).ConfigureAwait(false);
+            await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        DiscordEmbedBuilder embed = context.Guild.CreateDefaultEmbed(guildConfiguration, false);
+        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
 
         try
         {
             var builder = new StringBuilder();
 
             // guru can only retrieve guru notes
-            ConfiguredCancelableAsyncEnumerable<MemberNote> notes =
-                context.Member.GetPermissionLevel(guildConfiguration) >= PermissionLevel.Moderator
-                    ? _noteService.GetNotesAsync(user, context.Guild).ConfigureAwait(false)
-                    : _noteService.GetNotesAsync(user, context.Guild, MemberNoteType.Guru).ConfigureAwait(false);
+            IAsyncEnumerable<MemberNote> notes =
+                context.Member!.GetPermissionLevel(guildConfiguration) >= PermissionLevel.Moderator
+                    ? _noteService.GetNotesAsync(user, guild)
+                    : _noteService.GetNotesAsync(user, guild, MemberNoteType.Guru);
 
             await foreach (MemberNote note in notes)
             {
-                if (note.GuildId != context.Guild.Id) continue;
+                if (note.GuildId != guild.Id)
+                {
+                    continue;
+                }
+
                 builder.AppendLine($"\u2022 [{note.Id}] [{note.Type:G}] {note.Content}");
             }
 
             if (builder.Length == 0)
+            {
                 builder.AppendLine($"No notes saved for {user.Mention}");
+            }
 
             embed.WithAuthor(user);
             embed.WithTitle("Saved Notes");
@@ -58,6 +69,6 @@ internal sealed partial class NoteCommand
             embed.WithFooter("See log for more details.");
         }
 
-        await context.CreateResponseAsync(embed, true).ConfigureAwait(false);
+        await context.RespondAsync(embed, true);
     }
 }

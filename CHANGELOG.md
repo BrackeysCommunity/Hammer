@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+- `/message` now parses channel mentions from modal input.
+- Added `Warn For This` context menu which simultaneously deletes the message and warns the author.
+
+### Fixed
+- Fixed a bug with rule autocompletion (hopefully for the last time).
+- Fixed parsing of /gag duration.
+
+### Changed
+- Temporary ban DM no longer contains ModMail notice.
+- `/infraction view` subcommand has been moved to `/viewinfraction` root command to allow for more strict permissions on
+modification.
+
+### Removed
+- Removed `/migrate` command.
+
 ## [5.10.0] - 2025-02-24
 
 ### Changed

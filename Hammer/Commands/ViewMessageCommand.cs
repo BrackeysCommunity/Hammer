@@ -1,17 +1,21 @@
+using System.ComponentModel;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Resources;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
 /// <summary>
 ///     Represents a module which implements the <c>viewmessage</c> command.
 /// </summary>
-internal sealed class ViewMessageCommand : ApplicationCommandModule
+internal sealed class ViewMessageCommand
 {
     private readonly ConfigurationService _configurationService;
     private readonly MessageService _messageService;
@@ -30,17 +34,22 @@ internal sealed class ViewMessageCommand : ApplicationCommandModule
         _messageDeletionService = messageDeletionService;
     }
 
-    [SlashCommand("viewmessage", "Views a staff message, or deleted message, by its ID.", false)]
+    [Command("viewmessage")]
+    [Description("Views a staff message, or deleted message, by its ID.")]
+    [RequireGuild]
+    [UsedImplicitly]
     public async Task ViewMessageAsync(
-        InteractionContext context,
-        [Option("id", "The ID of the message to retrieve.")] string rawId
+        SlashCommandContext context,
+        [Parameter("id"), Description("The ID of the message to retrieve.")] string rawId
     )
     {
-        await context.DeferAsync().ConfigureAwait(false);
+        await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
 
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
+        }
 
         if (long.TryParse(rawId, out long staffMessageId) &&
             await _messageService.GetStaffMessage(staffMessageId) is { } staffMessage &&
@@ -54,8 +63,8 @@ internal sealed class ViewMessageCommand : ApplicationCommandModule
             embed.AddField("Content", Formatter.BlockCode(staffMessage.Content));
         }
         else if (ulong.TryParse(rawId, out ulong deletedMessageId) &&
-            await _messageDeletionService.GetDeletedMessage(deletedMessageId) is { } deletedMessage &&
-            deletedMessage.GuildId == context.Guild.Id)
+                 await _messageDeletionService.GetDeletedMessage(deletedMessageId) is { } deletedMessage &&
+                 deletedMessage.GuildId == context.Guild.Id)
         {
             embed.WithColor(DiscordColor.Orange);
             embed.WithTitle($"Deleted Message {deletedMessage.MessageId}");
@@ -69,9 +78,11 @@ internal sealed class ViewMessageCommand : ApplicationCommandModule
             bool hasAttachments = deletedMessage.Attachments.Count > 0;
 
             string? content = hasContent ? Formatter.Sanitize(deletedMessage.Content) : null;
-            string? attachments = hasAttachments ? string.Join('\n', deletedMessage.Attachments.Select(a => a.AbsoluteUri)) : null;
-            
-            embed.AddFieldIf(hasContent, "Content", () => Formatter.BlockCode(content!.Length >= 1014 ? content[..1011] + "..." : content));
+            string? attachments =
+                hasAttachments ? string.Join('\n', deletedMessage.Attachments.Select(a => a.AbsoluteUri)) : null;
+
+            embed.AddFieldIf(hasContent, "Content",
+                () => Formatter.BlockCode(content!.Length >= 1014 ? content[..1011] + "..." : content));
             embed.AddFieldIf(hasAttachments, "Attachments", attachments);
         }
         else

@@ -1,6 +1,6 @@
 using DSharpPlus;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Hammer.Interactivity;
@@ -75,8 +75,7 @@ public sealed class ConversationContext
     /// </summary>
     /// <value>The original message, or <see langword="null" /> if no message is associated with this conversation.</value>
     /// <remarks>
-    ///     This property will be the result of <see cref="CommandContext.Message" /> if this context was constructed via
-    ///     <see cref="FromCommandContext" />, or the result of the first entry in
+    ///     This property will be the result of the first entry in
     ///     <see cref="DiscordInteractionResolvedCollection.Messages" /> if this context was constructed via
     ///     <see cref="FromInteractionContext" /> or <see cref="FromContextMenuContext" /> - which may be <see langword="null" />.
     /// </remarks>
@@ -95,30 +94,15 @@ public sealed class ConversationContext
     public DiscordUser User { get; }
 
     /// <summary>
-    ///     Constructs a new <see cref="ConversationContext" /> from a specified <see cref="ContextMenuContext" />.
-    /// </summary>
-    /// <param name="context">The <see cref="ContextMenuContext" /> from which the values should be pulled.</param>
-    /// <returns>A new instance of <see cref="ConversationContext" />.</returns>
-    public static ConversationContext FromContextMenuContext(ContextMenuContext context)
-    {
-        return new ConversationContext(context.Services, context.Member ?? context.User, context.Channel)
-        {
-            Interaction = context.Interaction,
-            Message = context.Interaction?.Data?.Resolved?.Messages?.FirstOrDefault().Value
-        };
-    }
-
-    /// <summary>
     ///     Constructs a new <see cref="ConversationContext" /> from a specified <see cref="InteractionContext" />.
     /// </summary>
     /// <param name="context">The <see cref="InteractionContext" /> from which the values should be pulled.</param>
     /// <returns>A new instance of <see cref="ConversationContext" />.</returns>
-    public static ConversationContext FromInteractionContext(InteractionContext context)
+    public static ConversationContext FromSlashCommandContext(SlashCommandContext context)
     {
-        return new ConversationContext(context.Services, context.Member ?? context.User, context.Channel)
+        return new ConversationContext(context.ServiceProvider, context.Member ?? context.User, context.Channel)
         {
-            Interaction = context.Interaction,
-            Message = context.Interaction?.Data?.Resolved?.Messages?.FirstOrDefault().Value
+            Interaction = context.Interaction, Message = context.Interaction?.Data?.Resolved?.Messages?.FirstOrDefault().Value
         };
     }
 
@@ -149,7 +133,7 @@ public sealed class ConversationContext
     {
         var builder = new DiscordMessageBuilder();
         builder.WithContent(content);
-        builder.WithEmbed(embed);
+        builder.AddEmbed(embed);
         return RespondAsync(builder);
     }
 
@@ -162,7 +146,7 @@ public sealed class ConversationContext
     public Task<DiscordMessage> RespondAsync(DiscordEmbed embed)
     {
         var builder = new DiscordMessageBuilder();
-        builder.WithEmbed(embed);
+        builder.AddEmbed(embed);
         return RespondAsync(builder);
     }
 

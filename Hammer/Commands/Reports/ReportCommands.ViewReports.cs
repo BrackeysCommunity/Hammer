@@ -1,35 +1,40 @@
+using System.ComponentModel;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Reports;
 
 internal sealed partial class ReportCommands
 {
-    [SlashCommand("viewreports", "Views all reports made against this user.", false)]
-    [SlashRequireGuild]
+    [Command("viewreports")]
+    [Description("Views all reports made against this user.")]
+    [RequireGuild]
+    [UsedImplicitly]
     public async Task ViewReportsAsync(
-        InteractionContext context,
-        [Option("user", "The user whose reported messages to view.")] DiscordUser user
+        SlashCommandContext context,
+        [Parameter("user"), Description("The user whose reported messages to view.")] DiscordUser user
     )
     {
-        await context.DeferAsync().ConfigureAwait(false);
+        await context.DeferResponseAsync();
 
         var list = new List<string>();
 
-        foreach (ReportedMessage reportedMessage in _reportService.EnumerateReports(user, context.Guild))
+        foreach (ReportedMessage reportedMessage in _reportService.EnumerateReports(user, context.Guild!))
         {
             var id = reportedMessage.MessageId.ToString();
 
             try
             {
-                DiscordChannel channel = await context.Client.GetChannelAsync(reportedMessage.ChannelId).ConfigureAwait(false);
-                DiscordMessage message = await channel.GetMessageAsync(reportedMessage.MessageId).ConfigureAwait(false);
+                DiscordChannel channel = await context.Client.GetChannelAsync(reportedMessage.ChannelId);
+                DiscordMessage message = await channel.GetMessageAsync(reportedMessage.MessageId);
                 id = Formatter.MaskedUrl(id, message.JumpLink);
             }
             catch (DiscordException)
@@ -57,6 +62,6 @@ internal sealed partial class ReportCommands
             embed.WithDescription(string.Join('\n', list));
         }
 
-        await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed)).ConfigureAwait(false);
+        await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
     }
 }

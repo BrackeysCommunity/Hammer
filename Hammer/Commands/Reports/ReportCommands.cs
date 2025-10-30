@@ -1,4 +1,3 @@
-using DSharpPlus.SlashCommands;
 using Hammer.Services;
 
 namespace Hammer.Commands.Reports;
@@ -6,7 +5,7 @@ namespace Hammer.Commands.Reports;
 /// <summary>
 ///     Represents a class which implements application commands for message reporting.
 /// </summary>
-internal sealed partial class ReportCommands : ApplicationCommandModule
+internal sealed partial class ReportCommands
 {
     private readonly MessageReportService _reportService;
 

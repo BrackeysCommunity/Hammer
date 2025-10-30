@@ -1,28 +1,36 @@
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
 internal sealed partial class InfractionCommand
 {
-    [SlashCommand("move", "Moves all infractions from one user to another.", false)]
-    [SlashRequireGuild]
-    public async Task MoveAsync(InteractionContext context,
-        [Option("source", "The user whose infractions to move.")] DiscordUser source,
-        [Option("destination", "The user who will acquire the moved infractions.")] DiscordUser destination)
+    [Command("move")]
+    [Description("Moves all infractions from one user to another.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task MoveAsync(SlashCommandContext context,
+        [Parameter("source"), Description("The user whose infractions to move.")]
+        DiscordUser source,
+        [Parameter("destination"), Description("The user who will acquire the moved infractions.")]
+        DiscordUser destination)
     {
         if (source == destination)
         {
-            await context.CreateResponseAsync("You can't move infractions to the same user.", true).ConfigureAwait(false);
+            await context.RespondAsync("You can't move infractions to the same user.", true);
             return;
         }
 
-        await context.DeferAsync().ConfigureAwait(false);
+        await context.DeferResponseAsync();
 
-        IEnumerable<Infraction> infractions = _infractionService.EnumerateInfractions(source, context.Guild);
+        DiscordGuild guild = context.Guild!;
+        IEnumerable<Infraction> infractions = _infractionService.EnumerateInfractions(source, guild);
         var count = 0;
         foreach (Infraction infraction in infractions)
         {
@@ -38,7 +46,7 @@ internal sealed partial class InfractionCommand
 
         var builder = new DiscordWebhookBuilder();
         builder.AddEmbed(embed);
-        await context.EditResponseAsync(builder).ConfigureAwait(false);
+        await context.EditResponseAsync(builder);
 
         embed = new DiscordEmbedBuilder();
         embed.WithColor(DiscordColor.Orange);
@@ -46,7 +54,7 @@ internal sealed partial class InfractionCommand
         embed.AddField("From", source.Mention, true);
         embed.AddField("To", destination.Mention, true);
         embed.AddField("Count", count, true);
-        embed.AddField("Staff Member", context.Member.Mention, true);
-        await _logService.LogAsync(context.Guild, embed).ConfigureAwait(false);
+        embed.AddField("Staff Member", context.Member!.Mention, true);
+        await _logService.LogAsync(guild, embed);
     }
 }

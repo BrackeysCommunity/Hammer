@@ -1,18 +1,20 @@
-﻿using DSharpPlus;
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
 /// <summary>
 ///     Represents a module which implements the <c>/infraction prune</c>.
 /// </summary>
-internal sealed class PruneInfractionsCommand : ApplicationCommandModule
+internal sealed class PruneInfractionsCommand
 {
     private readonly InfractionService _infractionService;
 
@@ -25,11 +27,13 @@ internal sealed class PruneInfractionsCommand : ApplicationCommandModule
         _infractionService = infractionService;
     }
 
-    [SlashCommand("pruneinfractions", "Prune all stale infractions for invalid users.", false)]
-    [SlashRequireGuild]
-    public async Task PruneAsync(InteractionContext context)
+    [Command("pruneinfractions")]
+    [Description("Prune all stale infractions for invalid users.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task PruneAsync(SlashCommandContext context)
     {
-        await context.DeferAsync().ConfigureAwait(false);
+        await context.DeferResponseAsync();
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(DiscordColor.Orange);
@@ -40,14 +44,14 @@ internal sealed class PruneInfractionsCommand : ApplicationCommandModule
         var builder = new DiscordWebhookBuilder();
         builder.AddEmbed(embed);
 
-        var yes = new DiscordButtonComponent(ButtonStyle.Success, "prune-confirm", "Yes");
-        var no = new DiscordButtonComponent(ButtonStyle.Danger, "prune-cancel", "No");
-        builder.AddComponents(yes, no);
+        var yes = new DiscordButtonComponent(DiscordButtonStyle.Success, "prune-confirm", "Yes");
+        var no = new DiscordButtonComponent(DiscordButtonStyle.Danger, "prune-cancel", "No");
+        builder.AddActionRowComponent(yes, no);
 
-        DiscordMessage message = await context.EditResponseAsync(builder).ConfigureAwait(false);
+        DiscordMessage message = await context.EditResponseAsync(builder);
 
-        InteractivityResult<ComponentInteractionCreateEventArgs> result =
-            await message.WaitForButtonAsync(i => i.User == context.User).ConfigureAwait(false);
+        InteractivityResult<ComponentInteractionCreatedEventArgs> result =
+            await message.WaitForButtonAsync(i => i.User == context.User);
 
         builder.Clear();
         builder.ClearComponents();
@@ -58,7 +62,7 @@ internal sealed class PruneInfractionsCommand : ApplicationCommandModule
             embed.WithTitle("Prune cancelled");
             embed.WithDescription("The pruning process was cancelled because no action was taken.");
             builder.AddEmbed(embed);
-            await context.EditResponseAsync(builder).ConfigureAwait(false);
+            await context.EditResponseAsync(builder);
             return;
         }
 
@@ -68,7 +72,7 @@ internal sealed class PruneInfractionsCommand : ApplicationCommandModule
             embed.WithTitle("Prune cancelled");
             embed.WithDescription("The pruning process was cancelled.");
             builder.AddEmbed(embed);
-            await context.EditResponseAsync(builder).ConfigureAwait(false);
+            await context.EditResponseAsync(builder);
             return;
         }
 
@@ -76,15 +80,15 @@ internal sealed class PruneInfractionsCommand : ApplicationCommandModule
         embed.WithTitle("Prune in progress");
         embed.WithDescription("Please wait while stale infractions are being pruned.\nThis process may take several minutes.");
         builder.AddEmbed(embed);
-        await context.EditResponseAsync(builder).ConfigureAwait(false);
+        await context.EditResponseAsync(builder);
 
-        int count = await _infractionService.PruneStaleInfractionsAsync().ConfigureAwait(false);
+        int count = await _infractionService.PruneStaleInfractionsAsync();
 
         embed.WithColor(DiscordColor.Green);
         embed.WithTitle("Prune complete");
         embed.WithDescription($"{count:N0} stale infractions were pruned.");
         builder.Clear();
         builder.AddEmbed(embed);
-        await context.EditResponseAsync(builder).ConfigureAwait(false);
+        await context.EditResponseAsync(builder);
     }
 }

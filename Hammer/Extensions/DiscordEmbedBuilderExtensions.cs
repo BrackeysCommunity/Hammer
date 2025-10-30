@@ -18,7 +18,10 @@ internal static class DiscordEmbedBuilderExtensions
     /// <exception cref="ArgumentNullException"><paramref name="embedBuilder" /> is <see langword="null" />.</exception>
     public static DiscordEmbedBuilder AddModMailNotice(this DiscordEmbedBuilder embedBuilder)
     {
-        ArgumentNullException.ThrowIfNull(embedBuilder);
+        if (embedBuilder is null)
+        {
+            throw new ArgumentNullException(nameof(embedBuilder));
+        }
 
         embedBuilder.AddField("\u200B", EmbedMessages.DmModMail);
         return embedBuilder;
@@ -45,12 +48,23 @@ internal static class DiscordEmbedBuilderExtensions
         bool addThumbnail = true
     )
     {
-        ArgumentNullException.ThrowIfNull(embedBuilder);
-        ArgumentNullException.ThrowIfNull(guild);
+        if (embedBuilder is null)
+        {
+            throw new ArgumentNullException(nameof(embedBuilder));
+        }
 
-        string iconUrl = guild.GetIconUrl(ImageFormat.Png);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        string iconUrl = guild.GetIconUrl(MediaFormat.Png) ?? guild.IconUrl;
         embedBuilder.WithFooter(guild.Name, iconUrl: iconUrl);
-        if (addThumbnail) embedBuilder.WithThumbnail(iconUrl);
+        if (addThumbnail)
+        {
+            embedBuilder.WithThumbnail(iconUrl);
+        }
+
         return embedBuilder;
     }
 
@@ -76,7 +90,7 @@ internal static class DiscordEmbedBuilderExtensions
             throw new ArgumentNullException(nameof(builder));
         }
 
-        return builder.AddField(name, value?.ToString(), inline);
+        return builder.AddField(name, value?.ToString()!, inline);
     }
 
     /// <summary>
@@ -104,7 +118,7 @@ internal static class DiscordEmbedBuilderExtensions
 
         if (condition)
         {
-            builder.AddField(name, value?.ToString(), inline);
+            builder.AddField(name, value?.ToString()!, inline);
         }
 
         return builder;
@@ -144,7 +158,7 @@ internal static class DiscordEmbedBuilderExtensions
 
         if (predicate.Invoke())
         {
-            builder.AddField(name, value?.ToString(), inline);
+            builder.AddField(name, value?.ToString()!, inline);
         }
 
         return builder;
@@ -191,7 +205,7 @@ internal static class DiscordEmbedBuilderExtensions
 
         if (predicate.Invoke())
         {
-            builder.AddField(name, valueFactory.Invoke()?.ToString(), inline);
+            builder.AddField(name, valueFactory.Invoke()?.ToString()!, inline);
         }
 
         return builder;
@@ -231,7 +245,7 @@ internal static class DiscordEmbedBuilderExtensions
 
         if (condition)
         {
-            builder.AddField(name, valueFactory.Invoke()?.ToString(), inline);
+            builder.AddField(name, valueFactory.Invoke()?.ToString()!, inline);
         }
 
         return builder;

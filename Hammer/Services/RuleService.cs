@@ -1,4 +1,4 @@
-﻿using DSharpPlus.Entities;
+using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Exceptions;
@@ -34,30 +34,39 @@ internal sealed class RuleService : BackgroundService
     /// <param name="brief">The rule brief.</param>
     /// <returns>The newly-created rule.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public async Task<Rule> AddRuleAsync(DiscordGuild guild, string description, string? brief = null)
+    public Rule AddRule(DiscordGuild guild, string description, string? brief = null)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
-        if (string.IsNullOrWhiteSpace(description)) throw new ArgumentNullException(nameof(description));
-        if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules)) _guildRules.Add(guild.Id, rules = new List<Rule>());
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            throw new ArgumentNullException(nameof(description));
+        }
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules))
+        {
+            _guildRules.Add(guild.Id, rules = []);
+        }
+
+        using HammerContext context = _dbContextFactory.CreateDbContext();
 
         var rule = new Rule { Id = rules.Count + 1, GuildId = guild.Id, Description = description, Brief = brief };
-        EntityEntry<Rule> entry = await context.AddAsync(rule).ConfigureAwait(false);
+        EntityEntry<Rule> entry = context.Add(rule);
         rules.Add(rule = entry.Entity);
 
-        await context.SaveChangesAsync().ConfigureAwait(false);
+        context.SaveChanges();
         return rule;
     }
 
     /// <summary>
     ///     Creates a "Rule Not Found" embed.
     /// </summary>
-    /// <param name="guild">The guild whose branding to display.</param>
     /// <param name="ruleId">The ID of the rule which wasn't found.</param>
     /// <returns>A <see cref="DiscordEmbed" /> stating the rule cannot be found.</returns>
-    public DiscordEmbed CreateRuleNotFoundEmbed(DiscordGuild guild, int ruleId)
+    public static DiscordEmbed CreateRuleNotFoundEmbed(int ruleId)
     {
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(0xFF0000);
@@ -69,10 +78,9 @@ internal sealed class RuleService : BackgroundService
     /// <summary>
     ///     Creates a "Rule Not Found" embed.
     /// </summary>
-    /// <param name="guild">The guild whose branding to display.</param>
     /// <param name="searchQuery">The search query which failed.</param>
     /// <returns>A <see cref="DiscordEmbed" /> stating the rule cannot be found.</returns>
-    public DiscordEmbed CreateRuleNotFoundEmbed(DiscordGuild guild, string searchQuery)
+    public static DiscordEmbed CreateRuleNotFoundEmbed(string searchQuery)
     {
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(0xFF0000);
@@ -90,15 +98,22 @@ internal sealed class RuleService : BackgroundService
     /// <exception cref="ArgumentOutOfRangeException">
     ///     <paramref name="id" /> is less than 1, or greater than the count of the guild rules.
     /// </exception>
-    public async Task DeleteRuleAsync(DiscordGuild guild, int id)
+    public void DeleteRule(DiscordGuild guild, int id)
     {
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
-        if (!GuildHasRule(guild, id)) return;
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
-        Rule ruleToDelete = GetRuleById(guild, id)!;
+        if (!GuildHasRule(guild, id))
+        {
+            return;
+        }
+
+        Rule ruleToDelete = GetRuleById(guild, id);
         _guildRules[guild.Id].Remove(ruleToDelete);
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        using HammerContext context = _dbContextFactory.CreateDbContext();
         context.RemoveRange(context.Rules.Where(r => r.GuildId == guild.Id));
 
         // propagate IDs downwards
@@ -107,10 +122,10 @@ internal sealed class RuleService : BackgroundService
         {
             Rule rule = remainder[index];
             rule.Id = index + 1;
-            await context.AddAsync(rule).ConfigureAwait(false);
+            context.Add(rule);
         }
 
-        await context.SaveChangesAsync().ConfigureAwait(false);
+        context.SaveChanges();
     }
 
     /// <summary>
@@ -122,7 +137,10 @@ internal sealed class RuleService : BackgroundService
     /// <exception cref="RuleNotFoundException">No rule with the specified ID was found.</exception>
     public Rule GetRuleById(ulong guildId, int id)
     {
-        if (!GuildHasRule(guildId, id)) throw new RuleNotFoundException(id);
+        if (!GuildHasRule(guildId, id))
+        {
+            throw new RuleNotFoundException(id);
+        }
 
         return _guildRules[guildId].First(r => r.Id == id);
     }
@@ -137,8 +155,15 @@ internal sealed class RuleService : BackgroundService
     /// <exception cref="RuleNotFoundException">No rule with the specified ID was found.</exception>
     public Rule GetRuleById(DiscordGuild guild, int id)
     {
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
-        if (!GuildHasRule(guild, id)) throw new RuleNotFoundException(id);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (!GuildHasRule(guild, id))
+        {
+            throw new RuleNotFoundException(id);
+        }
 
         return _guildRules[guild.Id].First(r => r.Id == id);
     }
@@ -151,9 +176,15 @@ internal sealed class RuleService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public IReadOnlyList<Rule> GetGuildRules(DiscordGuild guild)
     {
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
         if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules))
+        {
             return ArraySegment<Rule>.Empty;
+        }
 
         return rules.OrderBy(r => r.Id).ToArray();
     }
@@ -169,10 +200,15 @@ internal sealed class RuleService : BackgroundService
     /// </returns>
     public bool GuildHasRule(ulong guildId, int id)
     {
-        if (id < 1) return false;
+        if (id < 1)
+        {
+            return false;
+        }
 
         if (!_guildRules.TryGetValue(guildId, out List<Rule>? rules))
+        {
             return false;
+        }
 
         return id <= rules.Count && rules.Exists(r => r.Id == id);
     }
@@ -189,11 +225,20 @@ internal sealed class RuleService : BackgroundService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public bool GuildHasRule(DiscordGuild guild, int id)
     {
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
-        if (id < 1) return false;
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (id < 1)
+        {
+            return false;
+        }
 
         if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules))
+        {
             return false;
+        }
 
         return id <= rules.Count && rules.Exists(r => r.Id == id);
     }
@@ -204,14 +249,16 @@ internal sealed class RuleService : BackgroundService
     public async Task ModifyRulesMessageAsync(DiscordMessage message)
     {
         DiscordColor color = DiscordColor.Orange;
-        DiscordChannel channel = message.Channel;
+        DiscordChannel channel = message.Channel!;
         DiscordGuild guild = channel.Guild;
         IReadOnlyList<Rule> rules = GetGuildRules(guild);
         var builder = new DiscordMessageBuilder();
         var index = 0;
 
         if (_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             color = guildConfiguration.PrimaryColor;
+        }
 
         foreach (Rule[] ruleChunk in rules.Chunk(25)) // embeds cannot have more than 25 fields
         {
@@ -222,9 +269,11 @@ internal sealed class RuleService : BackgroundService
             embed.WithColor(color);
 
             if (index == 0)
+            {
                 embed.WithDescription($"Welcome to {channel.Guild.Name}!\n\n" +
                                       "To ensure that every one of us here are all happy, please take note and follow these " +
                                       "rules:");
+            }
 
             foreach (Rule rule in ruleChunk)
             {
@@ -241,6 +290,42 @@ internal sealed class RuleService : BackgroundService
     }
 
     /// <summary>
+    ///     Gets a value indicating whether a rule matches a search query.
+    /// </summary>
+    /// <param name="rule">The rule to check.</param>
+    /// <param name="searchTerms">The search query.</param>
+    /// <returns>
+    ///     <see langword="true" /> if <paramref name="rule" /> matches <paramref name="searchTerms" />; otherwise,
+    ///     <see langword="false" />.
+    /// </returns>
+    public static bool RuleMatches(Rule rule, IEnumerable<string> searchTerms)
+    {
+        foreach (string term in searchTerms)
+        {
+            if (!string.IsNullOrWhiteSpace(rule.Brief))
+            {
+                foreach (string word in rule.Brief.Split())
+                {
+                    if (word.StartsWith(term, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            foreach (string word in rule.Description.Split())
+            {
+                if (word.StartsWith(term, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     ///     Searches for a rule by a search query.
     /// </summary>
     /// <param name="guild">The guild whose rules to search.</param>
@@ -251,9 +336,20 @@ internal sealed class RuleService : BackgroundService
     /// </exception>
     public Rule? SearchForRule(DiscordGuild guild, string searchQuery)
     {
-        if (guild == null) throw new ArgumentNullException(nameof(guild));
-        if (searchQuery == null) throw new ArgumentNullException(nameof(searchQuery));
-        if (string.IsNullOrWhiteSpace(searchQuery)) return null;
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        if (searchQuery == null)
+        {
+            throw new ArgumentNullException(nameof(searchQuery));
+        }
+
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            return null;
+        }
 
         string[] searchTerms = searchQuery.Split();
         var matches = new List<Rule>();
@@ -262,33 +358,12 @@ internal sealed class RuleService : BackgroundService
         foreach (Rule item in rules)
         {
             if (RuleMatches(item, searchTerms))
+            {
                 matches.Add(item);
+            }
         }
 
         return matches.Count > 0 ? matches[0] : null;
-
-        static bool RuleMatches(Rule rule, IEnumerable<string> searchTerms)
-        {
-            foreach (string term in searchTerms)
-            {
-                if (!string.IsNullOrWhiteSpace(rule.Brief))
-                {
-                    foreach (string word in rule.Brief.Split())
-                    {
-                        if (word.StartsWith(term, StringComparison.OrdinalIgnoreCase))
-                            return true;
-                    }
-                }
-
-                foreach (string word in rule.Description.Split())
-                {
-                    if (word.StartsWith(term, StringComparison.OrdinalIgnoreCase))
-                        return true;
-                }
-            }
-
-            return false;
-        }
     }
 
     /// <summary>
@@ -297,11 +372,15 @@ internal sealed class RuleService : BackgroundService
     /// <param name="guild">The guild whose rules to modify.</param>
     /// <param name="ruleId">The ID of the rule to modify.</param>
     /// <param name="brief">The new rule brief.</param>
-    public async Task SetRuleBriefAsync(DiscordGuild guild, int ruleId, string? brief)
+    public void SetRuleBrief(DiscordGuild guild, int ruleId, string? brief)
     {
-        if (!GuildHasRule(guild, ruleId)) return;
-        Rule rule = GetRuleById(guild, ruleId)!;
-        await SetRuleBriefAsync(rule, brief).ConfigureAwait(false);
+        if (!GuildHasRule(guild, ruleId))
+        {
+            return;
+        }
+
+        Rule rule = GetRuleById(guild, ruleId);
+        SetRuleBrief(rule, brief);
     }
 
     /// <summary>
@@ -309,14 +388,14 @@ internal sealed class RuleService : BackgroundService
     /// </summary>
     /// <param name="rule">The rule to modify.</param>
     /// <param name="brief">The new rule brief.</param>
-    public async Task SetRuleBriefAsync(Rule rule, string? brief)
+    public void SetRuleBrief(Rule rule, string? brief)
     {
         rule.Brief = brief;
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        using HammerContext context = _dbContextFactory.CreateDbContext();
         context.Entry(rule).State = EntityState.Modified;
         context.Update(rule);
-        await context.SaveChangesAsync().ConfigureAwait(false);
+        context.SaveChanges();
     }
 
     /// <summary>
@@ -325,11 +404,15 @@ internal sealed class RuleService : BackgroundService
     /// <param name="guild">The guild whose rules to modify.</param>
     /// <param name="ruleId">The ID of the rule to modify.</param>
     /// <param name="content">The new rule content.</param>
-    public async Task SetRuleContentAsync(DiscordGuild guild, int ruleId, string content)
+    public void SetRuleContent(DiscordGuild guild, int ruleId, string content)
     {
-        if (!GuildHasRule(guild, ruleId)) return;
-        Rule rule = GetRuleById(guild, ruleId)!;
-        await SetRuleContentAsync(rule, content).ConfigureAwait(false);
+        if (!GuildHasRule(guild, ruleId))
+        {
+            return;
+        }
+
+        Rule rule = GetRuleById(guild, ruleId);
+        SetRuleContent(rule, content);
     }
 
     /// <summary>
@@ -337,14 +420,14 @@ internal sealed class RuleService : BackgroundService
     /// </summary>
     /// <param name="rule">The rule to modify.</param>
     /// <param name="content">The new rule content.</param>
-    public async Task SetRuleContentAsync(Rule rule, string content)
+    public void SetRuleContent(Rule rule, string content)
     {
         rule.Description = content;
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        using HammerContext context = _dbContextFactory.CreateDbContext();
         context.Entry(rule).State = EntityState.Modified;
         context.Update(rule);
-        await context.SaveChangesAsync().ConfigureAwait(false);
+        context.SaveChanges();
     }
 
     /// <summary>
@@ -359,7 +442,9 @@ internal sealed class RuleService : BackgroundService
         var index = 0;
 
         if (_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             color = guildConfiguration.PrimaryColor;
+        }
 
         foreach (Rule[] ruleChunk in rules.Chunk(25)) // embeds cannot have more than 25 fields
         {
@@ -370,9 +455,11 @@ internal sealed class RuleService : BackgroundService
             embed.WithColor(color);
 
             if (index == 0)
+            {
                 embed.WithDescription($"Welcome to {channel.Guild.Name}!\n\n" +
                                       "To ensure that every one of us here are all happy, please take note and follow these " +
                                       "rules:");
+            }
 
             foreach (Rule rule in ruleChunk)
             {
@@ -391,17 +478,20 @@ internal sealed class RuleService : BackgroundService
     /// <inheritdoc />
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return LoadRulesAsync();
+        Load();
+        return Task.CompletedTask;
     }
 
-    private async Task LoadRulesAsync()
+    private void Load()
     {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        using HammerContext context = _dbContextFactory.CreateDbContext();
 
         foreach (IGrouping<ulong, Rule> guildRules in context.Rules.AsEnumerable().GroupBy(r => r.GuildId))
         {
             if (!_guildRules.TryGetValue(guildRules.Key, out List<Rule>? rules))
-                _guildRules.Add(guildRules.Key, rules = new List<Rule>());
+            {
+                _guildRules.Add(guildRules.Key, rules = []);
+            }
 
             rules.AddRange(guildRules.OrderBy(r => r.Id));
         }

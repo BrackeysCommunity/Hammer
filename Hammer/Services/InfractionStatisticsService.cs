@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -48,10 +48,15 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="InvalidOperationException"><paramref name="guild" /> is not a configured guild.</exception>
     public async Task<DiscordEmbed> CreateStatisticsEmbedAsync(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        {
             throw new InvalidOperationException("Guild is not configured");
+        }
 
         (int totalBanCount, int tempBanCount, int permBanCount) = GetTotalBanCount(guild);
         (int totalMuteCount, int tempMuteCount, int permMuteCount) = GetTotalMuteCount(guild);
@@ -65,7 +70,7 @@ internal sealed class InfractionStatisticsService
         int usersMutedCount = GetDistinctMutedUsers(guild);
         int usersGaggedCount = GetDistinctGaggedUsers(guild);
         int usersWarnedCount = GetDistinctWarnedUsers(guild);
-        int totalMessagesDeletedCount = await GetTotalDeletedMessageCountAsync(guild).ConfigureAwait(false);
+        int totalMessagesDeletedCount = await GetTotalDeletedMessageCountAsync(guild);
 
         (int A, int B) banRatio = Ratio(permBanCount, tempBanCount);
         (int A, int B) muteRatio = Ratio(permMuteCount, tempMuteCount);
@@ -112,21 +117,28 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetDistinctBannedUsers(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
-        var options = new InfractionSearchOptions {Type = InfractionType.Ban};
+        var options = new InfractionSearchOptions { Type = InfractionType.Ban };
         IReadOnlyList<Infraction> bans = _infractionService.GetInfractions(guild, options);
 
-        options = new InfractionSearchOptions {Type = InfractionType.TemporaryBan};
+        options = new InfractionSearchOptions { Type = InfractionType.TemporaryBan };
         IReadOnlyList<Infraction> temporaryBans = _infractionService.GetInfractions(guild, options);
 
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < bans.Count; index++)
-            users.Add(bans[index].UserId);
+        foreach (Infraction ban in bans)
+        {
+            users.Add(ban.UserId);
+        }
 
-        for (var index = 0; index < temporaryBans.Count; index++)
-            users.Add(temporaryBans[index].UserId);
+        foreach (Infraction temporaryBan in temporaryBans)
+        {
+            users.Add(temporaryBan.UserId);
+        }
 
         return users.Count;
     }
@@ -139,14 +151,19 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetDistinctGaggedUsers(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
-        var options = new InfractionSearchOptions {Type = InfractionType.Gag};
+        var options = new InfractionSearchOptions { Type = InfractionType.Gag };
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild, options);
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < infractions.Count; index++)
-            users.Add(infractions[index].UserId);
+        foreach (Infraction gag in infractions)
+        {
+            users.Add(gag.UserId);
+        }
 
         return users.Count;
     }
@@ -159,14 +176,19 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetDistinctKickedUsers(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
-        var options = new InfractionSearchOptions {Type = InfractionType.Kick};
+        var options = new InfractionSearchOptions { Type = InfractionType.Kick };
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild, options);
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < infractions.Count; index++)
-            users.Add(infractions[index].UserId);
+        foreach (Infraction kick in infractions)
+        {
+            users.Add(kick.UserId);
+        }
 
         return users.Count;
     }
@@ -180,21 +202,28 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetDistinctMutedUsers(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
-        var options = new InfractionSearchOptions {Type = InfractionType.Mute};
+        var options = new InfractionSearchOptions { Type = InfractionType.Mute };
         IReadOnlyList<Infraction> mutes = _infractionService.GetInfractions(guild, options);
 
-        options = new InfractionSearchOptions {Type = InfractionType.TemporaryMute};
+        options = new InfractionSearchOptions { Type = InfractionType.TemporaryMute };
         IReadOnlyList<Infraction> temporaryMutes = _infractionService.GetInfractions(guild, options);
 
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < mutes.Count; index++)
-            users.Add(mutes[index].UserId);
+        foreach (Infraction mute in mutes)
+        {
+            users.Add(mute.UserId);
+        }
 
-        for (var index = 0; index < temporaryMutes.Count; index++)
-            users.Add(temporaryMutes[index].UserId);
+        foreach (Infraction temporaryMute in temporaryMutes)
+        {
+            users.Add(temporaryMute.UserId);
+        }
 
         return users.Count;
     }
@@ -207,13 +236,19 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetDistinctWarnedUsers(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        var options = new InfractionSearchOptions {Type = InfractionType.Warning};
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        var options = new InfractionSearchOptions { Type = InfractionType.Warning };
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild, options);
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < infractions.Count; index++)
-            users.Add(infractions[index].UserId);
+        foreach (Infraction warning in infractions)
+        {
+            users.Add(warning.UserId);
+        }
 
         return users.Count;
     }
@@ -225,12 +260,18 @@ internal sealed class InfractionStatisticsService
     /// <returns>A <see cref="TimeSpan" /> representing the total remaining time of all temporary bans.</returns>
     public TimeSpan GetRemainingBanTime(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
         IReadOnlyList<TemporaryBan> bans = _banService.GetTemporaryBans(guild);
         TimeSpan total = TimeSpan.Zero;
 
-        for (var index = 0; index < bans.Count; index++)
-            total += bans[index].ExpiresAt - DateTimeOffset.UtcNow;
+        foreach (TemporaryBan temporaryBan in bans)
+        {
+            total += temporaryBan.ExpiresAt - DateTimeOffset.UtcNow;
+        }
 
         return total;
     }
@@ -242,14 +283,20 @@ internal sealed class InfractionStatisticsService
     /// <returns>A <see cref="TimeSpan" /> representing the total remaining time of all temporary mutes.</returns>
     public TimeSpan GetRemainingMuteTime(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
         IReadOnlyList<Mute> mutes = _muteService.GetTemporaryMutes(guild);
         TimeSpan total = TimeSpan.Zero;
 
-        for (var index = 0; index < mutes.Count; index++)
+        foreach (Mute mute in mutes)
         {
-            if (mutes[index].ExpiresAt is { } expiresAt)
+            if (mute.ExpiresAt is { } expiresAt)
+            {
                 total += expiresAt - DateTimeOffset.UtcNow;
+            }
         }
 
         return total;
@@ -263,11 +310,14 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public (int Total, int Temporary, int Permanent) GetTotalBanCount(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         var options = new InfractionSearchOptions();
-        int temporary = _infractionService.GetInfractions(guild, options with {Type = InfractionType.TemporaryBan}).Count;
-        int permanent = _infractionService.GetInfractions(guild, options with {Type = InfractionType.Ban}).Count;
+        int temporary = _infractionService.GetInfractions(guild, options with { Type = InfractionType.TemporaryBan }).Count;
+        int permanent = _infractionService.GetInfractions(guild, options with { Type = InfractionType.Ban }).Count;
 
         return (temporary + permanent, temporary, permanent);
     }
@@ -280,8 +330,12 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public async Task<int> GetTotalDeletedMessageCountAsync(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        return await _messageDeletionService.CountMessageDeletionsAsync(guild).ConfigureAwait(false);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        return await _messageDeletionService.CountMessageDeletionsAsync(guild);
     }
 
     /// <summary>
@@ -292,8 +346,12 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetTotalGagCount(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        return _infractionService.GetInfractions(guild, new InfractionSearchOptions {Type = InfractionType.Gag}).Count;
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        return _infractionService.GetInfractions(guild, new InfractionSearchOptions { Type = InfractionType.Gag }).Count;
     }
 
     /// <summary>
@@ -304,12 +362,18 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetTotalDistinctUsers(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild);
         var users = new HashSet<ulong>();
 
-        for (var index = 0; index < infractions.Count; index++)
-            users.Add(infractions[index].UserId);
+        foreach (Infraction infraction in infractions)
+        {
+            users.Add(infraction.UserId);
+        }
 
         return users.Count;
     }
@@ -322,7 +386,11 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetTotalInfractionCount(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
         return _infractionService.GetInfractions(guild).Count;
     }
 
@@ -334,8 +402,12 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetTotalKickCount(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        return _infractionService.GetInfractions(guild, new InfractionSearchOptions {Type = InfractionType.Kick}).Count;
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        return _infractionService.GetInfractions(guild, new InfractionSearchOptions { Type = InfractionType.Kick }).Count;
     }
 
     /// <summary>
@@ -346,11 +418,14 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public (int Total, int Temporary, int Permanent) GetTotalMuteCount(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
 
         var options = new InfractionSearchOptions();
-        int temporary = _infractionService.GetInfractions(guild, options with {Type = InfractionType.TemporaryMute}).Count;
-        int permanent = _infractionService.GetInfractions(guild, options with {Type = InfractionType.Mute}).Count;
+        int temporary = _infractionService.GetInfractions(guild, options with { Type = InfractionType.TemporaryMute }).Count;
+        int permanent = _infractionService.GetInfractions(guild, options with { Type = InfractionType.Mute }).Count;
 
         return (temporary + permanent, temporary, permanent);
     }
@@ -363,8 +438,12 @@ internal sealed class InfractionStatisticsService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public int GetTotalWarningCount(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        return _infractionService.GetInfractions(guild, new InfractionSearchOptions {Type = InfractionType.Warning}).Count;
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        return _infractionService.GetInfractions(guild, new InfractionSearchOptions { Type = InfractionType.Warning }).Count;
     }
 
     private static (int A, int B) Ratio(int a, int b)
@@ -379,9 +458,13 @@ internal sealed class InfractionStatisticsService
         while (a != 0 && b != 0)
         {
             if (a > b)
+            {
                 a %= b;
+            }
             else
+            {
                 b %= a;
+            }
         }
 
         return a == 0 ? b : a;

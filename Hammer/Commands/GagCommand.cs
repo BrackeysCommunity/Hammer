@@ -1,17 +1,20 @@
-using DSharpPlus;
+using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using X10D.Time;
 
 namespace Hammer.Commands;
 
 /// <summary>
 ///     Represents a class which implements the gag user context menu.
 /// </summary>
-internal sealed class GagCommand : ApplicationCommandModule
+internal sealed class GagCommand
 {
     private readonly ILogger<GagCommand> _logger;
     private readonly InfractionService _infractionService;
@@ -27,27 +30,28 @@ internal sealed class GagCommand : ApplicationCommandModule
         _infractionService = infractionService;
     }
 
-    [ContextMenu(ApplicationCommandType.UserContextMenu, "Gag", false)]
-    [SlashRequireGuild]
-    public async Task GagAsync(ContextMenuContext context)
+    [Command("Gag")]
+    [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task GagContextMenuAsync(SlashCommandContext context, DiscordUser user)
     {
         var builder = new DiscordEmbedBuilder();
         var message = new DiscordWebhookBuilder();
 
-        DiscordMember staffMember = context.Member;
-        DiscordUser user = context.Interaction.Data.Resolved.Users.First().Value;
+        DiscordMember? staffMember = context.Member;
 
         if (staffMember is null)
         {
-            await context.CreateResponseAsync("Cannot perform this action outside of a guild.", true).ConfigureAwait(false);
+            await context.RespondAsync("Cannot perform this action outside of a guild.", true);
             return;
         }
 
-        await context.DeferAsync(true).ConfigureAwait(false);
+        await context.DeferResponseAsync(true);
 
         try
         {
-            await _infractionService.GagAsync(user, staffMember).ConfigureAwait(false);
+            await _infractionService.GagAsync(user, staffMember);
 
             builder.WithColor(DiscordColor.Orange);
             builder.WithAuthor(user);
@@ -65,32 +69,41 @@ internal sealed class GagCommand : ApplicationCommandModule
         }
 
         message.AddEmbed(builder);
-        await context.EditResponseAsync(message).ConfigureAwait(false);
+        await context.EditResponseAsync(message);
     }
 
-    [SlashCommand("gag", "Temporarily gags a user, so that a more final infraction can be issued.", false)]
-    [SlashRequireGuild]
+    [Command("gag")]
+    [Description("Temporarily gags a user, so that a more final infraction can be issued.")]
+    [RequireGuild]
+    [UsedImplicitly]
     public async Task GagAsync(
-        InteractionContext context,
-        [Option("user", "The user to gag.")] DiscordUser user,
-        [Option("duration", "The duration of the gag. Defaults to 5 minutes")] TimeSpan? duration = null
+        SlashCommandContext context,
+        [Parameter("user"), Description("The user to gag.")] DiscordUser user,
+        [Parameter("duration"), Description("The duration of the gag. Defaults to 5 minutes.")] string? duration = null
     )
     {
         var builder = new DiscordEmbedBuilder();
         var message = new DiscordWebhookBuilder();
-        DiscordMember staffMember = context.Member;
+        DiscordMember? staffMember = context.Member;
 
         if (staffMember is null)
         {
-            await context.CreateResponseAsync("Cannot perform this action outside of a guild.", true).ConfigureAwait(false);
+            await context.RespondAsync("Cannot perform this action outside of a guild.", true);
             return;
         }
 
-        await context.DeferAsync(true).ConfigureAwait(false);
+        await context.DeferResponseAsync(true);
 
         try
         {
-            await _infractionService.GagAsync(user, staffMember, duration: duration).ConfigureAwait(false);
+            if (TimeSpanParser.TryParse(duration, out TimeSpan timeout))
+            {
+                await _infractionService.GagAsync(user, staffMember, duration: timeout);
+            }
+            else
+            {
+                await _infractionService.GagAsync(user, staffMember);
+            }
 
             builder.WithColor(DiscordColor.Orange);
             builder.WithAuthor(user);
@@ -108,6 +121,6 @@ internal sealed class GagCommand : ApplicationCommandModule
         }
 
         message.AddEmbed(builder);
-        await context.EditResponseAsync(message).ConfigureAwait(false);
+        await context.EditResponseAsync(message);
     }
 }

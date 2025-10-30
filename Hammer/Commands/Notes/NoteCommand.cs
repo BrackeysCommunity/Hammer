@@ -1,4 +1,5 @@
-using DSharpPlus.SlashCommands;
+using System.ComponentModel;
+using DSharpPlus.Commands;
 using Hammer.Services;
 using Microsoft.Extensions.Logging;
 
@@ -7,8 +8,9 @@ namespace Hammer.Commands.Notes;
 /// <summary>
 ///     Represents a class which implements the <c>note</c> command.
 /// </summary>
-[SlashCommandGroup("note", "Manages member notes.", false)]
-internal sealed partial class NoteCommand : ApplicationCommandModule
+[Command("note")]
+[Description("Manages member notes.")]
+internal sealed partial class NoteCommand
 {
     private readonly ILogger<NoteCommand> _logger;
     private readonly ConfigurationService _configurationService;

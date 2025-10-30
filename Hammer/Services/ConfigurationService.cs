@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +22,12 @@ internal sealed class ConfigurationService
     }
 
     /// <summary>
+    ///     Gets the bot configuration.
+    /// </summary>
+    /// <value>The bot configuration.</value>
+    public BotConfiguration BotConfiguration => _configuration.Get<BotConfiguration>() ?? new BotConfiguration();
+
+    /// <summary>
     ///     Gets the bot configuration for the specified guild.
     /// </summary>
     /// <param name="guild">The guild whose configuration to retrieve.</param>
@@ -32,8 +38,12 @@ internal sealed class ConfigurationService
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     public GuildConfiguration? GetGuildConfiguration(DiscordGuild guild)
     {
-        ArgumentNullException.ThrowIfNull(guild);
-        return _configuration.GetSection(guild.Id.ToString())?.Get<GuildConfiguration>();
+        if (guild is null)
+        {
+            throw new ArgumentNullException(nameof(guild));
+        }
+
+        return _configuration.GetSection(guild.Id.ToString()).Get<GuildConfiguration>();
     }
 
     /// <summary>
@@ -52,7 +62,10 @@ internal sealed class ConfigurationService
         configuration = null;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (guild is null) return false;
+        if (guild is null)
+        {
+            return false;
+        }
 
         configuration = GetGuildConfiguration(guild);
         return configuration is not null;

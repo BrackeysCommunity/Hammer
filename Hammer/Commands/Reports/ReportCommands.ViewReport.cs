@@ -1,20 +1,25 @@
+using System.ComponentModel;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Reports;
 
 internal sealed partial class ReportCommands
 {
-    [SlashCommand("viewreport", "Views all reports made against this user.", false)]
-    [SlashRequireGuild]
-    public async Task ViewReportAsync(InteractionContext context, [Option("id", "The ID of the report to view.")] long id)
+    [Command("viewreport")]
+    [Description("Views all reports made against this user.")]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task ViewReportAsync(CommandContext context,
+        [Parameter("id"), Description("The ID of the report to view.")] long id)
     {
-        await context.DeferAsync().ConfigureAwait(false);
+        await context.DeferResponseAsync();
 
         var embed = new DiscordEmbedBuilder();
 
@@ -28,8 +33,8 @@ internal sealed partial class ReportCommands
 
             try
             {
-                DiscordChannel channel = await context.Client.GetChannelAsync(reportedMessage.ChannelId).ConfigureAwait(false);
-                DiscordMessage message = await channel.GetMessageAsync(reportedMessage.MessageId).ConfigureAwait(false);
+                DiscordChannel channel = await context.Client.GetChannelAsync(reportedMessage.ChannelId);
+                DiscordMessage message = await channel.GetMessageAsync(reportedMessage.MessageId);
                 embed.AddField("Message ID", Formatter.MaskedUrl(message.Id.ToString(), message.JumpLink), true);
                 embed.AddField("Message Time", Formatter.Timestamp(message.CreationTimestamp, TimestampFormat.LongDateTime),
                     true);
@@ -41,10 +46,14 @@ internal sealed partial class ReportCommands
             }
 
             if (!string.IsNullOrWhiteSpace(reportedMessage.Content))
+            {
                 embed.AddField("Content", Formatter.BlockCode(Formatter.Sanitize(reportedMessage.Content)));
+            }
 
             if (reportedMessage.Attachments.Count > 0)
+            {
                 embed.AddField("Attachments", string.Join('\n', reportedMessage.Attachments));
+            }
 
             DiscordUser user = await context.Client.GetUserAsync(reportedMessage.AuthorId);
             embed.WithAuthor(user);
@@ -56,6 +65,6 @@ internal sealed partial class ReportCommands
             embed.WithDescription($"No report with the ID {id} could be found.");
         }
 
-        await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed)).ConfigureAwait(false);
+        await context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
     }
 }

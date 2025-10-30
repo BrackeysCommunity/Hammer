@@ -9,15 +9,36 @@ namespace Hammer.Data.EntityConfigurations;
 /// </summary>
 internal sealed class AltAccountConfiguration : IEntityTypeConfiguration<AltAccount>
 {
+    private readonly bool _isMySql;
+
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="AltAccountConfiguration" /> class.
+    /// </summary>
+    /// <param name="isMySql">
+    ///     <see langword="true" /> if this configuration should use MySQL configuration, otherwise <see langword="false" />.
+    /// </param>
+    public AltAccountConfiguration(bool isMySql)
+    {
+        _isMySql = isMySql;
+    }
+
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<AltAccount> builder)
     {
         builder.ToTable("AltAccount");
-        builder.HasKey(e => new {e.UserId, e.AltId});
+        builder.HasKey(e => new { e.UserId, e.AltId });
 
-        builder.Property(e => e.UserId);
-        builder.Property(e => e.AltId);
-        builder.Property(e => e.StaffMemberId);
-        builder.Property(e => e.RegisteredAt).HasConversion<DateTimeOffsetToBytesConverter>();
+        builder.Property(e => e.UserId).HasColumnOrder(1);
+        builder.Property(e => e.AltId).HasColumnOrder(2);
+        builder.Property(e => e.StaffMemberId).HasColumnOrder(3);
+
+        if (_isMySql)
+        {
+            builder.Property(e => e.RegisteredAt).HasColumnOrder(4).HasColumnType("DATETIME(6)");
+        }
+        else
+        {
+            builder.Property(e => e.RegisteredAt).HasColumnOrder(4).HasConversion<DateTimeOffsetToBytesConverter>();
+        }
     }
 }

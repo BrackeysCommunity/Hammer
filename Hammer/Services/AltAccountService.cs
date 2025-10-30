@@ -38,31 +38,42 @@ internal sealed class AltAccountService : BackgroundService
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="user" /> or <paramref name="alt" /> is <see langword="null" />.
     /// </exception>
-    public async Task AddAltAsync(DiscordUser user, DiscordUser alt, DiscordMember staffMember)
+    public void AddAlt(DiscordUser user, DiscordUser alt, DiscordMember staffMember)
     {
-        if (user is null) throw new ArgumentNullException(nameof(user));
-        if (alt is null) throw new ArgumentNullException(nameof(alt));
-        if (staffMember is null) throw new ArgumentNullException(nameof(staffMember));
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-        var record = new AltAccount {StaffMemberId = staffMember.Id, RegisteredAt = DateTimeOffset.UtcNow};
-        context.AltAccounts.Add(record with {UserId = user.Id, AltId = alt.Id});
-        context.AltAccounts.Add(record with {UserId = alt.Id, AltId = user.Id});
-        await context.SaveChangesAsync();
+        if (alt is null)
+        {
+            throw new ArgumentNullException(nameof(alt));
+        }
 
-        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, new HashSet<ulong>());
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
+
+        using HammerContext context = _dbContextFactory.CreateDbContext();
+        var record = new AltAccount { StaffMemberId = staffMember.Id, RegisteredAt = DateTimeOffset.UtcNow };
+        context.AltAccounts.Add(record with { UserId = user.Id, AltId = alt.Id });
+        context.AltAccounts.Add(record with { UserId = alt.Id, AltId = user.Id });
+        context.SaveChanges();
+
+        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, []);
         cache.Add(alt.Id);
 
         foreach (ulong altId in cache)
         {
-            HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altId, new HashSet<ulong>());
+            HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altId, []);
             altCache.Add(user.Id);
         }
 
         AltAccount[] altAccounts = context.AltAccounts.Where(a => a.AltId == user.Id).ToArray();
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(DiscordColor.Green);
         embed.WithTitle("Alt account registered");
         embed.WithDescription("The following users have been registered as alts of each other.");
@@ -70,7 +81,7 @@ internal sealed class AltAccountService : BackgroundService
         embed.AddField($"Alt {"Account".ToQuantity(altAccounts.Length, ShowQuantityAs.None)}",
             string.Join("\n", altAccounts.Select(a => MentionUtility.MentionUser(a.UserId))), true);
         embed.AddField("Staff Member", staffMember.Mention, true);
-        await _discordLogService.LogAsync(staffMember.Guild, embed).ConfigureAwait(false);
+        _ = _discordLogService.LogAsync(staffMember.Guild, embed);
     }
 
     /// <summary>
@@ -98,29 +109,50 @@ internal sealed class AltAccountService : BackgroundService
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="user" /> or <paramref name="alt" /> is <see langword="null" />.
     /// </exception>
-    public async Task RemoveAltAsync(DiscordUser user, DiscordUser alt, DiscordMember staffMember)
+    public void RemoveAlt(DiscordUser user, DiscordUser alt, DiscordMember staffMember)
     {
-        if (user is null) throw new ArgumentNullException(nameof(user));
-        if (alt is null) throw new ArgumentNullException(nameof(alt));
-        if (staffMember is null) throw new ArgumentNullException(nameof(staffMember));
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        if (alt is null)
+        {
+            throw new ArgumentNullException(nameof(alt));
+        }
+
+        if (staffMember is null)
+        {
+            throw new ArgumentNullException(nameof(staffMember));
+        }
+
+        using HammerContext context = _dbContextFactory.CreateDbContext();
 
         AltAccount? altAccount = context.AltAccounts.FirstOrDefault(a => a.UserId == user.Id && a.AltId == alt.Id);
-        if (altAccount is not null) context.AltAccounts.Remove(altAccount);
+        if (altAccount is not null)
+        {
+            context.AltAccounts.Remove(altAccount);
+        }
 
         AltAccount[] altAccounts = context.AltAccounts.Where(a => a.AltId == user.Id).ToArray();
-        if (altAccounts.Length > 0) context.AltAccounts.RemoveRange(altAccounts);
+        if (altAccounts.Length > 0)
+        {
+            context.AltAccounts.RemoveRange(altAccounts);
+        }
 
-        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, new HashSet<ulong>());
-        HashSet<ulong>? altCache = _altAccountCache.GetOrAdd(alt.Id, new HashSet<ulong>());
+        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, []);
+        HashSet<ulong>? altCache = _altAccountCache.GetOrAdd(alt.Id, []);
         cache.Remove(alt.Id);
         altCache.Remove(user.Id);
 
         foreach (ulong altId in GetAltsFor(alt.Id))
         {
             altAccounts = context.AltAccounts.Where(a => a.UserId == user.Id && a.AltId == altId).ToArray();
-            if (altAccounts.Length > 0) context.AltAccounts.RemoveRange(altAccounts);
+            if (altAccounts.Length > 0)
+            {
+                context.AltAccounts.RemoveRange(altAccounts);
+            }
+
             cache.Remove(altId);
             if (_altAccountCache.TryGetValue(altId, out altCache))
             {
@@ -128,35 +160,34 @@ internal sealed class AltAccountService : BackgroundService
             }
         }
 
-        await context.SaveChangesAsync();
+        context.SaveChanges();
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(ImageFormat.Png));
+        embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
         embed.WithColor(DiscordColor.Orange);
         embed.WithTitle("Alt account unregistered");
         embed.WithDescription("The following users have been unregistered as alts of each other.");
         embed.AddField("Main Account", user.Mention, true);
         embed.AddField("Alt Account", alt.Mention, true);
         embed.AddField("Staff Member", staffMember.Mention, true);
-        await _discordLogService.LogAsync(staffMember.Guild, embed).ConfigureAwait(false);
+        _ = _discordLogService.LogAsync(staffMember.Guild, embed);
     }
 
-    /// <summary>
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    /// <inheritdoc />
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        UpdateFromDatabase();
-        return Task.CompletedTask;
+        await UpdateFromDatabase();
     }
 
-    private void UpdateFromDatabase()
+    private async Task UpdateFromDatabase()
     {
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         foreach (IGrouping<ulong, AltAccount> group in context.AltAccounts.GroupBy(u => u.UserId))
         {
-            HashSet<ulong> cache = _altAccountCache.GetOrAdd(group.Key, new HashSet<ulong>());
+            HashSet<ulong> cache = _altAccountCache.GetOrAdd(group.Key, []);
             foreach (AltAccount altAccount in group)
             {
-                HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altAccount.AltId, new HashSet<ulong>());
+                HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altAccount.AltId, []);
                 cache.Add(altAccount.AltId);
                 altCache.Add(group.Key);
             }

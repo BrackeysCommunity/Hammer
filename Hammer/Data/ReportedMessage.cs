@@ -1,4 +1,5 @@
-﻿using DSharpPlus.Entities;
+using DSharpPlus.Entities;
+using JetBrains.Annotations;
 
 namespace Hammer.Data;
 
@@ -22,11 +23,20 @@ internal sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<
     /// </exception>
     public ReportedMessage(DiscordMessage message, DiscordMember reporter)
     {
-        if (message is null) throw new ArgumentNullException(nameof(message));
-        if (reporter is null) throw new ArgumentNullException(nameof(reporter));
+        if (message is null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        if (reporter is null)
+        {
+            throw new ArgumentNullException(nameof(reporter));
+        }
 
         if (message.Channel.Guild != reporter.Guild)
+        {
             throw new ArgumentException("Message and reporter must be in the same guild.");
+        }
 
         Attachments = message.Attachments.Select(a => new Uri(a.Url)).ToArray();
         AuthorId = message.Author.Id;
@@ -36,7 +46,8 @@ internal sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<
         MessageId = message.Id;
         ReporterId = reporter.Id;
     }
-    
+
+    [UsedImplicitly]
     private ReportedMessage()
     {
         Attachments = ArraySegment<Uri>.Empty;
@@ -75,13 +86,13 @@ internal sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<
     ///     Gets or sets the ID of the report.
     /// </summary>
     /// <value>The report ID.</value>
-    public long Id { get; private set; }
+    public long Id { get; [UsedImplicitly] private set; }
 
     /// <summary>
     ///     Gets or sets the ID the message.
     /// </summary>
     /// <value>The message user ID.</value>
-    public ulong MessageId { get; private set; }
+    public ulong MessageId { get; [UsedImplicitly] private set; }
 
     /// <summary>
     ///     Gets or sets the ID of the user which reported the message.
@@ -92,15 +103,27 @@ internal sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<
     /// <inheritdoc />
     public bool Equals(DiscordMessage? other)
     {
-        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
         return MessageId == other.Id;
     }
 
     /// <inheritdoc />
     public bool Equals(ReportedMessage? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return Id == other.Id;
     }
 

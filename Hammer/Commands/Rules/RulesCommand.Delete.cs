@@ -33,7 +33,7 @@ internal sealed partial class RulesCommand
 
         if (!_ruleService.GuildHasRule(guild, (int)ruleId))
         {
-            builder.AddEmbed(_ruleService.CreateRuleNotFoundEmbed((int)ruleId));
+            builder.AddEmbed(Services.RuleService.CreateRuleNotFoundEmbed((int)ruleId));
             await context.EditResponseAsync(builder);
             return;
         }

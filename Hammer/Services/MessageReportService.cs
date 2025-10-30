@@ -544,7 +544,7 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
         await context.SaveChangesAsync();
     }
 
-    private DiscordEmbed CreateStaffReportEmbed(DiscordMessage message, DiscordMember reporter)
+    private static DiscordEmbed CreateStaffReportEmbed(DiscordMessage message, DiscordMember reporter)
     {
         DiscordColor color = DiscordColor.Orange;
 

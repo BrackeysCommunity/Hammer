@@ -25,7 +25,7 @@ internal sealed class RuleAutoCompleteProvider : IAutoCompleteProvider
         foreach (Rule rule in rules)
         {
             if (!hasOptionValue || (int.TryParse(optionValue, out int ruleId) && rule.Id == ruleId) ||
-                ruleService.RuleMatches(rule, searchTerms))
+                RuleService.RuleMatches(rule, searchTerms))
             {
                 result.Add(new DiscordAutoCompleteChoice(GetRuleDescription(rule), rule.Id.ToString()));
             }

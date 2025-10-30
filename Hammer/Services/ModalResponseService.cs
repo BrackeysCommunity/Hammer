@@ -124,7 +124,7 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
             !int.TryParse(ruleIdString, out ruleId) ||
             !_ruleService.GuildHasRule(guild, ruleId))
         {
-            DiscordEmbed responseEmbed = _ruleService.CreateRuleNotFoundEmbed(ruleId);
+            DiscordEmbed responseEmbed = RuleService.CreateRuleNotFoundEmbed(ruleId);
             var response = new DiscordFollowupMessageBuilder();
             response.AsEphemeral();
             response.AddEmbed(responseEmbed);

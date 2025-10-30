@@ -73,7 +73,7 @@ internal sealed class InfractionCooldownService : BackgroundService
     /// <param name="infraction">The recently-issued infraction.</param>
     /// <param name="infractionEmbed">The infraction embed to display.</param>
     /// <returns><see langword="true" /> if the user confirmed the infraction; otherwise, <see langword="false" />.</returns>
-    public async Task<bool> ShowConfirmationAsync(
+    public static async Task<bool> ShowConfirmationAsync(
         SlashCommandContext context,
         DiscordUser user,
         Infraction infraction,

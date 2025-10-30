@@ -17,7 +17,7 @@ internal sealed class MessageCommand
     [Description("Sends a private staff message to a member.")]
     [RequireGuild]
     [UsedImplicitly]
-    public async Task MessageAsync(
+    public static async Task MessageAsync(
         SlashCommandContext context,
         [Parameter("member"), Description("The member to message.")] DiscordUser user
     )

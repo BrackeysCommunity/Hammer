@@ -70,7 +70,7 @@ internal sealed class BanCommand
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
             DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
-            bool result = await _cooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
             if (!result)
             {
                 return;

@@ -14,7 +14,7 @@ internal sealed partial class RulesCommand
     [Description("Add a rule.")]
     [RequireGuild]
     [UsedImplicitly]
-    public async Task AddAsync(SlashCommandContext context)
+    public static async Task AddAsync(SlashCommandContext context)
     {
         var modal = new DiscordModalBuilder();
         modal.WithCustomId(CustomIds.AddRule);

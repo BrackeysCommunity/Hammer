@@ -37,7 +37,7 @@ internal sealed class InfoCommand
     [RequireGuild]
     public async Task InfoAsync(SlashCommandContext context)
     {
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
         {
             configuration = new GuildConfiguration();

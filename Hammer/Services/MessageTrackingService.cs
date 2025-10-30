@@ -220,8 +220,12 @@ internal sealed class MessageTrackingService : BackgroundService
 
         foreach (IGrouping<ulong, TrackedMessage> channelGroups in messages.GroupBy(m => m.ChannelId))
         {
-            DiscordChannel channel = guild.GetChannel(channelGroups.Key);
-            if (channel is null)
+            DiscordChannel channel;
+            try
+            {
+                channel = await guild.GetChannelAsync(channelGroups.Key);
+            }
+            catch (NotFoundException)
             {
                 foreach (TrackedMessage trackedMessage in channelGroups)
                 {
@@ -236,15 +240,8 @@ internal sealed class MessageTrackingService : BackgroundService
             {
                 try
                 {
-                    DiscordMessage message = await channel.GetMessageAsync(trackedMessage.Id);
-                    if (message is null)
-                    {
-                        trackedMessage.IsDeleted = true;
-                    }
-                    else
-                    {
-                        _trackedMessages.Add(trackedMessage);
-                    }
+                    await channel.GetMessageAsync(trackedMessage.Id);
+                    _trackedMessages.Add(trackedMessage);
                 }
                 catch (NotFoundException)
                 {

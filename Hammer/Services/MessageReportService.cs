@@ -538,22 +538,15 @@ internal sealed class MessageReportService : BackgroundService
 
         foreach (ReportedMessage reportedMessage in context.ReportedMessages.Where(r => r.GuildId == e.Guild.Id))
         {
-            DiscordChannel? channel = e.Guild.GetChannel(reportedMessage.ChannelId);
-            if (channel is null)
+            try
+            {
+                DiscordChannel channel = await e.Guild.GetChannelAsync(reportedMessage.ChannelId);
+                await channel.GetMessageAsync(reportedMessage.MessageId);
+                _reportedMessages.Add(reportedMessage);
+            }
+            catch (NotFoundException)
             {
                 context.Entry(reportedMessage).State = EntityState.Deleted;
-            }
-            else
-            {
-                try
-                {
-                    await channel.GetMessageAsync(reportedMessage.MessageId);
-                    _reportedMessages.Add(reportedMessage);
-                }
-                catch (NotFoundException)
-                {
-                    context.Entry(reportedMessage).State = EntityState.Deleted;
-                }
             }
         }
 
@@ -569,13 +562,14 @@ internal sealed class MessageReportService : BackgroundService
 
         string? content = hasContent ? Formatter.BlockCode(Formatter.Sanitize(message.Content)) : null;
         string? attachments = hasAttachments ? string.Join('\n', message.Attachments.Select(a => a.Url)) : null;
+        string channelMention = message.Channel?.Mention ?? MentionUtility.MentionChannel(message.ChannelId);
 
         return new DiscordEmbedBuilder()
             .WithColor(color)
             .WithTitle("Message Reported")
-            .WithDescription($"{reporter.Mention} reported a message in {message.Channel.Mention}")
-            .AddField("Channel", message.Channel.Mention, true)
-            .AddField("Author", message.Author.Mention, true)
+            .WithDescription($"{reporter.Mention} reported a message in {channelMention}")
+            .AddField("Channel", channelMention, true)
+            .AddFieldIf(message.Author is not null, "Author", () => message.Author!.Mention, true)
             .AddField("Reporter", reporter.Mention, true)
             .AddField("Message ID", Formatter.MaskedUrl(message.Id.ToString(), message.JumpLink), true)
             .AddField("Message Time", Formatter.Timestamp(message.CreationTimestamp, TimestampFormat.ShortDateTime),

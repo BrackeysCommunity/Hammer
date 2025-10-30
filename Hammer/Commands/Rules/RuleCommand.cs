@@ -40,8 +40,8 @@ internal sealed class RuleCommand
         string search,
         [Parameter("mention"), Description("The user to mention.")] DiscordUser? mentionUser = null)
     {
-        DiscordGuild guild = context.Guild;
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        DiscordGuild guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;

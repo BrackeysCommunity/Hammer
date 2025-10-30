@@ -890,8 +890,7 @@ internal sealed class InfractionService : BackgroundService
             {
                 try
                 {
-                    DiscordUser user = await _discordClient.GetUserAsync(userId);
-                    isStale = user is null;
+                    await _discordClient.GetUserAsync(userId);
                 }
                 catch (NotFoundException)
                 {

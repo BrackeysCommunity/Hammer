@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Configuration;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Rules;
 
@@ -15,6 +16,7 @@ internal sealed partial class RulesCommand
     [Command("delete")]
     [Description("Deletes a rule.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task DeleteAsync(SlashCommandContext context,
         [SlashAutoCompleteProvider<RuleAutoCompleteProvider>] [Parameter("rule"), Description("The rule to modify")] long ruleId)
     {

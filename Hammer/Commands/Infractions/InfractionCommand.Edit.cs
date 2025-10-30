@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
@@ -15,6 +16,7 @@ internal sealed partial class InfractionCommand
     [Command("edit")]
     [Description("Edits an infraction.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task EditAsync(SlashCommandContext context,
         [Parameter("infraction"), Description("The infraction to modify.")]
         long infractionId,

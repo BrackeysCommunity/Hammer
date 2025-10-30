@@ -6,6 +6,7 @@ using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Hammer.Commands.Notes;
@@ -15,6 +16,7 @@ internal sealed partial class NoteCommand
     [Command("create")]
     [Description("Creates a new note.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task CreateAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user for whom to create a note.")] DiscordUser user,
         [Parameter("content"), Description("The content of the note.")] string content)

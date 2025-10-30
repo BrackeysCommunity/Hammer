@@ -7,6 +7,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
@@ -29,6 +30,7 @@ internal sealed class PruneInfractionsCommand
     [Command("pruneinfractions")]
     [Description("Prune all stale infractions for invalid users.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task PruneAsync(SlashCommandContext context)
     {
         await context.DeferResponseAsync();

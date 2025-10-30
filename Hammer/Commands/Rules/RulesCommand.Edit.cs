@@ -8,6 +8,7 @@ using Hammer.AutocompleteProviders;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 using X10D.Text;
 
 namespace Hammer.Commands.Rules;
@@ -17,6 +18,7 @@ internal sealed partial class RulesCommand
     [Command("edit")]
     [Description("Edits a rule.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task EditAsync(SlashCommandContext context,
         [SlashAutoCompleteProvider<RuleAutoCompleteProvider>] [Parameter("rule"), Description("The rule to modify.")] long ruleId)
     {

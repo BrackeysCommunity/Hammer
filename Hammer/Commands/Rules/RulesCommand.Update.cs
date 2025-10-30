@@ -5,6 +5,7 @@ using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Rules;
 
@@ -15,6 +16,7 @@ internal sealed partial class RulesCommand
     [Command("update")]
     [Description("Sends the rule embed.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task UpdateAsync(SlashCommandContext context,
         [Parameter("messageLink"), Description("The link to the message to edit.")] string messageLink)
     {

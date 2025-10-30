@@ -6,6 +6,7 @@ using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
@@ -31,6 +32,7 @@ internal sealed class BadMessageCommand
     [Command("Warn For This")]
     [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task BadMessageAsync(SlashCommandContext context, DiscordMessage message)
     {
         DiscordGuild guild = context.Guild!;

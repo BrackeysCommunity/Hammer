@@ -9,6 +9,7 @@ using Hammer.AutocompleteProviders;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 using PermissionLevel = Hammer.Data.PermissionLevel;
 
 namespace Hammer.Commands.Notes;
@@ -18,6 +19,7 @@ internal sealed partial class NoteCommand
     [Command("view")]
     [Description("Views a note.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task ViewAsync(SlashCommandContext context,
         [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to view.")] long noteId)
     {

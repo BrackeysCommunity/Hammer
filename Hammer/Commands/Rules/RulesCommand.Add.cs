@@ -4,6 +4,7 @@ using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Rules;
 
@@ -12,6 +13,7 @@ internal sealed partial class RulesCommand
     [Command("add")]
     [Description("Add a rule.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task AddAsync(SlashCommandContext context)
     {
         var modal = new DiscordModalBuilder();

@@ -8,6 +8,7 @@ using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 
@@ -50,6 +51,7 @@ internal sealed class WarnCommand
     [Command("warn")]
     [Description("Issues a warning to a user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task WarnAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user to warn.")] DiscordUser user,
         [Parameter("reason"), Description("The reason for the warning.")] string reason,

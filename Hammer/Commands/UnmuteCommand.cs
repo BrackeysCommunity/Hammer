@@ -5,6 +5,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 
@@ -32,6 +33,7 @@ internal sealed class UnmuteCommand
     [Command("unmute")]
     [Description("Unmutes a user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task UnmuteAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user to unmute.")] DiscordUser user,
         [Parameter("reason"), Description("The reason for the mute revocation.")] string? reason = null)

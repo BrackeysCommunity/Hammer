@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Notes;
 
@@ -15,6 +16,7 @@ internal sealed partial class NoteCommand
     [Command("delete")]
     [Description("Deletes a note.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task DeleteAsync(SlashCommandContext context,
         [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to delete.")] long noteId)
     {

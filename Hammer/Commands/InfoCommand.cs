@@ -10,6 +10,7 @@ using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
 using Humanizer.Localisation;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
@@ -35,6 +36,7 @@ internal sealed class InfoCommand
     [Command("info")]
     [Description("Displays information about the bot.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task InfoAsync(SlashCommandContext context)
     {
         DiscordGuild guild = context.Guild!;

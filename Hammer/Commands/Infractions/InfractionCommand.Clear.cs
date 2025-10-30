@@ -6,6 +6,7 @@ using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
@@ -14,6 +15,7 @@ internal sealed partial class InfractionCommand
     [Command("clear")]
     [Description("Clears all infractions from the specified user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task ClearAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user whose infractions to clear.")]
         DiscordUser user)

@@ -7,6 +7,7 @@ using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Resources;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
@@ -34,6 +35,7 @@ internal sealed class ViewMessageCommand
 
     [Command("viewmessage")]
     [Description("Views a staff message, or deleted message, by its ID.")]
+    [UsedImplicitly]
     public async Task ViewMessageAsync(
         SlashCommandContext context,
         [Parameter("id"), Description("The ID of the message to retrieve.")] string rawId

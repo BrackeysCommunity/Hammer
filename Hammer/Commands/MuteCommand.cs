@@ -10,6 +10,7 @@ using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 using X10D.Time;
@@ -57,6 +58,7 @@ internal sealed class MuteCommand
     [Command("mute")]
     [Description("Temporarily or permanently mutes a user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task MuteAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user to mute.")] DiscordUser user,
         [Parameter("reason"), Description("The reason for the mute.")] string? reason = null,

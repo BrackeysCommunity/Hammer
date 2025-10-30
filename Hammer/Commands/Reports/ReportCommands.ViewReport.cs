@@ -6,6 +6,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Reports;
 
@@ -14,6 +15,7 @@ internal sealed partial class ReportCommands
     [Command("viewreport")]
     [Description("Views all reports made against this user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task ViewReportAsync(CommandContext context,
         [Parameter("id"), Description("The ID of the report to view.")] long id)
     {

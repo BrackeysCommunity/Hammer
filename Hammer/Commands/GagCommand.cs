@@ -5,6 +5,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Time;
 
@@ -32,7 +33,8 @@ internal sealed class GagCommand
     [Command("Gag")]
     [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
     [RequireGuild]
-    public async Task GagAsync(SlashCommandContext context)
+    [UsedImplicitly]
+    public async Task GagContextMenuAsync(SlashCommandContext context, DiscordUser user)
     {
         var builder = new DiscordEmbedBuilder();
         var message = new DiscordWebhookBuilder();
@@ -74,6 +76,7 @@ internal sealed class GagCommand
     [Command("gag")]
     [Description("Temporarily gags a user, so that a more final infraction can be issued.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task GagAsync(
         SlashCommandContext context,
         [Parameter("user"), Description("The user to gag.")] DiscordUser user,

@@ -4,6 +4,7 @@ using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Hammer.Commands;
@@ -27,6 +28,7 @@ internal sealed class MigrateDatabaseCommand
     [Command("migratedb")]
     [Description("Migrates the SQLite database to MySQL/MariaDB.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task MigrateDatabaseAsync(SlashCommandContext context)
     {
         var embed = new DiscordEmbedBuilder();

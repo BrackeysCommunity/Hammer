@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Notes;
 
@@ -15,6 +16,7 @@ internal sealed partial class NoteCommand
     [Command("edittype")]
     [Description("Edits the type of a note.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task EditTypeAsync(SlashCommandContext context,
         [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to edit.")] long noteId,
         [Parameter("type"), Description("The new type of the note.")] MemberNoteType type)

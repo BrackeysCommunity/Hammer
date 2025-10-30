@@ -9,6 +9,7 @@ using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Rules;
 
@@ -34,6 +35,7 @@ internal sealed class RuleCommand
     [Command("rule")]
     [Description("Displays a rule.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task RuleAsync(SlashCommandContext context,
         [Parameter("rule"), Description("The rule to display.")]
         [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]

@@ -7,6 +7,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
@@ -28,6 +29,7 @@ internal sealed class AltCommand
     [Command("add")]
     [Description("Adds an alt account to a user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task AddAltAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user to add an alt account to.")] DiscordUser user,
         [Parameter("alt"), Description("The alt account to add.")] DiscordUser alt)
@@ -51,6 +53,7 @@ internal sealed class AltCommand
     [Command("remove")]
     [Description("Removes an alt account from a user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task RemoveAltAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user to remove an alt account from.")] DiscordUser user,
         [Parameter("alt"), Description("The alt account to remove.")] DiscordUser alt)
@@ -72,6 +75,7 @@ internal sealed class AltCommand
     [Command("view")]
     [Description("Views the alt accounts for a user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task ViewAltsAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user to add an alt account to.")] DiscordUser user)
     {

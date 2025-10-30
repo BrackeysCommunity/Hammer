@@ -4,6 +4,7 @@ using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
@@ -15,6 +16,7 @@ internal sealed class MessageCommand
     [Command("message")]
     [Description("Sends a private staff message to a member.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task MessageAsync(
         SlashCommandContext context,
         [Parameter("member"), Description("The member to message.")] DiscordUser user

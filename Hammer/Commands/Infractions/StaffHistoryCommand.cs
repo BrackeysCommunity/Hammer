@@ -9,6 +9,7 @@ using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
@@ -31,6 +32,7 @@ internal sealed class StaffHistoryCommand
     [Command("staffhistory")]
     [Description("Searches a staff member's history.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task StaffHistoryAsync(SlashCommandContext context,
         [Parameter("staffMember"), Description("The staff member whose infractions to search.")]
         DiscordUser user)

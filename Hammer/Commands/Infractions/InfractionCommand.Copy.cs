@@ -5,6 +5,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
@@ -13,6 +14,7 @@ internal sealed partial class InfractionCommand
     [Command("copy")]
     [Description("Copies all infractions from one user to another.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task CopyAsync(SlashCommandContext context,
         [Parameter("source"), Description("The user whose infractions to copy.")]
         DiscordUser source,

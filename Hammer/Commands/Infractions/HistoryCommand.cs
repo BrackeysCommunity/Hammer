@@ -5,6 +5,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Time;
 
@@ -29,30 +30,10 @@ internal sealed class HistoryCommand
         _infractionService = infractionService;
     }
 
-    [Command("View Infraction History")]
-    [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
-    [RequireGuild]
-    public async Task HistoryAsync(SlashCommandContext context)
-    {
-        DiscordUser user = context.Interaction.Data.Resolved.Users.First().Value;
-
-        await context.DeferResponseAsync(true);
-
-        var builder = new DiscordWebhookBuilder();
-        var response = new InfractionHistoryResponse(_infractionService, user, context.User, context.Guild, true);
-
-        for (var pageIndex = 0; pageIndex < response.Pages; pageIndex++)
-        {
-            DiscordEmbedBuilder embed = _infractionService.BuildInfractionHistoryEmbed(response, pageIndex);
-            builder.AddEmbed(embed);
-        }
-
-        await context.EditResponseAsync(builder);
-    }
-
     [Command("history")]
     [Description("Views the infraction history for a user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task HistoryAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user whose history to view.")] DiscordUser user,
         [Parameter("before"), Description("If set, limits to infractions before the specified date.")] string? beforeRaw = null,
@@ -141,6 +122,26 @@ internal sealed class HistoryCommand
 
                 builder.AddEmbed(embed);
             }
+        }
+
+        await context.EditResponseAsync(builder);
+    }
+
+    [Command("View History")]
+    [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
+    [RequireGuild]
+    [UsedImplicitly]
+    public async Task ViewHistoryAsync(SlashCommandContext context, DiscordUser user)
+    {
+        await context.DeferResponseAsync(true);
+
+        var builder = new DiscordWebhookBuilder();
+        var response = new InfractionHistoryResponse(_infractionService, user, context.User, context.Guild!, true);
+
+        for (var pageIndex = 0; pageIndex < response.Pages; pageIndex++)
+        {
+            DiscordEmbedBuilder embed = _infractionService.BuildInfractionHistoryEmbed(response, pageIndex);
+            builder.AddEmbed(embed);
         }
 
         await context.EditResponseAsync(builder);

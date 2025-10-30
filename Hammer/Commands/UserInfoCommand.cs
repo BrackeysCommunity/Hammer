@@ -8,6 +8,7 @@ using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
@@ -37,6 +38,7 @@ internal sealed class UserInfoCommand
     [Command("userinfo")]
     [Description("Displays information about a user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task UserInfoAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user whose information to view.")] DiscordUser user)
     {

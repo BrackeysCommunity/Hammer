@@ -8,6 +8,7 @@ using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
@@ -27,6 +28,7 @@ internal sealed class ViewInfractionCommand
     [Command("viewinfraction")]
     [Description("Views an infraction.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task ViewInfractionAsync(SlashCommandContext context,
         [Parameter("infraction"), Description("The infraction to view.")]
         long infractionId

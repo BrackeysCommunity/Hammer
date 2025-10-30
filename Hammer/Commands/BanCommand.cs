@@ -9,6 +9,7 @@ using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 using X10D.Time;
@@ -52,6 +53,7 @@ internal sealed class BanCommand
     [Command("ban")]
     [Description("Temporarily or permanently bans a user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task BanAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user to ban.")] DiscordUser user,
         [Parameter("reason"), Description("The reason for the ban.")] string? reason = null,

@@ -9,6 +9,7 @@ using Hammer.AutocompleteProviders;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 
@@ -51,6 +52,7 @@ internal sealed class KickCommand
     [Command("kick")]
     [Description("Kicks a member")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task KickAsync(SlashCommandContext context,
         [Parameter("member"), Description("The member to kick.")] DiscordUser user,
         [Parameter("reason"), Description("The reason for the kick.")] string? reason = null,

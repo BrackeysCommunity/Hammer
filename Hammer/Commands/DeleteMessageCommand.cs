@@ -3,6 +3,7 @@ using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Services;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands;
 
@@ -25,6 +26,7 @@ internal sealed class DeleteMessageCommand
     [Command("Delete Message")]
     [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task DeleteMessageAsync(SlashCommandContext context, DiscordMessage message)
     {
         await context.DeferResponseAsync(true);

@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Hammer.Commands.Notes;
@@ -16,6 +17,7 @@ internal sealed partial class NoteCommand
     [Command("viewall")]
     [Description("Views all notes for a given user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task ViewAllAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user whose notes to view.")] DiscordUser user)
     {

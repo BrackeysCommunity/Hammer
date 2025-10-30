@@ -2,6 +2,7 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Resources;
+using JetBrains.Annotations;
 using SmartFormat;
 
 namespace Hammer.Commands.Reports;
@@ -10,12 +11,12 @@ internal sealed partial class ReportCommands
 {
     [Command("Report Message")]
     [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
-    public async Task ReportMessageAsync(SlashCommandContext context)
+    [UsedImplicitly]
+    public async Task ReportMessageAsync(SlashCommandContext context, DiscordMessage message)
     {
         await context.DeferResponseAsync(true);
 
         DiscordUser user = context.User;
-        DiscordMessage message = context.Interaction.Data.Resolved.Messages.First().Value;
         await _reportService.ReportMessageAsync(message, (DiscordMember)user);
 
         var builder = new DiscordWebhookBuilder();

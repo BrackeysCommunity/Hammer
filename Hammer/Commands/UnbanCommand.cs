@@ -5,6 +5,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Extensions;
 using Hammer.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using X10D.Text;
 
@@ -32,6 +33,7 @@ internal sealed class UnbanCommand
     [Command("unban")]
     [Description("Unbans a user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task UnbanAsync(SlashCommandContext context,
         [Parameter("user"), Description("The user to unban.")] DiscordUser user,
         [Parameter("reason"), Description("The reason for the ban revocation.")] string? reason = null)

@@ -4,6 +4,7 @@ using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Data;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
 
@@ -12,6 +13,7 @@ internal sealed partial class InfractionCommand
     [Command("stats")]
     [Description("View infraction stats.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task StatsAsync(SlashCommandContext context)
     {
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(context.Guild);

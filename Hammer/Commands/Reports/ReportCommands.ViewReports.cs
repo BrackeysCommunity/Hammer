@@ -8,6 +8,7 @@ using DSharpPlus.Exceptions;
 using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace Hammer.Commands.Reports;
 
@@ -16,6 +17,7 @@ internal sealed partial class ReportCommands
     [Command("viewreports")]
     [Description("Views all reports made against this user.")]
     [RequireGuild]
+    [UsedImplicitly]
     public async Task ViewReportsAsync(
         SlashCommandContext context,
         [Parameter("user"), Description("The user whose reported messages to view.")] DiscordUser user

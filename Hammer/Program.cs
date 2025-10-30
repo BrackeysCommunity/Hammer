@@ -1,5 +1,11 @@
 using DSharpPlus;
+using DSharpPlus.Commands;
 using DSharpPlus.Extensions;
+using Hammer.Commands;
+using Hammer.Commands.Infractions;
+using Hammer.Commands.Notes;
+using Hammer.Commands.Reports;
+using Hammer.Commands.Rules;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Services;
@@ -40,6 +46,36 @@ builder.Services.ConfigureEventHandlers(events =>
     events.AddEventHandlers<MuteService>(ServiceLifetime.Singleton);
     events.AddEventHandlers<StaffReactionService>();
     events.AddEventHandlers<UserReactionService>();
+});
+
+builder.Services.AddCommandsExtension((_, commands) =>
+{
+    commands.AddCommands<AltCommand>();
+    commands.AddCommands<BadMessageCommand>();
+    commands.AddCommands<BanCommand>();
+    commands.AddCommands<DeleteMessageCommand>();
+    commands.AddCommands<GagCommand>();
+    commands.AddCommands<HistoryCommand>();
+    commands.AddCommands<InfractionCommand>();
+    commands.AddCommands<InfoCommand>();
+    commands.AddCommands<KickCommand>();
+    commands.AddCommands<MessageCommand>();
+    commands.AddCommands<MessageHistoryCommand>();
+    commands.AddCommands<MigrateDatabaseCommand>();
+    commands.AddCommands<MuteCommand>();
+    commands.AddCommands<NoteCommand>();
+    commands.AddCommands<PruneInfractionsCommand>();
+    commands.AddCommands<ReportCommands>();
+    commands.AddCommands<RuleCommand>();
+    commands.AddCommands<RulesCommand>();
+    commands.AddCommands<SelfHistoryCommand>();
+    commands.AddCommands<StaffHistoryCommand>();
+    commands.AddCommands<UnbanCommand>();
+    commands.AddCommands<UnmuteCommand>();
+    commands.AddCommands<UserInfoCommand>();
+    commands.AddCommands<ViewInfractionCommand>();
+    commands.AddCommands<ViewMessageCommand>();
+    commands.AddCommands<WarnCommand>();
 });
 
 builder.Services.AddDbContextFactory<HammerContext>((services, optionsBuilder) =>

@@ -38,6 +38,12 @@ public readonly struct InfractionSearchOptions
     public DateTimeOffset? IssuedBefore { get; init; }
 
     /// <summary>
+    ///     Gets or initializes the staff member ID filter.
+    /// </summary>
+    /// <value>The staff member ID by which to filter.</value>
+    public ulong? StaffMemberId { get; init; }
+
+    /// <summary>
     ///     Gets or initializes the infraction type filter.
     /// </summary>
     /// <value>The type by which to filter.</value>

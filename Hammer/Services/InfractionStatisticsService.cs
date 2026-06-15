@@ -43,10 +43,11 @@ internal sealed class InfractionStatisticsService
     ///     Creates an embed which displays infraction statistics for the specified guild.
     /// </summary>
     /// <param name="guild">The guild whose statistics to render.</param>
+    /// <param name="staffMember">The staff member whose statistics to retrieve.</param>
     /// <returns>A <see cref="DiscordEmbed" /> populated with the statistics of <paramref name="guild" />'s infractions.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
     /// <exception cref="InvalidOperationException"><paramref name="guild" /> is not a configured guild.</exception>
-    public async Task<DiscordEmbed> CreateStatisticsEmbedAsync(DiscordGuild guild)
+    public async Task<DiscordEmbed> CreateStatisticsEmbedAsync(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
@@ -58,19 +59,19 @@ internal sealed class InfractionStatisticsService
             throw new InvalidOperationException("Guild is not configured");
         }
 
-        (int totalBanCount, int tempBanCount, int permBanCount) = GetTotalBanCount(guild);
-        (int totalMuteCount, int tempMuteCount, int permMuteCount) = GetTotalMuteCount(guild);
+        (int totalBanCount, int tempBanCount, int permBanCount) = GetTotalBanCount(guild, staffMember);
+        (int totalMuteCount, int tempMuteCount, int permMuteCount) = GetTotalMuteCount(guild, staffMember);
 
-        int infractionCount = GetTotalInfractionCount(guild);
-        int totalKickCount = GetTotalKickCount(guild);
-        int totalGagCount = GetTotalGagCount(guild);
-        int totalWarningCount = GetTotalWarningCount(guild);
-        int usersBannedCount = GetDistinctBannedUsers(guild);
-        int usersKickedCount = GetDistinctKickedUsers(guild);
-        int usersMutedCount = GetDistinctMutedUsers(guild);
-        int usersGaggedCount = GetDistinctGaggedUsers(guild);
-        int usersWarnedCount = GetDistinctWarnedUsers(guild);
-        int totalMessagesDeletedCount = await GetTotalDeletedMessageCountAsync(guild);
+        int infractionCount = GetTotalInfractionCount(guild, staffMember);
+        int totalKickCount = GetTotalKickCount(guild, staffMember);
+        int totalGagCount = GetTotalGagCount(guild, staffMember);
+        int totalWarningCount = GetTotalWarningCount(guild, staffMember);
+        int usersBannedCount = GetDistinctBannedUsers(guild, staffMember);
+        int usersKickedCount = GetDistinctKickedUsers(guild, staffMember);
+        int usersMutedCount = GetDistinctMutedUsers(guild, staffMember);
+        int usersGaggedCount = GetDistinctGaggedUsers(guild, staffMember);
+        int usersWarnedCount = GetDistinctWarnedUsers(guild, staffMember);
+        int totalMessagesDeletedCount = await GetTotalDeletedMessageCountAsync(guild, staffMember);
 
         (int A, int B) banRatio = Ratio(permBanCount, tempBanCount);
         (int A, int B) muteRatio = Ratio(permMuteCount, tempMuteCount);
@@ -93,6 +94,7 @@ internal sealed class InfractionStatisticsService
         DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration);
         embed.WithTitle("Infraction Statistics");
 
+        embed.AddFieldIf(staffMember is not null, "Staff Member", staffMember!.Mention, true);
         embed.AddField("Total Infractions", $"{infractionCount:N0}", true);
         embed.AddField("Bans", $"{totalBanCount:N0} ({usersBannedCount:N0} distinct)", true);
         embed.AddField("Kicks", $"{totalKickCount:N0} ({usersKickedCount:N0} distinct)", true);
@@ -113,19 +115,20 @@ internal sealed class InfractionStatisticsService
     ///     <see cref="InfractionType.TemporaryBan" />.
     /// </summary>
     /// <param name="guild">The guild whose bans to count.</param>
+    /// <param name="staffMember">The staff member who issued the bans.</param>
     /// <returns>The total number of users who have received at least one ban in <paramref name="guild" />.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public int GetDistinctBannedUsers(DiscordGuild guild)
+    public int GetDistinctBannedUsers(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        var options = new InfractionSearchOptions { Type = InfractionType.Ban };
+        var options = new InfractionSearchOptions { Type = InfractionType.Ban, StaffMemberId = staffMember?.Id };
         IReadOnlyList<Infraction> bans = _infractionService.GetInfractions(guild, options);
 
-        options = new InfractionSearchOptions { Type = InfractionType.TemporaryBan };
+        options = new InfractionSearchOptions { Type = InfractionType.TemporaryBan, StaffMemberId = staffMember?.Id };
         IReadOnlyList<Infraction> temporaryBans = _infractionService.GetInfractions(guild, options);
 
         var users = new HashSet<ulong>();
@@ -147,16 +150,17 @@ internal sealed class InfractionStatisticsService
     ///     Returns the total number of distinct users who have received a <see cref="InfractionType.Gag" />.
     /// </summary>
     /// <param name="guild">The guild whose gags to count.</param>
+    /// <param name="staffMember">The staff member who issued the gags.</param>
     /// <returns>The total number of users who have received at least one gag in <paramref name="guild" />.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public int GetDistinctGaggedUsers(DiscordGuild guild)
+    public int GetDistinctGaggedUsers(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        var options = new InfractionSearchOptions { Type = InfractionType.Gag };
+        var options = new InfractionSearchOptions { Type = InfractionType.Gag, StaffMemberId = staffMember?.Id };
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild, options);
         var users = new HashSet<ulong>();
 
@@ -172,16 +176,17 @@ internal sealed class InfractionStatisticsService
     ///     Returns the total number of distinct users who have received a <see cref="InfractionType.Kick" />.
     /// </summary>
     /// <param name="guild">The guild whose kicks to count.</param>
+    /// <param name="staffMember">The staff member who issued the kicks.</param>
     /// <returns>The total number of users who have received at least one kick in <paramref name="guild" />.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public int GetDistinctKickedUsers(DiscordGuild guild)
+    public int GetDistinctKickedUsers(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        var options = new InfractionSearchOptions { Type = InfractionType.Kick };
+        var options = new InfractionSearchOptions { Type = InfractionType.Kick, StaffMemberId = staffMember?.Id };
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild, options);
         var users = new HashSet<ulong>();
 
@@ -198,19 +203,20 @@ internal sealed class InfractionStatisticsService
     ///     <see cref="InfractionType.TemporaryMute" />.
     /// </summary>
     /// <param name="guild">The guild whose mutes to count.</param>
+    /// <param name="staffMember">The staff member who issued the mutes.</param>
     /// <returns>The total number of users who have received at least one mute in <paramref name="guild" />.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public int GetDistinctMutedUsers(DiscordGuild guild)
+    public int GetDistinctMutedUsers(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        var options = new InfractionSearchOptions { Type = InfractionType.Mute };
+        var options = new InfractionSearchOptions { Type = InfractionType.Mute, StaffMemberId = staffMember?.Id };
         IReadOnlyList<Infraction> mutes = _infractionService.GetInfractions(guild, options);
 
-        options = new InfractionSearchOptions { Type = InfractionType.TemporaryMute };
+        options = new InfractionSearchOptions { Type = InfractionType.TemporaryMute, StaffMemberId = staffMember?.Id };
         IReadOnlyList<Infraction> temporaryMutes = _infractionService.GetInfractions(guild, options);
 
         var users = new HashSet<ulong>();
@@ -232,16 +238,17 @@ internal sealed class InfractionStatisticsService
     ///     Returns the total number of distinct users who have received a <see cref="InfractionType.Warning" />.
     /// </summary>
     /// <param name="guild">The guild whose warnings to count.</param>
+    /// <param name="staffMember">The staff member who issued the warnings.</param>
     /// <returns>The total number of users who have received at least one warning in <paramref name="guild" />.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public int GetDistinctWarnedUsers(DiscordGuild guild)
+    public int GetDistinctWarnedUsers(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        var options = new InfractionSearchOptions { Type = InfractionType.Warning };
+        var options = new InfractionSearchOptions { Type = InfractionType.Warning, StaffMemberId = staffMember?.Id };
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild, options);
         var users = new HashSet<ulong>();
 
@@ -306,9 +313,10 @@ internal sealed class InfractionStatisticsService
     ///     Returns the total number of bans issued in the specified guild.
     /// </summary>
     /// <param name="guild">The guild whose bans to count.</param>
+    /// <param name="staffMember">The staff member who issued the bans.</param>
     /// <returns>A tuple containing the total, the temporary, and the permanent, ban count.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public (int Total, int Temporary, int Permanent) GetTotalBanCount(DiscordGuild guild)
+    public (int Total, int Temporary, int Permanent) GetTotalBanCount(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
@@ -316,8 +324,10 @@ internal sealed class InfractionStatisticsService
         }
 
         var options = new InfractionSearchOptions();
-        int temporary = _infractionService.GetInfractions(guild, options with { Type = InfractionType.TemporaryBan }).Count;
-        int permanent = _infractionService.GetInfractions(guild, options with { Type = InfractionType.Ban }).Count;
+        int temporary = _infractionService
+            .GetInfractions(guild, options with { Type = InfractionType.TemporaryBan, StaffMemberId = staffMember?.Id }).Count;
+        int permanent = _infractionService
+            .GetInfractions(guild, options with { Type = InfractionType.Ban, StaffMemberId = staffMember?.Id }).Count;
 
         return (temporary + permanent, temporary, permanent);
     }
@@ -326,32 +336,35 @@ internal sealed class InfractionStatisticsService
     ///     Returns the total number of deleted messages in the specified guild.
     /// </summary>
     /// <param name="guild">The guild whose deleted messages to count.</param>
+    /// <param name="staffMember">The staff member who deleted the messages.</param>
     /// <returns>The total number of deleted messages in <paramref name="guild" />.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public async Task<int> GetTotalDeletedMessageCountAsync(DiscordGuild guild)
+    public async Task<int> GetTotalDeletedMessageCountAsync(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        return await _messageDeletionService.CountMessageDeletionsAsync(guild);
+        return await _messageDeletionService.CountMessageDeletionsAsync(guild, staffMember?.Id);
     }
 
     /// <summary>
     ///     Returns the total number of gags issued in the specified guild.
     /// </summary>
     /// <param name="guild">The guild whose gags to count.</param>
+    /// <param name="staffMember">The staff member who issued the gags.</param>
     /// <returns>The total number of issued gags in <paramref name="guild" />.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public int GetTotalGagCount(DiscordGuild guild)
+    public int GetTotalGagCount(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        return _infractionService.GetInfractions(guild, new InfractionSearchOptions { Type = InfractionType.Gag }).Count;
+        return _infractionService.GetInfractions(guild,
+            new InfractionSearchOptions { Type = InfractionType.Gag, StaffMemberId = staffMember?.Id }).Count;
     }
 
     /// <summary>
@@ -382,41 +395,45 @@ internal sealed class InfractionStatisticsService
     ///     Returns the total number of infractions issued in the specified guild.
     /// </summary>
     /// <param name="guild">The guild whose infractions to count.</param>
+    /// <param name="staffMember">The staff member who issued the infractions.</param>
     /// <returns>The total number of issued infractions in <paramref name="guild" />.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public int GetTotalInfractionCount(DiscordGuild guild)
+    public int GetTotalInfractionCount(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        return _infractionService.GetInfractions(guild).Count;
+        return _infractionService.GetInfractions(guild, new InfractionSearchOptions { StaffMemberId = staffMember?.Id }).Count;
     }
 
     /// <summary>
     ///     Returns the total number of gags issued in the specified guild.
     /// </summary>
     /// <param name="guild">The guild whose gags to count.</param>
+    /// <param name="staffMember">The staff member who issued the gags.</param>
     /// <returns>The total number of issued gags in <paramref name="guild" />.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public int GetTotalKickCount(DiscordGuild guild)
+    public int GetTotalKickCount(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        return _infractionService.GetInfractions(guild, new InfractionSearchOptions { Type = InfractionType.Kick }).Count;
+        return _infractionService.GetInfractions(guild,
+            new InfractionSearchOptions { Type = InfractionType.Kick, StaffMemberId = staffMember?.Id }).Count;
     }
 
     /// <summary>
     ///     Returns the total number of mutes issued in the specified guild.
     /// </summary>
     /// <param name="guild">The guild whose bans to count.</param>
+    /// <param name="staffMember">The staff member who issued the mutes.</param>
     /// <returns>A tuple containing the total, the temporary, and the permanent, mute count.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public (int Total, int Temporary, int Permanent) GetTotalMuteCount(DiscordGuild guild)
+    public (int Total, int Temporary, int Permanent) GetTotalMuteCount(DiscordGuild guild, DiscordUser? staffMember = null)
     {
         if (guild is null)
         {
@@ -424,8 +441,10 @@ internal sealed class InfractionStatisticsService
         }
 
         var options = new InfractionSearchOptions();
-        int temporary = _infractionService.GetInfractions(guild, options with { Type = InfractionType.TemporaryMute }).Count;
-        int permanent = _infractionService.GetInfractions(guild, options with { Type = InfractionType.Mute }).Count;
+        int temporary = _infractionService.GetInfractions(guild,
+            options with { Type = InfractionType.TemporaryMute, StaffMemberId = staffMember?.Id }).Count;
+        int permanent = _infractionService
+            .GetInfractions(guild, options with { Type = InfractionType.Mute, StaffMemberId = staffMember?.Id }).Count;
 
         return (temporary + permanent, temporary, permanent);
     }
@@ -434,16 +453,18 @@ internal sealed class InfractionStatisticsService
     ///     Returns the total number of warnings issued in the specified guild.
     /// </summary>
     /// <param name="guild">The guild whose warnings to count.</param>
+    /// <param name="staffMember">The staff member who issued the warnings.</param>   
     /// <returns>The total number of issued warnings in <paramref name="guild" />.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    public int GetTotalWarningCount(DiscordGuild guild)
+    public int GetTotalWarningCount(DiscordGuild guild, DiscordMember? staffMember = null)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        return _infractionService.GetInfractions(guild, new InfractionSearchOptions { Type = InfractionType.Warning }).Count;
+        return _infractionService.GetInfractions(guild,
+            new InfractionSearchOptions { Type = InfractionType.Warning, StaffMemberId = staffMember?.Id }).Count;
     }
 
     private static (int A, int B) Ratio(int a, int b)

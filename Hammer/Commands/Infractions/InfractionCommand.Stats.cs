@@ -14,7 +14,9 @@ internal sealed partial class InfractionCommand
     [Description("View infraction stats.")]
     [RequireGuild]
     [UsedImplicitly]
-    public async Task StatsAsync(SlashCommandContext context)
+    public async Task StatsAsync(SlashCommandContext context,
+        [Parameter("staffMember"), Description("The staff member whose infractions to view.")]
+        DiscordMember? staffMember = null)
     {
         DiscordGuild guild = context.Guild!;
         IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild);

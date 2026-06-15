@@ -39,8 +39,9 @@ internal sealed class MessageDeletionService
     ///     Returns the count of deleted messages in the specified guild.
     /// </summary>
     /// <param name="guild">The guild whose deleted messages to count.</param>
+    /// <param name="staffMemberId">The ID of the staff member who deleted the messages.</param>
     /// <returns>The count of deleted messages in <paramref name="guild" />.</returns>
-    public async Task<int> CountMessageDeletionsAsync(DiscordGuild guild)
+    public async Task<int> CountMessageDeletionsAsync(DiscordGuild guild, ulong? staffMemberId = null)
     {
         if (guild is null)
         {
@@ -48,7 +49,9 @@ internal sealed class MessageDeletionService
         }
 
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-        return context.DeletedMessages.Count(m => m.GuildId == guild.Id);
+        return staffMemberId is null
+            ? context.DeletedMessages.Count(m => m.GuildId == guild.Id)
+            : context.DeletedMessages.Count(m => m.GuildId == guild.Id && m.StaffMemberId == staffMemberId);
     }
 
     /// <summary>

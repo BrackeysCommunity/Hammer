@@ -696,6 +696,11 @@ internal sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>
                 continue;
             }
 
+            if (searchOptions.StaffMemberId is { } staffMemberId && infraction.StaffMemberId != staffMemberId)
+            {
+                continue;
+            }
+
             infractions[resultIndex++] = infraction;
         }
 

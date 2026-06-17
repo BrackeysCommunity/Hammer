@@ -1,4 +1,5 @@
 using System.Globalization;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -59,6 +60,10 @@ internal sealed class InfractionStatisticsService
             throw new InvalidOperationException("Guild is not configured");
         }
 
+        Infraction earliestInfraction = GetEarliestInfraction(guild);
+        Infraction latestInfraction = GetLatestInfraction(guild);
+        string infractionSpan = (latestInfraction.IssuedAt - earliestInfraction.IssuedAt).Humanize();
+
         (int totalBanCount, int tempBanCount, int permBanCount) = GetTotalBanCount(guild, staffMember);
         (int totalMuteCount, int tempMuteCount, int permMuteCount) = GetTotalMuteCount(guild, staffMember);
 
@@ -93,9 +98,20 @@ internal sealed class InfractionStatisticsService
 
         DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration);
         embed.WithTitle("Infraction Statistics");
+        if (staffMember is null)
+        {
+            embed.WithDescription($"There are currently {infractionCount:N0} infractions spanning {infractionSpan}");
+        }
+        else
+        {
+            embed.WithDescription(
+                $"There are currently {infractionCount:N0} issued by {staffMember.Mention} infractions spanning {infractionSpan}");
+            embed.AddField("Staff Member", staffMember.Mention, true);
+        }
 
-        embed.AddFieldIf(staffMember is not null, "Staff Member", staffMember!.Mention, true);
         embed.AddField("Total Infractions", $"{infractionCount:N0}", true);
+        embed.AddField("Earliest Infraction", Formatter.Timestamp(earliestInfraction.IssuedAt), true);
+        embed.AddField("Latest Infraction", Formatter.Timestamp(latestInfraction.IssuedAt), true);
         embed.AddField("Bans", $"{totalBanCount:N0} ({usersBannedCount:N0} distinct)", true);
         embed.AddField("Kicks", $"{totalKickCount:N0} ({usersKickedCount:N0} distinct)", true);
         embed.AddField("Mutes", $"{totalMuteCount:N0} ({usersMutedCount:N0} distinct)", true);
@@ -465,6 +481,32 @@ internal sealed class InfractionStatisticsService
 
         return _infractionService.GetInfractions(guild,
             new InfractionSearchOptions { Type = InfractionType.Warning, StaffMemberId = staffMember?.Id }).Count;
+    }
+
+    private Infraction GetEarliestInfraction(DiscordGuild guild)
+    {
+        IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild);
+        Infraction? earliest = infractions.OrderBy(i => i.IssuedAt).FirstOrDefault();
+
+        if (earliest is null)
+        {
+            throw new InvalidOperationException("No infractions found");
+        }
+
+        return earliest;
+    }
+
+    private Infraction GetLatestInfraction(DiscordGuild guild)
+    {
+        IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild);
+        Infraction? latest = infractions.OrderByDescending(i => i.IssuedAt).FirstOrDefault();
+
+        if (latest is null)
+        {
+            throw new InvalidOperationException("No infractions found");
+        }
+
+        return latest;
     }
 
     private static (int A, int B) Ratio(int a, int b)

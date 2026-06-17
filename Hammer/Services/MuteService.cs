@@ -164,8 +164,7 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
     ///     -or-
     ///     <para><paramref name="issuer" /> is <see langword="null" />.</para>
     /// </exception>
-    public async Task<(Infraction Infraction, bool DmSuccess)> MuteAsync(DiscordUser user, DiscordMember issuer, string? reason,
-        Rule? ruleBroken)
+    public async ValueTask<InfractionResult> MuteAsync(DiscordUser user, DiscordMember issuer, string? reason, Rule? ruleBroken)
     {
         if (user is null)
         {
@@ -202,18 +201,14 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
         }
 
         var options = new InfractionOptions { NotifyUser = true, Reason = reason.AsNullIfWhiteSpace(), RuleBroken = ruleBroken };
-
         await CreateMuteAsync(user, guild, null);
-
-        (Infraction infraction, bool success) =
-            await _infractionService.CreateInfractionAsync(InfractionType.Mute, user, issuer, options);
-
+        var result = await _infractionService.CreateInfractionAsync(InfractionType.Mute, user, issuer, options);
         int infractionCount = _infractionService.GetInfractionCount(user, issuer.Guild);
 
         Rule? rule = null;
-        if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        if (result.Infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(result.Infraction.GuildId, ruleId))
         {
-            rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+            rule = _ruleService.GetRuleById(result.Infraction.GuildId, ruleId);
         }
 
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
@@ -242,10 +237,10 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
         embed.AddFieldIf(infractionCount > 0, "Total User Infractions", infractionCount, true);
         embed.AddFieldIf(rule is not null, "Rule Broken", () => $"{rule!.Id} - {rule.Brief ?? rule.Description}", true);
         embed.AddFieldIf(!string.IsNullOrWhiteSpace(options.Reason), "Reason", options.Reason);
-        embed.WithFooter($"Infraction {infraction.Id}");
+        embed.WithFooter($"Infraction {result.Infraction.Id}");
         await _logService.LogAsync(issuer.Guild, embed);
 
-        return (infraction, success);
+        return result;
     }
 
     /// <summary>
@@ -329,7 +324,7 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
     ///     -or-
     ///     <para><paramref name="issuer" /> is <see langword="null" />.</para>
     /// </exception>
-    public async Task<(Infraction Infraction, bool DmSuccess)> TemporaryMuteAsync(
+    public async ValueTask<InfractionResult> TemporaryMuteAsync(
         DiscordUser user,
         DiscordMember issuer,
         string? reason,
@@ -375,14 +370,13 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
         await CreateMuteAsync(user, guild, options.ExpirationTime.Value);
 
 
-        (Infraction infraction, bool success) =
-            await _infractionService.CreateInfractionAsync(InfractionType.TemporaryMute, user, issuer, options);
+        var result = await _infractionService.CreateInfractionAsync(InfractionType.TemporaryMute, user, issuer, options);
         int infractionCount = _infractionService.GetInfractionCount(user, guild);
 
         Rule? rule = null;
-        if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        if (result.Infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(result.Infraction.GuildId, ruleId))
         {
-            rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+            rule = _ruleService.GetRuleById(result.Infraction.GuildId, ruleId);
         }
 
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
@@ -412,10 +406,10 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
         embed.AddFieldIf(infractionCount > 0, "Total User Infractions", infractionCount, true);
         embed.AddFieldIf(rule is not null, "Rule Broken", () => $"{rule!.Id} - {rule.Brief ?? rule.Description}", true);
         embed.AddFieldIf(!string.IsNullOrWhiteSpace(options.Reason), "Reason", options.Reason);
-        embed.WithFooter($"Infraction {infraction.Id}");
+        embed.WithFooter($"Infraction {result.Infraction.Id}");
         await _logService.LogAsync(guild, embed);
 
-        return (infraction, success);
+        return result;
     }
 
     /// <summary>

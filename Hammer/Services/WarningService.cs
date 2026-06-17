@@ -1,15 +1,12 @@
 using DSharpPlus.Entities;
 using Hammer.Data;
 using Hammer.Extensions;
-using Hammer.Resources;
 using X10D.Text;
 
 namespace Hammer.Services;
 
-/// <summary>
-///     Represents a service which manages member warnings.
-/// </summary>
-internal sealed class WarningService
+/// <inheritdoc />
+internal sealed class WarningService : IWarningService
 {
     private readonly DiscordLogService _logService;
     private readonly InfractionService _infractionService;
@@ -25,61 +22,45 @@ internal sealed class WarningService
         _ruleService = ruleService;
     }
 
-    /// <summary>
-    ///     Warns a user with the specified reason.
-    /// </summary>
-    /// <param name="user">The user to warn.</param>
-    /// <param name="issuer">The staff member who issued the warning.</param>
-    /// <param name="reason">The reason for the warning.</param>
-    /// <param name="ruleBroken">The rule broken, if any.</param>
-    /// <param name="additionalInfo">Additional information about the warning.</param>
-    /// <returns>
-    ///     A tuple containing the created infraction, and a boolean indicating whether the user was successfully DMd.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    ///     <paramref name="reason" /> is <see langword="null" />, empty, or consists of only whitespace.
-    /// </exception>
-    public async Task<(Infraction Infraction, bool DmSuccess)> WarnAsync(DiscordUser user, DiscordMember issuer, string reason,
-        Rule? ruleBroken, string? additionalInfo = null)
+    /// <inheritdoc />
+    public async ValueTask<InfractionResult> WarnAsync(WarningOptions options)
     {
-        if (string.IsNullOrWhiteSpace(reason))
+        if (options is null)
         {
-            throw new ArgumentException(ExceptionMessages.ReasonCannotBeEmpty, nameof(reason));
+            throw new ArgumentNullException(nameof(options));
         }
 
-        var options = new InfractionOptions
+        var opt = new InfractionOptions
         {
             NotifyUser = true,
-            Reason = reason.AsNullIfWhiteSpace(),
-            RuleBroken = ruleBroken,
-            AdditionalInformation = additionalInfo.AsNullIfWhiteSpace()
+            Reason = options.Reason.AsNullIfWhiteSpace(),
+            RuleBroken = options.RuleBroken,
+            AdditionalInformation = options.AdditionalInfo.AsNullIfWhiteSpace()
         };
 
-        (Infraction infraction, bool success) =
-            await _infractionService.CreateInfractionAsync(InfractionType.Warning, user, issuer, options);
-        int infractionCount = _infractionService.GetInfractionCount(user, issuer.Guild);
+        var result = await _infractionService.CreateInfractionAsync(InfractionType.Warning, options.User, options.Issuer, opt);
+        int infractionCount = _infractionService.GetInfractionCount(options.User, options.Issuer.Guild);
 
         Rule? rule = null;
-        if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        if (result.Infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(result.Infraction.GuildId, ruleId))
         {
-            rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+            rule = _ruleService.GetRuleById(result.Infraction.GuildId, ruleId);
         }
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(DiscordColor.Orange);
-        embed.WithAuthor(user);
+        embed.WithAuthor(options.User);
         embed.WithTitle("User warned");
-        embed.AddField("User", user.Mention, true);
-        embed.AddField("User ID", user.Id, true);
-        embed.AddField("Staff Member", issuer.Mention, true);
+        embed.AddField("User", options.User.Mention, true);
+        embed.AddField("User ID", options.User.Id, true);
+        embed.AddField("Staff Member", options.Issuer.Mention, true);
         embed.AddFieldIf(infractionCount > 0, "Total User Infractions", infractionCount, true);
         embed.AddFieldIf(rule is not null, "Rule Broken", () => $"{rule!.Id} - {rule.Brief ?? rule.Description}", true);
-        embed.AddFieldIf(!string.IsNullOrWhiteSpace(options.Reason), "Reason", options.Reason);
-        embed.AddFieldIf(!string.IsNullOrWhiteSpace(infraction.AdditionalInformation), "Additional Information",
-            infraction.AdditionalInformation);
-        embed.WithFooter($"Infraction {infraction.Id}");
+        embed.AddFieldIf(!string.IsNullOrWhiteSpace(opt.Reason), "Reason", opt.Reason);
+        embed.AddFieldIf(!string.IsNullOrWhiteSpace(opt.AdditionalInformation), "Additional Information", opt.AdditionalInformation);
+        embed.WithFooter($"Infraction {result.Infraction.Id}");
 
-        await _logService.LogAsync(issuer.Guild, embed);
-        return (infraction, success);
+        await _logService.LogAsync(options.Issuer.Guild, embed);
+        return result;
     }
 }

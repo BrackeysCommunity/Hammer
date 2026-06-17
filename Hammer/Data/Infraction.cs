@@ -3,7 +3,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents an infraction.
 /// </summary>
-internal sealed class Infraction : IEquatable<Infraction>, IComparable<Infraction>, IComparable
+public sealed class Infraction : IEquatable<Infraction>, IComparable<Infraction>, IComparable
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="Infraction" /> class.

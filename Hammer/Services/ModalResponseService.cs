@@ -217,10 +217,10 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
 
         DiscordChannel channel = message.Channel!;
         var additionalInfo = $"Message {message.Id} in {channel.Mention} (#{channel.Name})";
-        (Infraction infraction, bool dmSuccess) =
-            await _warningService.WarnAsync(user, staffMember, reason, rule, additionalInfo);
+        var options = new WarningOptions(user, staffMember, reason, rule, additionalInfo);
+        InfractionResult result = await _warningService.WarnAsync(options);
 
-        if (!dmSuccess)
+        if (!result.DirectMessageSuccess)
         {
             importantNotes.Add("The warning was successfully issued, but the user could not be DM'd.");
         }
@@ -236,7 +236,7 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
         builder.WithColor(DiscordColor.Orange);
         builder.WithTitle("Warned user");
         builder.WithDescription(reason);
-        builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
+        builder.WithFooter($"Infraction {result.Infraction.Id} \u2022 User {user.Id}");
 
         _logger.LogInformation("{StaffMember} warned {User}. Reason: {Reason}", staffMember, user, reason);
 

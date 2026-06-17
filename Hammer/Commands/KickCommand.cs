@@ -124,10 +124,9 @@ internal sealed class KickCommand
                 }
             }
 
-            (infraction, bool dmSuccess) =
-                await _banService.KickAsync(member, context.Member!, reason, rule, clearMessageHistory);
+            InfractionResult result = await _banService.KickAsync(member, context.Member!, reason, rule, clearMessageHistory);
 
-            if (!dmSuccess)
+            if (!result.DirectMessageSuccess)
             {
                 importantNotes.Add("The kick was successfully issued, but the user could not be DM'd.");
             }
@@ -141,7 +140,7 @@ internal sealed class KickCommand
             builder.WithColor(DiscordColor.Red);
             builder.WithTitle("Kicked user");
             builder.WithDescription(reason);
-            builder.WithFooter($"Infraction {infraction.Id} \u2022 User {member.Id}");
+            builder.WithFooter($"Infraction {result.Infraction.Id} \u2022 User {member.Id}");
 
             reason = reason.WithWhiteSpaceAlternative("None");
             _logger.LogInformation("{StaffMember} kicked {User}. Reason: {Reason}", context.Member, member, reason);

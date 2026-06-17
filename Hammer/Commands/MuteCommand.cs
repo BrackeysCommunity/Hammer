@@ -136,7 +136,7 @@ internal sealed class MuteCommand
             }
         }
 
-        Task<(Infraction, bool)> infractionTask;
+        ValueTask<InfractionResult> infractionTask;
         PermissionLevel permissionLevel = member.GetPermissionLevel(guildConfiguration);
         var shouldClampDuration = false;
 
@@ -176,9 +176,9 @@ internal sealed class MuteCommand
 
         try
         {
-            (infraction, bool dmSuccess) = await infractionTask;
+            InfractionResult result = await infractionTask;
 
-            if (!dmSuccess)
+            if (!result.DirectMessageSuccess)
             {
                 importantNotes.Add("The mute was successfully issued, but the user could not be DM'd.");
             }
@@ -190,15 +190,15 @@ internal sealed class MuteCommand
                 builder.WithDescription(reason);
             }
 
-            builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
+            builder.WithFooter($"Infraction {result.Infraction.Id} \u2022 User {user.Id}");
             reason = reason.WithWhiteSpaceAlternative("None");
 
-            if (infraction.Type == InfractionType.Mute)
+            if (result.Infraction.Type == InfractionType.Mute)
             {
                 builder.WithTitle("Muted user");
                 _logger.LogInformation("{StaffMember} muted {User}. Reason: {Reason}", member, user, reason);
             }
-            else if (infraction.Type == InfractionType.TemporaryMute)
+            else if (result.Infraction.Type == InfractionType.TemporaryMute)
             {
                 builder.WithTitle("Temporarily muted user");
                 builder.AddField("Duration", duration!.Value.Humanize());

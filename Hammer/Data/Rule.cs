@@ -3,7 +3,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents a guild rule.
 /// </summary>
-internal sealed class Rule : IEquatable<Rule>
+public sealed class Rule : IEquatable<Rule>
 {
     /// <summary>
     ///     Gets or sets the brief rule description, if any.

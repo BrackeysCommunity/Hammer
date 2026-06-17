@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Text;
 using DSharpPlus;
@@ -153,7 +154,7 @@ internal sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>
     /// <returns>
     ///     A tuple containing the newly-created infraction, and a boolean indicating whether the user was successfully DMd.
     /// </returns>
-    public async Task<(Infraction Infraction, bool DmSuccess)> CreateInfractionAsync(
+    public async ValueTask<InfractionResult> CreateInfractionAsync(
         InfractionType type,
         DiscordUser user,
         DiscordMember staffMember,
@@ -208,7 +209,7 @@ internal sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>
         }
 
         _cooldownService.StartCooldown(infraction);
-        return (infraction, result);
+        return new InfractionResult(infraction, result);
     }
 
     /// <summary>
@@ -453,7 +454,7 @@ internal sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>
     ///     The duration of the gag. If <see langword="null" />, the duration as specified in the configuration file is used.
     /// </param>
     /// <returns>The newly-created infraction, or <see langword="null" /> if the infraction could not be created.</returns>
-    public async Task<(Infraction?, bool)> GagAsync(
+    public async ValueTask<InfractionResult> GagAsync(
         DiscordUser user,
         DiscordMember staffMember,
         DiscordMessage? sourceMessage = null,
@@ -463,7 +464,7 @@ internal sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>
         DiscordGuild guild = staffMember.Guild;
         if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
-            return (null, false);
+            return default;
         }
 
         if (!duration.HasValue)
@@ -674,7 +675,7 @@ internal sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>
             return ArraySegment<Infraction>.Empty;
         }
 
-        var infractions = new Infraction[cache.Count];
+        Infraction[] infractions = ArrayPool<Infraction>.Shared.Rent(cache.Count);
         var resultIndex = 0;
 
         for (var index = 0; index < infractions.Length; index++)

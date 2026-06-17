@@ -139,14 +139,14 @@ internal sealed class BanCommand
             }
         }
 
-        Task<(Infraction, bool)> infractionTask = duration is null
+        ValueTask<InfractionResult> infractionTask = duration is null
             ? _banService.BanAsync(user, context.Member!, reason, rule, clearMessageHistory)
             : _banService.TemporaryBanAsync(user, context.Member!, reason, duration.Value, rule, clearMessageHistory);
         try
         {
-            (infraction, bool dmSuccess) = await infractionTask;
+            InfractionResult result = await infractionTask;
 
-            if (!dmSuccess)
+            if (!result.DirectMessageSuccess)
             {
                 importantNotes.Add("The ban was successfully issued, but the user could not be DM'd.");
             }
@@ -160,7 +160,7 @@ internal sealed class BanCommand
                 builder.WithDescription(reason);
             }
 
-            builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
+            builder.WithFooter($"Infraction {result.Infraction.Id} \u2022 User {user.Id}");
             reason = reason.WithWhiteSpaceAlternative("None");
 
             if (duration is null)

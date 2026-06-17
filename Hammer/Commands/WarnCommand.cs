@@ -104,10 +104,10 @@ internal sealed class WarnCommand
                 }
             }
 
-            (infraction, bool dmSuccess) =
-                await _warningService.WarnAsync(user, member, reason, rule);
+            var options = new WarningOptions(user: user, issuer: member, reason: reason, ruleBroken: rule);
+            InfractionResult result = await _warningService.WarnAsync(options);
 
-            if (!dmSuccess)
+            if (!result.DirectMessageSuccess)
             {
                 importantNotes.Add("The warning was successfully issued, but the user could not be DM'd.");
             }
@@ -121,7 +121,7 @@ internal sealed class WarnCommand
             builder.WithColor(DiscordColor.Orange);
             builder.WithTitle("Warned user");
             builder.WithDescription(reason);
-            builder.WithFooter($"Infraction {infraction.Id} \u2022 User {user.Id}");
+            builder.WithFooter($"Infraction {result.Infraction.Id} \u2022 User {user.Id}");
 
             reason = reason.WithWhiteSpaceAlternative("None");
             _logger.LogInformation("{StaffMember} warned {User}. Reason: {Reason}", member, user, reason);

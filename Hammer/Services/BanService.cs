@@ -111,7 +111,7 @@ internal sealed class BanService : BackgroundService
     ///     -or-
     ///     <para><paramref name="issuer" /> is <see langword="null" />.</para>
     /// </exception>
-    public async Task<(Infraction Infraction, bool DmSuccess)> BanAsync(
+    public async ValueTask<InfractionResult> BanAsync(
         DiscordUser user,
         DiscordMember issuer,
         string? reason,
@@ -130,17 +130,15 @@ internal sealed class BanService : BackgroundService
         }
 
         var options = new InfractionOptions { NotifyUser = false, Reason = reason.AsNullIfWhiteSpace(), RuleBroken = ruleBroken };
-
-        (Infraction infraction, bool success) =
-            await _infractionService.CreateInfractionAsync(InfractionType.Ban, user, issuer, options);
+        var result = await _infractionService.CreateInfractionAsync(InfractionType.Ban, user, issuer, options);
 
         DiscordGuild guild = issuer.Guild;
         int infractionCount = _infractionService.GetInfractionCount(user, guild);
 
         Rule? rule = null;
-        if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        if (result.Infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(result.Infraction.GuildId, ruleId))
         {
-            rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+            rule = _ruleService.GetRuleById(result.Infraction.GuildId, ruleId);
         }
 
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
@@ -156,12 +154,13 @@ internal sealed class BanService : BackgroundService
         embed.AddFieldIf(infractionCount > 0, "Total User Infractions", infractionCount, true);
         embed.AddFieldIf(rule is not null, "Rule Broken", () => $"{rule!.Id} - {rule.Brief ?? rule.Description}", true);
         embed.AddFieldIf(!string.IsNullOrWhiteSpace(options.Reason), "Reason", options.Reason);
-        embed.WithFooter($"Infraction {infraction.Id}");
+        embed.WithFooter($"Infraction {result.Infraction.Id}");
         await _logService.LogAsync(guild, embed);
-        await _mailmanService.SendInfractionAsync(infraction, infractionCount, options);
+        DiscordMessage? message = await _mailmanService.SendInfractionAsync(result.Infraction, infractionCount, options);
+        result = result with { DirectMessageSuccess = result.DirectMessageSuccess && message is not null };
 
         await guild.BanMemberAsync(user.Id, reason: reason, messageDeleteDuration: TimeSpan.FromDays(clearHistory ? 7 : 0));
-        return (infraction, success);
+        return result;
     }
 
     public TemporaryBan? GetTemporaryBan(DiscordUser user, DiscordGuild guild)
@@ -244,7 +243,7 @@ internal sealed class BanService : BackgroundService
     /// <exception cref="ArgumentException">
     ///     <paramref name="member" /> and <paramref name="staffMember" /> are not in the same guild.
     /// </exception>
-    public async Task<(Infraction Infraction, bool DmSucess)> KickAsync(
+    public async ValueTask<InfractionResult> KickAsync(
         DiscordMember member,
         DiscordMember staffMember,
         string? reason,
@@ -269,14 +268,12 @@ internal sealed class BanService : BackgroundService
         }
 
         var options = new InfractionOptions { NotifyUser = false, Reason = reason.AsNullIfWhiteSpace(), RuleBroken = ruleBroken };
-
-        (Infraction infraction, bool success) =
-            await _infractionService.CreateInfractionAsync(InfractionType.Kick, member, staffMember, options);
+        var result = await _infractionService.CreateInfractionAsync(InfractionType.Kick, member, staffMember, options);
 
         Rule? rule = null;
-        if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        if (result.Infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(result.Infraction.GuildId, ruleId))
         {
-            rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+            rule = _ruleService.GetRuleById(result.Infraction.GuildId, ruleId);
         }
 
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
@@ -292,11 +289,12 @@ internal sealed class BanService : BackgroundService
         embed.AddField("Messages Cleared", clearHistory ? "Yes" : "No", true);
         embed.AddFieldIf(rule is not null, "Rule Broken", () => $"{rule!.Id} - {rule.Brief ?? rule.Description}", true);
         embed.AddFieldIf(!string.IsNullOrWhiteSpace(options.Reason), "Reason", options.Reason);
-        embed.WithFooter($"Infraction {infraction.Id}");
+        embed.WithFooter($"Infraction {result.Infraction.Id}");
         await _logService.LogAsync(guild, embed);
 
         int infractionCount = _infractionService.GetInfractionCount(member, guild);
-        await _mailmanService.SendInfractionAsync(infraction, infractionCount, options);
+        DiscordMessage? directMessage = await _mailmanService.SendInfractionAsync(result.Infraction, infractionCount, options);
+        result = result with { DirectMessageSuccess = result.DirectMessageSuccess && directMessage is not null };
 
         await member.RemoveAsync(reason);
 
@@ -332,7 +330,7 @@ internal sealed class BanService : BackgroundService
             });
         }
 
-        return (infraction, success);
+        return result;
     }
 
     /// <summary>
@@ -408,7 +406,7 @@ internal sealed class BanService : BackgroundService
     ///     -or-
     ///     <para><paramref name="issuer" /> is <see langword="null" />.</para>
     /// </exception>
-    public async Task<(Infraction Infraction, bool DmSuccess)> TemporaryBanAsync(
+    public async ValueTask<InfractionResult> TemporaryBanAsync(
         DiscordUser user,
         DiscordMember issuer,
         string? reason,
@@ -438,14 +436,13 @@ internal sealed class BanService : BackgroundService
         DiscordGuild guild = issuer.Guild;
         CreateTemporaryBan(user, guild, options.ExpirationTime.Value);
 
-        (Infraction infraction, bool success) =
-            await _infractionService.CreateInfractionAsync(InfractionType.TemporaryBan, user, issuer, options);
+        var result = await _infractionService.CreateInfractionAsync(InfractionType.TemporaryBan, user, issuer, options);
         int infractionCount = _infractionService.GetInfractionCount(user, issuer.Guild);
 
         Rule? rule = null;
-        if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
+        if (result.Infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(result.Infraction.GuildId, ruleId))
         {
-            rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+            rule = _ruleService.GetRuleById(result.Infraction.GuildId, ruleId);
         }
 
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
@@ -464,7 +461,7 @@ internal sealed class BanService : BackgroundService
         embed.AddFieldIf(infractionCount > 0, "Total User Infractions", infractionCount, true);
         embed.AddFieldIf(rule is not null, "Rule Broken", () => $"{rule!.Id} - {rule.Brief ?? rule.Description}", true);
         embed.AddFieldIf(!string.IsNullOrWhiteSpace(options.Reason), "Reason", options.Reason);
-        embed.WithFooter($"Infraction {infraction.Id}");
+        embed.WithFooter($"Infraction {result.Infraction.Id}");
         await _logService.LogAsync(guild, embed);
 
         if (clearHistory)
@@ -498,7 +495,7 @@ internal sealed class BanService : BackgroundService
             });
         }
 
-        return (infraction, success);
+        return result;
     }
 
     /// <inheritdoc />

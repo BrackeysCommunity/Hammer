@@ -1,4 +1,4 @@
-﻿using Hammer.Data.ValueConverters;
+using Hammer.Data.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

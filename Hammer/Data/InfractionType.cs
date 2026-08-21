@@ -1,4 +1,4 @@
-﻿using Hammer.Resources;
+using Hammer.Resources;
 
 namespace Hammer.Data;
 

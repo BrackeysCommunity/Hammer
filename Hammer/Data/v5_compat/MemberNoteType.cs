@@ -1,4 +1,4 @@
-﻿namespace Hammer.Data.v5_compat;
+namespace Hammer.Data.v5_compat;
 
 /// <summary>
 ///     An enumeration of types for a <see cref="MemberNote" />.

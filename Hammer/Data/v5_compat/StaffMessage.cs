@@ -1,4 +1,4 @@
-﻿namespace Hammer.Data.v5_compat;
+namespace Hammer.Data.v5_compat;
 
 /// <summary>
 ///     Represents a message sent from a staff member to a community member.

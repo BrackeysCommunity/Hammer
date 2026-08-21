@@ -1,4 +1,4 @@
-﻿namespace Hammer.Data;
+namespace Hammer.Data;
 
 [Flags]
 public enum StaffNotificationOptions

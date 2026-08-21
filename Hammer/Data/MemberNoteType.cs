@@ -1,4 +1,4 @@
-﻿namespace Hammer.Data;
+namespace Hammer.Data;
 
 /// <summary>
 ///     An enumeration of types for a <see cref="MemberNote" />.

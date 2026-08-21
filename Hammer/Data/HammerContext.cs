@@ -86,6 +86,8 @@ internal sealed class HammerContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.HasDefaultSchema("hammer");
 
         modelBuilder.ApplyConfiguration(new AltAccountConfiguration());
         modelBuilder.ApplyConfiguration(new BlockedReporterConfiguration());

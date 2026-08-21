@@ -17,7 +17,7 @@ internal static class HammerContextConfig
     {
         builder.UseNpgsql(connectionString, options =>
         {
-            options.MapEnum<InfractionType>("infraction_type", "public", new NpgsqlSnakeCaseNameTranslator());
+            options.MapEnum<InfractionType>("infraction_type", "hammer", new NpgsqlSnakeCaseNameTranslator());
         });
         builder.UseSnakeCaseNamingConvention();
     }

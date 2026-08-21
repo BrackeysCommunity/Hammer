@@ -1,0 +1,29 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+namespace Hammer.Data.v5_compat.EntityConfigurations;
+
+/// <summary>
+///     Defines configuration for <see cref="Data.Infraction" />.
+/// </summary>
+internal sealed class InfractionConfiguration : IEntityTypeConfiguration<Infraction>
+{
+    /// <inheritdoc />
+    public void Configure(EntityTypeBuilder<Infraction> builder)
+    {
+        builder.ToTable("Infraction");
+        builder.HasKey(e => e.Id);
+
+        builder.Property(e => e.Id);
+        builder.Property(e => e.GuildId);
+        builder.Property(e => e.UserId);
+        builder.Property(e => e.StaffMemberId);
+        builder.Property(e => e.Type);
+        builder.Property(e => e.IssuedAt).HasConversion<DateTimeOffsetToBytesConverter>();
+        builder.Property(e => e.Reason);
+        builder.Property(e => e.AdditionalInformation);
+        builder.Property(e => e.RuleId);
+        builder.Property(e => e.RuleText);
+    }
+}

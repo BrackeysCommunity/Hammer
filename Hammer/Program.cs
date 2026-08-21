@@ -107,41 +107,6 @@ builder.Services.AddDbContextFactory<HammerContext>((services, optionsBuilder) =
     }
 });
 
-using (IServiceScope scope = builder.Services.BuildServiceProvider().CreateScope())
-{
-    ILogger<HammerContext> logger = scope.ServiceProvider.GetRequiredService<ILogger<HammerContext>>();
-    IDbContextFactory<HammerContext> factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<HammerContext>>();
-    await using HammerContext context = await factory.CreateDbContextAsync();
-
-    for (var attempt = 1;; attempt++)
-    {
-        try
-        {
-            if (context.Database.IsMySql())
-            {
-                string[] pending = (await context.Database.GetPendingMigrationsAsync()).ToArray();
-                if (pending.Length > 0)
-                {
-                    logger.LogInformation("Applying migrations: {Migrations}", string.Join(", ", pending));
-                    await context.Database.MigrateAsync();
-                }
-            }
-            else
-            {
-                // Dev convenience: create SQLite schema without migrations
-                await context.Database.EnsureCreatedAsync();
-            }
-
-            break;
-        }
-        catch (Exception ex) when (attempt < 5)
-        {
-            logger.LogWarning(ex, "Migration attempt {Attempt} failed. Retrying...", attempt);
-            await Task.Delay(TimeSpan.FromSeconds(3));
-        }
-    }
-}
-
 builder.Services.AddSingleton<DatabaseService>();
 builder.Services.AddSingleton<HttpClient>();
 builder.Services.AddSingleton<InfractionStatisticsService>();
@@ -161,4 +126,36 @@ builder.Services.AddHostedSingleton<RuleService>();
 builder.Services.AddHostedSingleton<BotService>();
 
 IHost app = builder.Build();
+await ConfigureMigrationsAsync<HammerContext>(app.Services);
 await app.RunAsync();
+return;
+
+async Task ConfigureMigrationsAsync<TContext>(IServiceProvider services) where TContext : DbContext
+{
+    using var scope = services.CreateScope();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<TContext>>();
+    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<TContext>>();
+    await using var context = await factory.CreateDbContextAsync();
+
+    for (var attempt = 1;; attempt++)
+    {
+        var contextName = typeof(TContext).Name;
+
+        try
+        {
+            string[] pending = [.. await context.Database.GetPendingMigrationsAsync()];
+            if (pending.Length > 0)
+            {
+                logger.LogInformation("Applying migrations for {Context}: {Migrations}", contextName, string.Join(", ", pending));
+                await context.Database.MigrateAsync();
+            }
+
+            break;
+        }
+        catch (Exception ex) when (attempt < 5)
+        {
+            logger.LogWarning(ex, "Migration attempt {Attempt} for {Context} failed. Retrying...", attempt, contextName);
+            await Task.Delay(TimeSpan.FromSeconds(3));
+        }
+    }
+}

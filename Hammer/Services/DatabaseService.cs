@@ -31,12 +31,6 @@ internal sealed class DatabaseService
         await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
         await context.Database.MigrateAsync();
 
-        if (!context.Database.IsMySql())
-        {
-            _logger.LogWarning("Cannot migrate from SQLite to SQLite. This operation will be skipped");
-            return 0;
-        }
-
         await using var migration = new HammerContext(
             new DbContextOptionsBuilder<HammerContext>()
                 .UseSqlite("Data Source=data/hammer.db")

@@ -1,6 +1,5 @@
 using Hammer.Data.EntityConfigurations;
 using Microsoft.EntityFrameworkCore;
-using MuteConfiguration = Hammer.Data.EntityConfigurations.MuteConfiguration;
 
 namespace Hammer.Data;
 
@@ -88,17 +87,16 @@ internal sealed class HammerContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        bool isMySql = Database.IsMySql();
-        modelBuilder.ApplyConfiguration(new AltAccountConfiguration(isMySql));
-        modelBuilder.ApplyConfiguration(new BlockedReporterConfiguration(isMySql));
-        modelBuilder.ApplyConfiguration(new DeletedMessageConfiguration(isMySql));
-        modelBuilder.ApplyConfiguration(new InfractionConfiguration(isMySql));
-        modelBuilder.ApplyConfiguration(new MemberNoteConfiguration(isMySql));
-        modelBuilder.ApplyConfiguration(new MuteConfiguration(isMySql));
+        modelBuilder.ApplyConfiguration(new AltAccountConfiguration());
+        modelBuilder.ApplyConfiguration(new BlockedReporterConfiguration());
+        modelBuilder.ApplyConfiguration(new DeletedMessageConfiguration());
+        modelBuilder.ApplyConfiguration(new InfractionConfiguration());
+        modelBuilder.ApplyConfiguration(new MemberNoteConfiguration());
+        modelBuilder.ApplyConfiguration(new MuteConfiguration());
         modelBuilder.ApplyConfiguration(new StaffMessageConfiguration());
         modelBuilder.ApplyConfiguration(new ReportedMessageConfiguration());
-        modelBuilder.ApplyConfiguration(new TemporaryBanConfiguration(isMySql));
-        modelBuilder.ApplyConfiguration(new TrackedMessageConfiguration(isMySql));
+        modelBuilder.ApplyConfiguration(new TemporaryBanConfiguration());
+        modelBuilder.ApplyConfiguration(new TrackedMessageConfiguration());
         modelBuilder.ApplyConfiguration(new RuleConfiguration());
     }
 }

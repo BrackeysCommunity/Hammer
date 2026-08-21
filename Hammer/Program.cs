@@ -6,11 +6,9 @@ using Hammer.Commands.Infractions;
 using Hammer.Commands.Notes;
 using Hammer.Commands.Reports;
 using Hammer.Commands.Rules;
-using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Services;
 using Microsoft.EntityFrameworkCore;
-using MySqlConnector;
 using Serilog;
 using X10D.Hosting.DependencyInjection;
 
@@ -80,36 +78,15 @@ builder.Services.AddCommandsExtension((_, commands) =>
     commands.AddCommands<WarnCommand>();
 });
 
-builder.Services.AddDbContextFactory<HammerContext>((services, optionsBuilder) =>
+builder.Services.AddDbContextFactory<HammerContext>((services, options) =>
 {
-    ILogger<HammerContext> logger = services.GetRequiredService<ILogger<HammerContext>>();
-    ConfigurationService configurationService = services.GetRequiredService<ConfigurationService>();
-    DatabaseConfiguration databaseConfiguration = configurationService.BotConfiguration.Database;
-    switch (databaseConfiguration.Provider)
-    {
-        case "mysql":
-            logger.LogTrace("Using MySQL/MariaDB database provider");
-            var connectionStringBuilder = new MySqlConnectionStringBuilder
-            {
-                Server = databaseConfiguration.Host,
-                Port = (uint)(databaseConfiguration.Port ?? 3306),
-                Database = databaseConfiguration.Database,
-                UserID = databaseConfiguration.Username,
-                Password = databaseConfiguration.Password
-            };
+    var configuration = services.GetRequiredService<IConfiguration>();
+    var logger = services.GetRequiredService<ILogger<HammerContext>>();
+    var connectionString = configuration.GetValue<string>("DB_CONNECTION_STRING") ??
+                           throw new InvalidOperationException("DB_CONNECTION_STRING is not set");
 
-            var connectionString = connectionStringBuilder.ToString();
-            var version = ServerVersion.AutoDetect(connectionString);
-
-            logger.LogTrace("Server version is {Version}", version);
-            optionsBuilder.UseMySql(connectionString, version);
-            break;
-
-        default:
-            logger.LogTrace("Using SQLite database provider");
-            optionsBuilder.UseSqlite("Data Source='data/hammer.db'");
-            break;
-    }
+    logger.LogTrace("Using PostgreSQL database provider for HammerContext");
+    HammerContextConfig.Configure(options, connectionString);
 });
 
 builder.Services.AddSingleton<DatabaseService>();

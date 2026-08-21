@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Hammer.Data.EntityConfigurations;
 
@@ -9,40 +8,18 @@ namespace Hammer.Data.EntityConfigurations;
 /// </summary>
 internal sealed class MemberNoteConfiguration : IEntityTypeConfiguration<MemberNote>
 {
-    private readonly bool _isMySql;
-
-    /// <summary>
-    ///     Initializes a new instance of the <see cref="MemberNoteConfiguration" /> class.
-    /// </summary>
-    /// <param name="isMySql">
-    ///     <see langword="true" /> if this configuration should use MySQL configuration, otherwise <see langword="false" />.
-    /// </param>
-    public MemberNoteConfiguration(bool isMySql)
-    {
-        _isMySql = isMySql;
-    }
-
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<MemberNote> builder)
     {
         builder.ToTable("MemberNote");
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.Id).HasColumnOrder(1);
-        builder.Property(e => e.Type).HasColumnOrder(2);
-        builder.Property(e => e.UserId).HasColumnOrder(3);
-        builder.Property(e => e.GuildId).HasColumnOrder(4);
-        builder.Property(e => e.AuthorId).HasColumnOrder(5);
-
-        if (_isMySql)
-        {
-            builder.Property(e => e.CreationTimestamp).HasColumnOrder(6).HasColumnType("DATETIME(6)");
-        }
-        else
-        {
-            builder.Property(e => e.CreationTimestamp).HasColumnOrder(6).HasConversion<DateTimeOffsetToBytesConverter>();
-        }
-
-        builder.Property(e => e.Content).HasColumnOrder(7).HasMaxLength(255);
+        builder.Property(e => e.Id);
+        builder.Property(e => e.Type);
+        builder.Property(e => e.UserId);
+        builder.Property(e => e.GuildId);
+        builder.Property(e => e.AuthorId);
+        builder.Property(e => e.CreationTimestamp);
+        builder.Property(e => e.Content).HasMaxLength(255);
     }
 }

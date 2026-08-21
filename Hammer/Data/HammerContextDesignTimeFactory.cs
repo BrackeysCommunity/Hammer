@@ -9,11 +9,10 @@ internal sealed class HammerContextDesignTimeFactory : IDesignTimeDbContextFacto
 {
     public HammerContext CreateDbContext(string[] args)
     {
-        var options = new DbContextOptionsBuilder<HammerContext>();
-        var serverVersion = new MariaDbServerVersion(ServerVersion.Parse("10.5.3-mariadb"));
+        const string connectionString = "Host=localhost;Port=5432;Username=root;Password=localdev;Database=postgres";
 
-        const string connectionString = "server=localhost;database=hammer;user=root;password=your_password";
-        options.UseMySql(connectionString, serverVersion, builder => builder.DisableBackslashEscaping());
+        var options = new DbContextOptionsBuilder<HammerContext>();
+        HammerContextConfig.Configure(options, connectionString);
 
         return new HammerContext(options.Options);
     }

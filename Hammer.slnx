@@ -6,10 +6,11 @@
         <File Path="USAGE.md" />
         <File Path=".editorconfig" />
         <File Path=".gitattributes" />
+        <File Path=".gitlab-ci.yml" />
         <File Path="CHANGELOG.md" />
         <File Path="compose.yaml" />
         <File Path="global.json" />
         <File Path="config.example.yaml" />
     </Folder>
-    <Project Path="Hammer\Hammer.csproj" Type="C#" />
+    <Project Path="Hammer\Hammer.csproj" />
 </Solution>

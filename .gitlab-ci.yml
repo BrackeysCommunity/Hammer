@@ -1,0 +1,10 @@
+image: mcr.microsoft.com/dotnet/sdk:10.0
+
+stages:
+  - build
+
+build:
+  stage: build
+  script:
+    - dotnet restore Hammer.slnx
+    - dotnet build Hammer.slnx -c Release --no-restore

@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using Hammer.Services;
-using Microsoft.Extensions.Logging;
 
 namespace Hammer.Commands.Notes;
 

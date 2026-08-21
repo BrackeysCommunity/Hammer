@@ -4,7 +4,6 @@ using Hammer.Data;
 using Hammer.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Hosting;
 
 namespace Hammer.Services;
 

@@ -4,7 +4,6 @@ using DSharpPlus.EventArgs;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
-using Microsoft.Extensions.Logging;
 using X10D.Text;
 
 namespace Hammer.Services;

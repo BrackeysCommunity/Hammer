@@ -8,8 +8,6 @@ using Hammer.Data;
 using Hammer.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Hammer.Services;
 

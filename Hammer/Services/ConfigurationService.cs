@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
-using Microsoft.Extensions.Configuration;
 
 namespace Hammer.Services;
 

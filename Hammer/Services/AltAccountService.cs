@@ -5,7 +5,6 @@ using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 
 namespace Hammer.Services;
 

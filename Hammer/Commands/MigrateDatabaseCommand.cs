@@ -5,7 +5,6 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Services;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Logging;
 
 namespace Hammer.Commands;
 

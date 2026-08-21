@@ -5,7 +5,6 @@ using DSharpPlus.Exceptions;
 using Hammer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Logging;
 
 namespace Hammer.Services;
 

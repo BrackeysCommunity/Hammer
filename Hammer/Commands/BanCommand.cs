@@ -10,7 +10,6 @@ using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Logging;
 using X10D.Text;
 using X10D.Time;
 

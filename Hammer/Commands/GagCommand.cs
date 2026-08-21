@@ -6,7 +6,6 @@ using DSharpPlus.Entities;
 using Hammer.Extensions;
 using Hammer.Services;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Logging;
 using X10D.Time;
 
 namespace Hammer.Commands;

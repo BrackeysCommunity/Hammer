@@ -12,7 +12,6 @@ using Hammer.Resources;
 using Humanizer;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using X10D.Text;
 using TimestampFormat = DSharpPlus.TimestampFormat;
 

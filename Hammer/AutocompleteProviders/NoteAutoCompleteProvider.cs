@@ -5,7 +5,6 @@ using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Hammer.AutocompleteProviders;
 

@@ -5,7 +5,6 @@ using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Resources;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using SmartFormat;
 
 namespace Hammer.Services;

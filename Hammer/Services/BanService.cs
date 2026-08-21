@@ -7,7 +7,6 @@ using Hammer.Extensions;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Hosting;
 using X10D.Text;
 using Timer = System.Timers.Timer;
 

@@ -8,7 +8,6 @@ using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Logging;
 
 namespace Hammer.Commands.Notes;
 

@@ -1,7 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Hammer.Interactivity;
 

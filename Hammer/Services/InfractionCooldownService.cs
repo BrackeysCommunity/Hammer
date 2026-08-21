@@ -6,8 +6,6 @@ using DSharpPlus.Interactivity.Extensions;
 using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Timer = System.Timers.Timer;
 
 namespace Hammer.Services;

@@ -1,6 +1,5 @@
 using Hammer.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Hammer.Services;
 

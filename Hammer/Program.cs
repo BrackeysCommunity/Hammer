@@ -14,18 +14,23 @@ using MySqlConnector;
 using Serilog;
 using X10D.Hosting.DependencyInjection;
 
-Directory.CreateDirectory("data");
+var workingDir = AppContext.BaseDirectory;
+
+var dataDir = Path.Combine(workingDir, "data");
+var logsDir = Path.Combine(workingDir, "logs");
+Directory.CreateDirectory(dataDir);
+Directory.CreateDirectory(logsDir);
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .WriteTo.File("logs/latest.log", rollingInterval: RollingInterval.Day)
+    .WriteTo.File(Path.Combine(logsDir, "latest.log"), rollingInterval: RollingInterval.Day)
 #if DEBUG
     .MinimumLevel.Debug()
 #endif
     .CreateLogger();
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-builder.Configuration.AddYamlFile("data/config.yaml", true, true);
+builder.Configuration.AddYamlFile(Path.Combine(dataDir, "config.yaml"), true, true);
 
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog();

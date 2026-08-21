@@ -11,7 +11,6 @@ internal sealed class AltAccountConfiguration : IEntityTypeConfiguration<AltAcco
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<AltAccount> builder)
     {
-        builder.ToTable("AltAccount");
         builder.HasKey(e => new { e.UserId, e.AltId });
 
         builder.Property(e => e.UserId);

@@ -11,7 +11,6 @@ internal sealed class BlockedReporterConfiguration : IEntityTypeConfiguration<Bl
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<BlockedReporter> builder)
     {
-        builder.ToTable("BlockedReporter");
         builder.HasKey(e => new { e.UserId, e.GuildId });
 
         builder.Property(e => e.UserId);

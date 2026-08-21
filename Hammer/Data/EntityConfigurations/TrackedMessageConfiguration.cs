@@ -12,7 +12,6 @@ internal sealed class TrackedMessageConfiguration : IEntityTypeConfiguration<Tra
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<TrackedMessage> builder)
     {
-        builder.ToTable("TrackedMessages");
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Id);

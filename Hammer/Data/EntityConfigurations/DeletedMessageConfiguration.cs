@@ -12,7 +12,6 @@ internal sealed class DeletedMessageConfiguration : IEntityTypeConfiguration<Del
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<DeletedMessage> builder)
     {
-        builder.ToTable("DeletedMessage");
         builder.HasKey(e => e.MessageId);
 
         builder.Property(e => e.MessageId);

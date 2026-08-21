@@ -11,7 +11,6 @@ internal sealed class MemberNoteConfiguration : IEntityTypeConfiguration<MemberN
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<MemberNote> builder)
     {
-        builder.ToTable("MemberNote");
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Id);

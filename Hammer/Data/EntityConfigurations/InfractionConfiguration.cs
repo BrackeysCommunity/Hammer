@@ -11,7 +11,6 @@ internal sealed class InfractionConfiguration : IEntityTypeConfiguration<Infract
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Infraction> builder)
     {
-        builder.ToTable("Infraction");
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Id);

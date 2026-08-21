@@ -9,7 +9,6 @@ using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
-using Humanizer.Localisation;
 using JetBrains.Annotations;
 
 namespace Hammer.Commands;

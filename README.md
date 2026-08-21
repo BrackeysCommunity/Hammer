@@ -12,7 +12,7 @@
 Hammer is a Discord bot which provides features to issue infractions to misbehaving users.
 
 ## Installing and configuring Hammer
-Hammer runs in a Docker container, and there is a [docker-compose.yaml](docker-compose.yaml) file which simplifies this process.
+Hammer runs in a Docker container, and there is a [compose.yaml](compose.yaml) file which simplifies this process.
 
 ### Clone the repository
 To start off, clone the repository into your desired directory:

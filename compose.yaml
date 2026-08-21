@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   hammer:
     container_name: Hammer
@@ -14,3 +13,4 @@ services:
     restart: always
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DB_CONNECTION_STRING=${DB_CONNECTION_STRING}

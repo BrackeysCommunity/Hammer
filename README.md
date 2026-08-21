@@ -25,6 +25,7 @@ Step into the Hammer directory using `cd Hammer`, and continue with the steps be
 The bot's token is passed to the container using the `DISCORD_TOKEN` environment variable. Create a file named `.env`, and add the following line:
 ```
 DISCORD_TOKEN=your_token_here
+CONNECTION_STRING=your_connection_string_here
 ```
 
 Two directories are required to exist for Docker compose to mount as container volumes, `data` and `logs`:

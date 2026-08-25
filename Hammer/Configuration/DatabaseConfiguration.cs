@@ -3,7 +3,7 @@ namespace Hammer.Configuration;
 /// <summary>
 ///     Represents the database configuration.
 /// </summary>
-internal sealed class DatabaseConfiguration
+public sealed class DatabaseConfiguration
 {
     /// <summary>
     ///     Gets or sets the database name.

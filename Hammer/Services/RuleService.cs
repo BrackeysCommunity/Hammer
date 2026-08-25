@@ -10,7 +10,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which manages guild rules.
 /// </summary>
-internal sealed class RuleService : BackgroundService
+public sealed class RuleService : BackgroundService
 {
     private readonly Dictionary<ulong, List<Rule>> _guildRules = new();
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;

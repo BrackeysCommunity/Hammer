@@ -3,7 +3,7 @@ namespace Hammer.Configuration;
 /// <summary>
 ///     Represents a mute configuration.
 /// </summary>
-internal sealed class MuteConfiguration
+public sealed class MuteConfiguration
 {
     /// <summary>
     ///     Gets or sets the duration of a gag.

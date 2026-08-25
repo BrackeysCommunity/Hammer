@@ -13,7 +13,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which handles infraction cooldowns, to prevent duplicate issues.
 /// </summary>
-internal sealed class InfractionCooldownService : BackgroundService
+public sealed class InfractionCooldownService : BackgroundService
 {
     private readonly ILogger<InfractionCooldownService> _logger;
     private readonly Dictionary<Infraction, DateTimeOffset> _hotInfractions = new();

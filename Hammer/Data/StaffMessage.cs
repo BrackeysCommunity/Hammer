@@ -3,7 +3,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents a message sent from a staff member to a community member.
 /// </summary>
-internal sealed class StaffMessage : IEquatable<StaffMessage>
+public sealed class StaffMessage : IEquatable<StaffMessage>
 {
     /// <summary>
     ///     Gets or sets the content of the message.

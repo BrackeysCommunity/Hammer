@@ -6,7 +6,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents a response to the <c>View Infraction History</c> command.
 /// </summary>
-internal sealed class InfractionHistoryResponse
+public sealed class InfractionHistoryResponse
 {
     private readonly InfractionService _infractionService;
     private readonly InfractionSearchOptions _searchOptions;

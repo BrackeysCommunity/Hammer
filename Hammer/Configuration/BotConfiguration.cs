@@ -3,7 +3,7 @@ namespace Hammer.Configuration;
 /// <summary>
 ///     Represents the bot configuration.
 /// </summary>
-internal sealed class BotConfiguration
+public sealed class BotConfiguration
 {
     /// <summary>
     ///     Gets or sets the database configuration.

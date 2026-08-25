@@ -5,7 +5,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents a user who has been blocked from making reports.
 /// </summary>
-internal sealed class BlockedReporter : IEquatable<BlockedReporter>
+public sealed class BlockedReporter : IEquatable<BlockedReporter>
 {
     /// <summary>
     ///     Gets or sets the date and time at which this user was blocked.

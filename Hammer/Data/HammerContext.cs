@@ -6,7 +6,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents a session with the Hammer database.
 /// </summary>
-internal sealed class HammerContext : DbContext
+public sealed class HammerContext : DbContext
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="HammerContext" /> class.

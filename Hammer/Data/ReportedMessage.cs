@@ -6,7 +6,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents a message report from a community user.
 /// </summary>
-internal sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<DiscordMessage>
+public sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<DiscordMessage>
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="ReportedMessage" /> class.

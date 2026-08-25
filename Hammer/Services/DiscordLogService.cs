@@ -10,7 +10,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which can send embeds to a log channel.
 /// </summary>
-internal sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
+public sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
 {
     private readonly DiscordClient _discordClient;
     private readonly ConfigurationService _configurationService;

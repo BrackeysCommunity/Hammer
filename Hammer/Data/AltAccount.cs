@@ -3,7 +3,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents an alt account record.
 /// </summary>
-internal sealed record AltAccount
+public sealed record AltAccount
 {
     /// <summary>
     ///     Gets or sets the ID of the alt account.

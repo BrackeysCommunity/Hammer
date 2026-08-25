@@ -6,7 +6,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents a message being tracked by the bot's database.
 /// </summary>
-internal class TrackedMessage : IEquatable<TrackedMessage>, IEquatable<DiscordMessage>
+public sealed class TrackedMessage : IEquatable<TrackedMessage>, IEquatable<DiscordMessage>
 {
     /// <summary>
     ///     Gets or sets the attachments in this message.

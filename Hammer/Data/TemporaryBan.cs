@@ -5,7 +5,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents a temporary ban.
 /// </summary>
-internal sealed class TemporaryBan : IEquatable<TemporaryBan>
+public sealed class TemporaryBan : IEquatable<TemporaryBan>
 {
     /// <summary>
     ///     Gets the date and time of the ban's expiration.

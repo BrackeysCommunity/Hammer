@@ -5,7 +5,7 @@ namespace Hammer.Configuration;
 /// <summary>
 ///     Represents a guild configuration.
 /// </summary>
-internal sealed class GuildConfiguration
+public sealed class GuildConfiguration
 {
     /// <summary>
     ///     Gets or sets the default bad-message warning message when using the <see cref="BadMessageCommand" />.

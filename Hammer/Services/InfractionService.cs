@@ -22,7 +22,7 @@ namespace Hammer.Services;
 /// </summary>
 /// <seealso cref="BanService" />
 /// <seealso cref="MuteService" />
-internal sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, IEventHandler<GuildUnavailableEventArgs>
+public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, IEventHandler<GuildUnavailableEventArgs>
 {
     private readonly ConcurrentDictionary<ulong, List<Infraction>> _infractionCache = new();
     private readonly ConcurrentDictionary<long, Infraction> _infractionIdCache = new();

@@ -8,7 +8,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents an instance of a mute.
 /// </summary>
-internal sealed class Mute : IEquatable<Mute>
+public sealed class Mute : IEquatable<Mute>
 {
     /// <summary>
     ///     Gets the date and time of the mute's expiration.

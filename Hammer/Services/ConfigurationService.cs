@@ -7,7 +7,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which can read configuration values from a file.
 /// </summary>
-internal sealed class ConfigurationService
+public sealed class ConfigurationService
 {
     private readonly IConfiguration _configuration;
 

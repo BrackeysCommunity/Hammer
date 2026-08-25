@@ -5,7 +5,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Represents a message which has been deleted by a staff member.
 /// </summary>
-internal sealed class DeletedMessage : IEquatable<DeletedMessage>
+public sealed class DeletedMessage : IEquatable<DeletedMessage>
 {
     /// <summary>
     ///     Gets the name of the bot that added this message to the database.

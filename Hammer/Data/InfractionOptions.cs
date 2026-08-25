@@ -5,7 +5,7 @@ namespace Hammer.Data;
 /// <summary>
 ///     Specifies options to provide to <see cref="Hammer.Services.InfractionService.CreateInfractionAsync" />.
 /// </summary>
-internal readonly struct InfractionOptions
+public readonly struct InfractionOptions
 {
     private readonly DateTimeOffset? _expirationTime;
 

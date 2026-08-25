@@ -3,7 +3,7 @@ namespace Hammer.Configuration;
 /// <summary>
 ///     Represents a role configuration.
 /// </summary>
-internal sealed class RoleConfiguration
+public sealed class RoleConfiguration
 {
     /// <summary>
     ///     Gets or sets the ID of the Administrator role.

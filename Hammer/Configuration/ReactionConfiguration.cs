@@ -3,7 +3,7 @@ namespace Hammer.Configuration;
 /// <summary>
 ///     Represents a reaction configuration.
 /// </summary>
-internal sealed class ReactionConfiguration
+public sealed class ReactionConfiguration
 {
     /// <summary>
     ///     Gets or sets the delete message reaction.

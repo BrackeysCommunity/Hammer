@@ -12,7 +12,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which handles sending direct messages to members for a variety of purposes.
 /// </summary>
-internal sealed class MailmanService
+public sealed class MailmanService
 {
     private readonly DiscordClient _discordClient;
 

@@ -11,7 +11,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which manages alt accounts.
 /// </summary>
-internal sealed class AltAccountService : BackgroundService
+public sealed class AltAccountService : BackgroundService
 {
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly DiscordLogService _discordLogService;

@@ -17,7 +17,7 @@ Hammer runs in a Docker container, and there is a [compose.yaml](compose.yaml) f
 ### Clone the repository
 To start off, clone the repository into your desired directory:
 ```bash
-git clone https://github.com/BrackeysCommunity/Hammer.git
+git clone https://git.brackeys.dev/bot/hammer.git
 ```
 Step into the Hammer directory using `cd Hammer`, and continue with the steps below.
 

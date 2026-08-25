@@ -79,7 +79,7 @@
         <Content Include="..\docker-compose.yaml">
             <Link>docker-compose.yaml</Link>
         </Content>
-        <Content Include="..\Dockerfile">
+        <Content Include="Dockerfile">
             <Link>Dockerfile</Link>
         </Content>
     </ItemGroup>

@@ -97,7 +97,7 @@ public sealed class TrackedMessage : IEquatable<TrackedMessage>, IEquatable<Disc
             GuildId = message.Channel.Guild.Id,
             Content = message.Content,
             CreationTimestamp = message.CreationTimestamp,
-            Attachments = message.Attachments.Select(a => new Uri(a.Url)).ToArray()
+            Attachments = [.. message.Attachments.Select(a => new Uri(a.Url))]
         };
     }
 

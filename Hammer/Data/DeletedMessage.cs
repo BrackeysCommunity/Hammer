@@ -104,7 +104,7 @@ public sealed class DeletedMessage : IEquatable<DeletedMessage>
     {
         return new DeletedMessage
         {
-            Attachments = message.Attachments.Select(a => new Uri(a.Url)).ToArray(),
+            Attachments = [.. message.Attachments.Select(a => new Uri(a.Url))],
             AuthorId = message.Author.Id,
             ChannelId = message.Channel.Id,
             Content = message.Content,

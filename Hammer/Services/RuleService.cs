@@ -185,7 +185,7 @@ public sealed class RuleService : BackgroundService
             return ArraySegment<Rule>.Empty;
         }
 
-        return rules.OrderBy(r => r.Id).ToArray();
+        return [.. rules.OrderBy(r => r.Id)];
     }
 
     /// <summary>

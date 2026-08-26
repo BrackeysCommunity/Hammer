@@ -121,7 +121,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
     /// <remarks>Do NOT use this method to issue infractions to users. Use an appropriate user-targeted method.</remarks>
     public void AddInfractions(IEnumerable<Infraction> infractions)
     {
-        infractions = infractions.ToArray();
+        infractions = [.. infractions];
 
         foreach (IGrouping<ulong, Infraction> group in infractions.GroupBy(i => i.GuildId))
         {
@@ -310,7 +310,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
         embed.WithColor(DiscordColor.Orange);
         embed.WithAuthor(user);
         IReadOnlyCollection<ulong> alts = _altAccountService.GetAltsFor(user.Id);
-        Infraction[] altInfractions = alts.SelectMany(alt => GetInfractions(alt, response.Guild.Id, searchOptions)).ToArray();
+        Infraction[] altInfractions = [.. alts.SelectMany(alt => GetInfractions(alt, response.Guild.Id, searchOptions))];
 
         if (response.StaffRequested && page == response.Pages - 1 && alts.Count > 0 && altInfractions.Length > 0)
         {

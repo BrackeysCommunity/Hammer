@@ -31,8 +31,7 @@ internal sealed partial class InfractionCommand
 
         DiscordGuild guild = context.Guild!;
         IEnumerable<Infraction> infractions = _infractionService.EnumerateInfractions(source, guild);
-        List<Infraction> copies = infractions.Select(infraction => new Infraction(infraction) { UserId = destination.Id })
-            .ToList();
+        List<Infraction> copies = [.. infractions.Select(infraction => new Infraction(infraction) { UserId = destination.Id })];
 
         _infractionService.AddInfractions(copies);
 

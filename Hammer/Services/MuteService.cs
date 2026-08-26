@@ -497,7 +497,7 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
 
         lock (_mutes)
         {
-            mutes = _mutes.ToArray();
+            mutes = [.. _mutes];
         }
 
         foreach (Mute mute in mutes.Where(b => b.ExpiresAt.HasValue && b.ExpiresAt <= DateTimeOffset.UtcNow))

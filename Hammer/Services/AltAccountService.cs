@@ -69,7 +69,7 @@ public sealed class AltAccountService : BackgroundService
             altCache.Add(user.Id);
         }
 
-        AltAccount[] altAccounts = context.AltAccounts.Where(a => a.AltId == user.Id).ToArray();
+        AltAccount[] altAccounts = [.. context.AltAccounts.Where(a => a.AltId == user.Id)];
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
@@ -93,7 +93,7 @@ public sealed class AltAccountService : BackgroundService
         if (_altAccountCache.TryGetValue(userId, out HashSet<ulong>? alts))
         {
             // get alts of alts without this userId
-            return alts.Concat(alts.SelectMany(a => _altAccountCache[a]).Where(a => a != userId)).ToArray();
+            return [.. alts, .. alts.SelectMany(a => _altAccountCache[a]).Where(a => a != userId)];
         }
 
         return ArraySegment<ulong>.Empty;
@@ -133,7 +133,7 @@ public sealed class AltAccountService : BackgroundService
             context.AltAccounts.Remove(altAccount);
         }
 
-        AltAccount[] altAccounts = context.AltAccounts.Where(a => a.AltId == user.Id).ToArray();
+        AltAccount[] altAccounts = [.. context.AltAccounts.Where(a => a.AltId == user.Id)];
         if (altAccounts.Length > 0)
         {
             context.AltAccounts.RemoveRange(altAccounts);
@@ -146,7 +146,7 @@ public sealed class AltAccountService : BackgroundService
 
         foreach (ulong altId in GetAltsFor(alt.Id))
         {
-            altAccounts = context.AltAccounts.Where(a => a.UserId == user.Id && a.AltId == altId).ToArray();
+            altAccounts = [.. context.AltAccounts.Where(a => a.UserId == user.Id && a.AltId == altId)];
             if (altAccounts.Length > 0)
             {
                 context.AltAccounts.RemoveRange(altAccounts);

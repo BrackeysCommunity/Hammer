@@ -85,7 +85,7 @@ internal static class DiscordUserExtensions
         }
 
         RoleConfiguration roleConfiguration = guildConfiguration.Roles;
-        List<ulong> roles = member.Roles.Select(r => r.Id).ToList();
+        List<ulong> roles = [.. member.Roles.Select(r => r.Id)];
 
         if (roles.Contains(roleConfiguration.AdministratorRoleId))
         {

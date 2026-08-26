@@ -38,9 +38,11 @@ internal sealed class StaffHistoryCommand
     {
         IEnumerable<Infraction> infractions = _infractionService.GetInfractions(context.Guild!)
             .Where(i => i.StaffMemberId == user.Id);
-        Infraction[] staffInfractions = infractions.Where(i => i.StaffMemberId == user.Id)
-            .OrderByDescending(i => i.IssuedAt)
-            .ToArray();
+        Infraction[] staffInfractions =
+        [
+            .. infractions.Where(i => i.StaffMemberId == user.Id)
+                .OrderByDescending(i => i.IssuedAt)
+        ];
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user);

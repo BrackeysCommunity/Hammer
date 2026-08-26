@@ -527,7 +527,7 @@ internal sealed class BanService : BackgroundService
 
         lock (_temporaryBans)
         {
-            temporaryBans = _temporaryBans.ToArray();
+            temporaryBans = [.. _temporaryBans];
         }
 
         foreach (TemporaryBan ban in temporaryBans.Where(b => b.ExpiresAt <= DateTimeOffset.UtcNow))

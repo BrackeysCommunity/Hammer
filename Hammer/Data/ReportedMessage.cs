@@ -38,7 +38,7 @@ public sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<Di
             throw new ArgumentException("Message and reporter must be in the same guild.");
         }
 
-        Attachments = message.Attachments.Select(a => new Uri(a.Url)).ToArray();
+        Attachments = [.. message.Attachments.Select(a => new Uri(a.Url))];
         AuthorId = message.Author.Id;
         ChannelId = message.Channel.Id;
         Content = message.Content;

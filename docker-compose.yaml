@@ -3,7 +3,9 @@ services:
   hammer:
     container_name: Hammer
     pull_policy: build
-    build: https://github.com/BrackeysBot/Hammer.git#main
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - type: bind
         source: /var/log/brackeysbot/hammer

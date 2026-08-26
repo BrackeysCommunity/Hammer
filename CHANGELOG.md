@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.11.0] - 2026-08-26
 
 ### Changed
-- Dropped MESSAGE_CONTENT intent, mute reapplication is now handled by Hawkeye.
+- Dropped GUILD_MEMBERS intent, mute reapplication is now handled by Hawkeye.
 
 ## [5.10.0] - 2025-02-24
 

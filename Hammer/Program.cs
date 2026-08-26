@@ -1,11 +1,14 @@
+using Asp.Versioning;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Extensions;
+using FluentResults.Extensions.AspNetCore;
 using Hammer.Commands;
 using Hammer.Commands.Infractions;
 using Hammer.Commands.Notes;
 using Hammer.Commands.Reports;
 using Hammer.Commands.Rules;
+using Hammer.Controllers;
 using Hammer.Data;
 using Hammer.Data.v5_compat;
 using Hammer.Services;
@@ -33,6 +36,15 @@ builder.Configuration.AddYamlFile(Path.Combine(dataDir, "config.yaml"), true, tr
 
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog();
+
+builder.Services.AddControllers();
+builder.Services.AddApiVersioning(options =>
+{
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+}).AddMvc();
+
+AspNetCoreResult.Setup(config => config.DefaultProfile = new HttpErrorResultEndpointProfile());
 
 builder.Services.AddSingleton<ConfigurationService>();
 const DiscordIntents intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers | DiscordIntents.MessageContents;
@@ -110,6 +122,8 @@ builder.Services.AddHostedSingleton<RuleService>();
 builder.Services.AddHostedSingleton<BotService>();
 
 var app = builder.Build();
+app.MapControllers();
+
 await ConfigureMigrationsAsync<HammerContext>(app.Services);
 await app.RunAsync();
 return;

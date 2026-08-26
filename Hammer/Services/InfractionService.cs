@@ -8,6 +8,7 @@ using DSharpPlus.Exceptions;
 using FluentResults;
 using Hammer.Configuration;
 using Hammer.Data;
+using Hammer.Data.Errors;
 using Hammer.Extensions;
 using Hammer.Resources;
 using Humanizer;
@@ -535,7 +536,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             return Result.Ok(infraction);
         }
 
-        return Result.Fail("Infraction not found.");
+        return Result.Fail(new NotFoundError("Infraction not found."));
     }
 
     /// <summary>

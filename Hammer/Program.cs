@@ -63,7 +63,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddSingleton<ConfigurationService>();
-const DiscordIntents intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers | DiscordIntents.MessageContents;
+const DiscordIntents intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents;
 builder.Services.AddDiscordClient(Environment.GetEnvironmentVariable("DISCORD_TOKEN")!, intents);
 builder.Services.ConfigureEventHandlers(events =>
 {

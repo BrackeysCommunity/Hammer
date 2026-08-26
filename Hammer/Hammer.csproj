@@ -10,6 +10,10 @@
         <Optimize Condition="'$(Configuration)' == 'Release'">true</Optimize>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(CI)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+
     <PropertyGroup Condition="'$(VersionSuffix)' != '' And '$(BuildNumber)' == ''">
         <Version>$(VersionPrefix)-$(VersionSuffix)</Version>
         <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>

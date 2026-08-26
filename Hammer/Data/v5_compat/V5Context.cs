@@ -79,7 +79,8 @@ internal sealed class V5Context : DbContext
     {
         base.OnConfiguring(optionsBuilder);
 
-        optionsBuilder.UseSqlite("Data Source='data/hammer.db'");
+        var dbFile = Path.Combine(AppContext.BaseDirectory, "data", "hammer.db");
+        optionsBuilder.UseSqlite($"Data Source='{dbFile}'");
     }
 
     /// <inheritdoc />

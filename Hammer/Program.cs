@@ -27,7 +27,7 @@ Log.Logger = new LoggerConfiguration()
 #endif
     .CreateLogger();
 
-HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddYamlFile(Path.Combine(dataDir, "config.yaml"), true, true);
 
 builder.Logging.ClearProviders();
@@ -107,7 +107,7 @@ builder.Services.AddHostedSingleton<RuleService>();
 
 builder.Services.AddHostedSingleton<BotService>();
 
-IHost app = builder.Build();
+var app = builder.Build();
 await ConfigureMigrationsAsync<HammerContext>(app.Services);
 await app.RunAsync();
 return;

@@ -25,7 +25,7 @@ internal sealed class MigrateDatabaseCommand
     }
 
     [Command("migratedb")]
-    [Description("Migrates the SQLite database to MySQL/MariaDB.")]
+    [Description("Migrates the SQLite database to Postgres.")]
     [RequireGuild]
     [UsedImplicitly]
     public async Task MigrateDatabaseAsync(SlashCommandContext context)

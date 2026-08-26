@@ -7,6 +7,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <VersionPrefix>6.0.0</VersionPrefix>
+        <Optimize Condition="'$(Configuration)' == 'Release'">true</Optimize>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(VersionSuffix)' != '' And '$(BuildNumber)' == ''">

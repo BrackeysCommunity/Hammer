@@ -1,4 +1,4 @@
-image: mcr.microsoft.com/dotnet/sdk:10.0
+image: mcr.microsoft.com/dotnet/sdk:9.0
 
 stages:
   - build

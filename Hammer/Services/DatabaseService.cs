@@ -1,4 +1,5 @@
 using Hammer.Data;
+using Hammer.Data.v5_compat;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hammer.Services;
@@ -10,17 +11,21 @@ internal sealed class DatabaseService
 {
     private readonly ILogger<DatabaseService> _logger;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
+    private readonly IDbContextFactory<V5Context> _migrationContextFactory;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="DatabaseService" /> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
     /// <param name="dbContextFactory">The <see cref="HammerContext" /> factory.</param>
+    /// <param name="migrationContextFactory">The <see cref="V5Context" /> factory.</param>
     public DatabaseService(ILogger<DatabaseService> logger,
-        IDbContextFactory<HammerContext> dbContextFactory)
+        IDbContextFactory<HammerContext> dbContextFactory,
+        IDbContextFactory<V5Context> migrationContextFactory)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
+        _migrationContextFactory = migrationContextFactory;
     }
 
     /// <summary>
@@ -28,15 +33,10 @@ internal sealed class DatabaseService
     /// </summary>
     public async Task<int> MigrateAsync(int batchSize = 1000, bool disableFkChecks = true)
     {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
         await context.Database.MigrateAsync();
 
-        await using var migration = new HammerContext(
-            new DbContextOptionsBuilder<HammerContext>()
-                .UseSqlite("Data Source=data/hammer.db")
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-                .Options);
-
+        await using var migration = await _migrationContextFactory.CreateDbContextAsync();
         context.ChangeTracker.AutoDetectChangesEnabled = false;
 
         if (disableFkChecks)
@@ -46,7 +46,6 @@ internal sealed class DatabaseService
 
         var totalInserted = 0;
 
-        // Copy order: parents -> children (adjust to your model)
         totalInserted += await CopyAsync(migration.AltAccounts.AsNoTracking(), context.AltAccounts, context, batchSize);
         totalInserted += await CopyAsync(migration.BlockedReporters.AsNoTracking(), context.BlockedReporters, context, batchSize);
         totalInserted += await CopyAsync(migration.Rules.AsNoTracking(), context.Rules, context, batchSize);

@@ -25,5 +25,7 @@ internal sealed class DeletedMessageConfiguration : IEntityTypeConfiguration<Del
         builder.Property(e => e.DeletionTimestamp).HasConversion<DateTimeOffsetToBytesConverter>();
         builder.Property(e => e.Content);
         builder.Property(e => e.Attachments).HasConversion<UriListToBytesConverter>();
+
+        builder.Ignore(e => e.AddedByBot);
     }
 }

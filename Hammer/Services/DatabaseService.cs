@@ -31,18 +31,14 @@ internal sealed class DatabaseService
     /// <summary>
     ///     Migrates the database from one source to another.
     /// </summary>
-    public async Task<int> MigrateAsync(int batchSize = 1000, bool disableFkChecks = true)
+    /// <param name="batchSize">The number of rows to insert in each batch.</param>
+    public async Task<int> MigrateAsync(int batchSize = 1000)
     {
         await using var context = await _dbContextFactory.CreateDbContextAsync();
         await context.Database.MigrateAsync();
 
         await using var migration = await _migrationContextFactory.CreateDbContextAsync();
         context.ChangeTracker.AutoDetectChangesEnabled = false;
-
-        if (disableFkChecks)
-        {
-            await context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS=0;");
-        }
 
         var totalInserted = 0;
 
@@ -57,11 +53,6 @@ internal sealed class DatabaseService
         totalInserted += await CopyAsync(migration.DeletedMessages.AsNoTracking(), context.DeletedMessages, context, batchSize);
         totalInserted += await CopyAsync(migration.Infractions.AsNoTracking(), context.Infractions, context, batchSize);
         totalInserted += await CopyAsync(migration.TrackedMessages.AsNoTracking(), context.TrackedMessages, context, batchSize);
-
-        if (disableFkChecks)
-        {
-            await context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS=1;");
-        }
 
         _logger.LogInformation("Migration complete. Inserted {Count} rows.", totalInserted);
         return totalInserted;

@@ -941,11 +941,12 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
     }
 
     /// <summary>
-    ///     Redacts an infraction.
+    ///     Removes an infraction.
     /// </summary>
-    /// <param name="infraction">The infraction to redact.</param>
+    /// <param name="infraction">The infraction to remove.</param>
+    /// <returns>A <see cref="Result" /> indicating whether the infraction was successfully removed.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="infraction" /> is <see langword="null" />.</exception>
-    public void RemoveInfraction(Infraction infraction)
+    public Result RemoveInfraction(Infraction infraction)
     {
         if (infraction is null)
         {
@@ -956,8 +957,14 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
         _infractionCache[infraction.GuildId].Remove(infraction);
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
+        if (!context.Infractions.Any(i => i.Id == infraction.Id))
+        {
+            return Result.Fail(new NotFoundError("Infraction not found."));
+        }
+
         context.Remove(infraction);
         context.SaveChanges();
+        return Result.Ok();
     }
 
     /// <summary>

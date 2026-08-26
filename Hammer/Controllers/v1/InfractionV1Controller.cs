@@ -35,4 +35,25 @@ public sealed class InfractionV1Controller : ControllerBase
         var result = _infractionService.GetInfraction(id);
         return result.ToActionResult();
     }
+
+    /// <summary>
+    ///     Deletes an infraction by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the infraction to delete.</param>
+    /// <returns>
+    ///     An <see cref="IActionResult" /> indicating the success or failure of the operation.
+    /// </returns>
+    [HttpDelete("{id:long}")]
+    public IActionResult DeleteInfraction(long id)
+    {
+        var infractionResult = _infractionService.GetInfraction(id);
+        if (infractionResult.IsFailed)
+        {
+            return infractionResult.ToActionResult();
+        }
+
+        var infraction = infractionResult.Value;
+        var result = _infractionService.RemoveInfraction(infraction);
+        return result.ToActionResult();
+    }
 }

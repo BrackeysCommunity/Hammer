@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Timers;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Hammer.Configuration;
 using Hammer.Data;
@@ -395,8 +394,6 @@ internal sealed class MuteService : BackgroundService
     /// <inheritdoc />
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _discordClient.GuildMemberAdded += DiscordClientOnGuildMemberAdded;
-
         _timer.Start();
         return UpdateFromDatabaseAsync();
     }
@@ -409,26 +406,6 @@ internal sealed class MuteService : BackgroundService
             _mutes.Clear();
             _mutes.AddRange(context.Mutes);
         }
-    }
-
-    private Task DiscordClientOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs e)
-    {
-        DiscordMember member = e.Member;
-        DiscordGuild guild = e.Guild;
-
-        if (IsUserMuted(member, guild))
-        {
-            if (!TryGetMutedRole(guild, out DiscordRole? mutedRole))
-            {
-                _logger.LogWarning("{Member} is muted, but no muted role was found in {Guild}!", member, guild);
-                return Task.CompletedTask;
-            }
-
-            _logger.LogInformation("{Member} is muted. Applying muted role", member);
-            return member.GrantRoleAsync(mutedRole, "Reapplying muted role for rejoined user");
-        }
-
-        return Task.CompletedTask;
     }
 
     private async Task CreateMuteAsync(DiscordUser user, DiscordGuild guild, DateTimeOffset? expirationTime)

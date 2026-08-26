@@ -7,6 +7,7 @@ using Hammer.Commands.Notes;
 using Hammer.Commands.Reports;
 using Hammer.Commands.Rules;
 using Hammer.Data;
+using Hammer.Data.v5_compat;
 using Hammer.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -78,6 +79,7 @@ builder.Services.AddCommandsExtension((_, commands) =>
     commands.AddCommands<WarnCommand>();
 });
 
+builder.Services.AddDbContextFactory<V5Context>();
 builder.Services.AddDbContextFactory<HammerContext>((services, options) =>
 {
     var configuration = services.GetRequiredService<IConfiguration>();

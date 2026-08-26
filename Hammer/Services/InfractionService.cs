@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
+using FluentResults;
 using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
@@ -518,10 +519,23 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
     ///     Gets the infraction with the specified ID.
     /// </summary>
     /// <param name="infractionId">The ID of the infraction to get.</param>
-    /// <returns>The infraction with the specified ID, or <see langword="null" /> if no such infraction exists.</returns>
-    public Infraction? GetInfraction(long infractionId)
+    /// <returns>A <see cref="Result{T}" /> containing the infraction if found, or an error message if not.</returns>
+    public Result<Infraction> GetInfraction(long infractionId)
     {
-        return _infractionIdCache.TryGetValue(infractionId, out Infraction? infraction) ? infraction : null;
+        if (_infractionIdCache.TryGetValue(infractionId, out Infraction? infraction))
+        {
+            return Result.Ok(infraction);
+        }
+
+        using var context = _dbContextFactory.CreateDbContext();
+        infraction = context.Infractions.FirstOrDefault(i => i.Id == infractionId);
+        if (infraction is not null)
+        {
+            _infractionIdCache.AddOrUpdate(infractionId, infraction, (_, _) => infraction);
+            return Result.Ok(infraction);
+        }
+
+        return Result.Fail("Infraction not found.");
     }
 
     /// <summary>

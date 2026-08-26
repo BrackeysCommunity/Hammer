@@ -37,8 +37,8 @@ internal sealed class ViewInfractionCommand
         await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
 
-        Infraction? infraction = _infractionService.GetInfraction(infractionId);
-        if (infraction is null)
+        var result = _infractionService.GetInfraction(infractionId);
+        if (result.IsFailed)
         {
             embed.WithColor(0xFF0000);
             embed.WithTitle("Infraction not found");
@@ -46,6 +46,7 @@ internal sealed class ViewInfractionCommand
         }
         else
         {
+            var infraction = result.Value;
             embed.WithColor(DiscordColor.Orange);
             embed.WithTitle($"Infraction {infraction.Id}");
             embed.AddField("User", MentionUtility.MentionUser(infraction.UserId), true);

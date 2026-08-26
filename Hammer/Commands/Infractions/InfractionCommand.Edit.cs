@@ -31,8 +31,8 @@ internal sealed partial class InfractionCommand
         var embed = new DiscordEmbedBuilder();
         var builder = new DiscordWebhookBuilder();
 
-        Infraction? infraction = _infractionService.GetInfraction(infractionId);
-        if (infraction is null)
+        var result = _infractionService.GetInfraction(infractionId);
+        if (result.IsFailed)
         {
             embed.WithColor(0xFF0000);
             embed.WithTitle("Infraction not found");
@@ -42,6 +42,7 @@ internal sealed partial class InfractionCommand
             return;
         }
 
+        var infraction = result.Value;
         if ((reason is null || reason == infraction.Reason) && (ruleId is null || infraction.RuleId == ruleId))
         {
             embed.WithColor(DiscordColor.Orange);

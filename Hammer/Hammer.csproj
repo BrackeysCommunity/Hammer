@@ -38,6 +38,7 @@
         <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02554" />
         <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02554" />
         <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+        <PackageReference Include="FluentResults" Version="4.0.0" />
         <PackageReference Include="Humanizer.Core" Version="3.0.10" />
         <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11">

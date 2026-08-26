@@ -23,8 +23,8 @@ internal sealed partial class InfractionCommand
         await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
 
-        Infraction? infraction = _infractionService.GetInfraction(infractionId);
-        if (infraction is null)
+        var result = _infractionService.GetInfraction(infractionId);
+        if (result.IsFailed)
         {
             embed.WithColor(0xFF0000);
             embed.WithTitle("Infraction not found");
@@ -32,6 +32,7 @@ internal sealed partial class InfractionCommand
         }
         else
         {
+            var infraction = result.Value;
             embed.WithColor(0x00FF00);
             embed.WithTitle("Infraction Redacted");
             embed.WithDescription($"{infraction.Type} #{infraction.Id} for {MentionUtility.MentionUser(infraction.UserId)} " +
@@ -43,8 +44,9 @@ internal sealed partial class InfractionCommand
         builder.AddEmbed(embed);
         await context.EditResponseAsync(builder);
 
-        if (infraction is not null)
+        if (result.IsSuccess)
         {
+            var infraction = result.Value;
             embed = new DiscordEmbedBuilder();
             embed.WithColor(DiscordColor.Orange);
             embed.WithTitle("Infraction Deleted");

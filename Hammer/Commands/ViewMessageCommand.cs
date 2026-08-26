@@ -45,15 +45,16 @@ internal sealed class ViewMessageCommand
     {
         await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
+        var guild = context.Guild!;
 
-        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? guildConfiguration))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
         {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
         }
 
         if (long.TryParse(rawId, out long staffMessageId) &&
             await _messageService.GetStaffMessage(staffMessageId) is { } staffMessage &&
-            staffMessage.GuildId == context.Guild.Id)
+            staffMessage.GuildId == guild.Id)
         {
             embed.WithColor(guildConfiguration.PrimaryColor);
             embed.WithTitle($"Message {staffMessage.Id}");
@@ -64,7 +65,7 @@ internal sealed class ViewMessageCommand
         }
         else if (ulong.TryParse(rawId, out ulong deletedMessageId) &&
                  await _messageDeletionService.GetDeletedMessage(deletedMessageId) is { } deletedMessage &&
-                 deletedMessage.GuildId == context.Guild.Id)
+                 deletedMessage.GuildId == guild.Id)
         {
             embed.WithColor(DiscordColor.Orange);
             embed.WithTitle($"Deleted Message {deletedMessage.MessageId}");
@@ -77,7 +78,7 @@ internal sealed class ViewMessageCommand
             bool hasContent = !string.IsNullOrWhiteSpace(deletedMessage.Content);
             bool hasAttachments = deletedMessage.Attachments.Count > 0;
 
-            string? content = hasContent ? Formatter.Sanitize(deletedMessage.Content) : null;
+            string? content = hasContent ? Formatter.Sanitize(deletedMessage.Content!) : null;
             string? attachments =
                 hasAttachments ? string.Join('\n', deletedMessage.Attachments.Select(a => a.AbsoluteUri)) : null;
 

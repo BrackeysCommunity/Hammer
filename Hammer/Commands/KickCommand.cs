@@ -62,7 +62,7 @@ internal sealed class KickCommand
     {
         await context.DeferResponseAsync(true);
 
-        if (_cooldownService.IsCooldownActive(user, context.Member) &&
+        if (_cooldownService.IsCooldownActive(user, context.Member!) &&
             _cooldownService.TryGetInfraction(user, out Infraction? infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
@@ -79,7 +79,7 @@ internal sealed class KickCommand
         var importantNotes = new List<string>();
         DiscordMember member;
 
-        DiscordGuild guild = context.Guild;
+        DiscordGuild guild = context.Guild!;
         try
         {
             member = await guild.GetMemberAsync(user.Id);
@@ -138,7 +138,11 @@ internal sealed class KickCommand
             builder.WithAuthor(member);
             builder.WithColor(DiscordColor.Red);
             builder.WithTitle("Kicked user");
-            builder.WithDescription(reason);
+            if (reason is not null)
+            {
+                builder.WithDescription(reason);
+            }
+
             builder.WithFooter($"Infraction {result.Infraction.Id} \u2022 User {member.Id}");
 
             reason = reason.WithWhiteSpaceAlternative("None");

@@ -69,17 +69,17 @@ public sealed class MemberNote : IEquatable<MemberNote>
             throw new ArgumentOutOfRangeException(nameof(type));
         }
 
-        if (targetUser == null)
+        if (targetUser is null)
         {
             throw new ArgumentNullException(nameof(targetUser));
         }
 
-        if (author == null)
+        if (author is null)
         {
             throw new ArgumentNullException(nameof(author));
         }
 
-        if (guild == null)
+        if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }

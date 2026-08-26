@@ -104,13 +104,13 @@ public sealed class DeletedMessage : IEquatable<DeletedMessage>
     {
         return new DeletedMessage
         {
-            Attachments = [.. message.Attachments.Select(a => new Uri(a.Url))],
-            AuthorId = message.Author.Id,
-            ChannelId = message.Channel.Id,
+            Attachments = [.. message.Attachments.Select(a => new Uri(a.Url!))],
+            AuthorId = message.Author?.Id ?? 0,
+            ChannelId = message.Channel?.Id ?? 0,
             Content = message.Content,
             CreationTimestamp = message.CreationTimestamp,
             DeletionTimestamp = DateTimeOffset.UtcNow,
-            GuildId = message.Channel.Guild.Id,
+            GuildId = message.Channel?.Guild.Id ?? 0,
             MessageId = message.Id,
             StaffMemberId = staffMember.Id
         };

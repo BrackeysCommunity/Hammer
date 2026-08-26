@@ -33,16 +33,16 @@ public sealed class ReportedMessage : IEquatable<ReportedMessage>, IEquatable<Di
             throw new ArgumentNullException(nameof(reporter));
         }
 
-        if (message.Channel.Guild != reporter.Guild)
+        if (message.Channel?.Guild! != reporter.Guild)
         {
             throw new ArgumentException("Message and reporter must be in the same guild.");
         }
 
-        Attachments = [.. message.Attachments.Select(a => new Uri(a.Url))];
-        AuthorId = message.Author.Id;
-        ChannelId = message.Channel.Id;
+        Attachments = [.. message.Attachments.Select(a => new Uri(a.Url!))];
+        AuthorId = message.Author?.Id ?? 0;
+        ChannelId = message.Channel?.Id ?? 0;
         Content = message.Content;
-        GuildId = message.Channel.Guild.Id;
+        GuildId = message.Channel?.Guild.Id ?? 0;
         MessageId = message.Id;
         ReporterId = reporter.Id;
     }

@@ -47,7 +47,10 @@ internal sealed class UnmuteCommand
             embed.WithAuthor(user);
             embed.WithColor(DiscordColor.SpringGreen);
             embed.WithTitle("Unmuted user");
-            embed.WithDescription(reason);
+            if (reason is not null)
+            {
+                embed.WithDescription(reason);
+            }
 
             reason = reason.WithWhiteSpaceAlternative("None");
             _logger.LogInformation("{StaffMember} unmuted {User}. Reason: {Reason}", context.Member, user, reason);

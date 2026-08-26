@@ -35,7 +35,7 @@ internal sealed class AltCommand
         [Parameter("alt"), Description("The alt account to add.")] DiscordUser alt)
     {
         await context.DeferResponseAsync();
-        _altAccountService.AddAlt(user, alt, context.Member);
+        _altAccountService.AddAlt(user, alt, context.Member!);
 
         DiscordUser olderAccount = user.CreationTimestamp > alt.CreationTimestamp ? alt : user;
 

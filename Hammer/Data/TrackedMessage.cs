@@ -92,12 +92,12 @@ public sealed class TrackedMessage : IEquatable<TrackedMessage>, IEquatable<Disc
         return new TrackedMessage
         {
             Id = message.Id,
-            AuthorId = message.Author.Id,
-            ChannelId = message.Channel.Id,
-            GuildId = message.Channel.Guild.Id,
+            AuthorId = message.Author?.Id ?? 0,
+            ChannelId = message.Channel?.Id ?? 0,
+            GuildId = message.Channel?.Guild.Id ?? 0,
             Content = message.Content,
             CreationTimestamp = message.CreationTimestamp,
-            Attachments = [.. message.Attachments.Select(a => new Uri(a.Url))]
+            Attachments = [.. message.Attachments.Select(a => new Uri(a.Url!))]
         };
     }
 
@@ -109,7 +109,7 @@ public sealed class TrackedMessage : IEquatable<TrackedMessage>, IEquatable<Disc
             return false;
         }
 
-        return Id == other.Id && ChannelId == other.Channel.Id && GuildId == other.Channel.Guild.Id;
+        return Id == other.Id && ChannelId == other.Channel?.Id && GuildId == other.Channel?.Guild.Id;
     }
 
     /// <inheritdoc />

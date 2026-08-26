@@ -31,7 +31,7 @@ internal sealed partial class NoteCommand
 
         try
         {
-            MemberNote note = await _noteService.CreateNoteAsync(user, context.Member, content);
+            MemberNote note = await _noteService.CreateNoteAsync(user, context.Member!, content);
 
             embed.WithColor(0x4CAF50);
             embed.WithTitle("Note Created");

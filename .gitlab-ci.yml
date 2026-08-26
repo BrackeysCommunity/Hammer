@@ -10,6 +10,14 @@ build:
     - dotnet restore Hammer.slnx
     - dotnet build Hammer.slnx -c Release --no-restore
 
+docker-build:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  script:
+    - docker build -f Hammer/Dockerfile .
+
 release:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest

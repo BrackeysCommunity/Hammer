@@ -12,3 +12,15 @@ services:
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
+
+  hammer-db:
+    container_name: hammer-db
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+    volumes:
+      - ${DB_DIR}:/var/lib/postgresql
+    restart: unless-stopped

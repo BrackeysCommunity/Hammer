@@ -72,7 +72,6 @@ builder.Services.ConfigureEventHandlers(events =>
     events.AddEventHandlers<InfractionService>(ServiceLifetime.Singleton);
     events.AddEventHandlers<MessageTrackingService>(ServiceLifetime.Singleton);
     events.AddEventHandlers<ModalResponseService>();
-    events.AddEventHandlers<MuteService>(ServiceLifetime.Singleton);
     events.AddEventHandlers<StaffReactionService>();
     events.AddEventHandlers<UserReactionService>();
 });

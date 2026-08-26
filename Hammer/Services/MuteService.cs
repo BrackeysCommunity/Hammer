@@ -21,7 +21,7 @@ namespace Hammer.Services;
 /// <summary>
 ///     Represents a service which handles temporary mutes.
 /// </summary>
-internal sealed class MuteService : BackgroundService, IEventHandler<GuildMemberAddedEventArgs>
+internal sealed class MuteService : BackgroundService
 {
     private static readonly TimeSpan QueryInterval = TimeSpan.FromSeconds(30);
     private readonly ConcurrentDictionary<DiscordGuild, DiscordRole> _mutedRoles = new();
@@ -430,27 +430,6 @@ internal sealed class MuteService : BackgroundService, IEventHandler<GuildMember
         }
 
         return result is not null;
-    }
-
-    /// <inheritdoc />
-    public Task HandleEventAsync(DiscordClient sender, GuildMemberAddedEventArgs e)
-    {
-        DiscordMember member = e.Member;
-        DiscordGuild guild = e.Guild;
-
-        if (IsUserMuted(member, guild))
-        {
-            if (!TryGetMutedRole(guild, out DiscordRole? mutedRole))
-            {
-                _logger.LogWarning("{Member} is muted, but no muted role was found in {Guild}!", member, guild);
-                return Task.CompletedTask;
-            }
-
-            _logger.LogInformation("{Member} is muted. Applying muted role", member);
-            return member.GrantRoleAsync(mutedRole, "Reapplying muted role for rejoined user");
-        }
-
-        return Task.CompletedTask;
     }
 
     /// <inheritdoc />

@@ -77,34 +77,47 @@ builder.Services.ConfigureEventHandlers(events =>
     events.AddEventHandlers<UserReactionService>();
 });
 
-builder.Services.AddCommandsExtension((_, commands) =>
+builder.Services.AddCommandsExtension((services, commands) =>
 {
-    commands.AddCommands<AltCommand>();
-    commands.AddCommands<BadMessageCommand>();
-    commands.AddCommands<BanCommand>();
-    commands.AddCommands<DeleteMessageCommand>();
-    commands.AddCommands<GagCommand>();
-    commands.AddCommands<HistoryCommand>();
-    commands.AddCommands<InfractionCommand>();
-    commands.AddCommands<InfoCommand>();
-    commands.AddCommands<KickCommand>();
-    commands.AddCommands<MessageCommand>();
-    commands.AddCommands<MessageHistoryCommand>();
-    commands.AddCommands<MigrateDatabaseCommand>();
-    commands.AddCommands<MuteCommand>();
-    commands.AddCommands<NoteCommand>();
-    commands.AddCommands<PruneInfractionsCommand>();
-    commands.AddCommands<ReportCommands>();
-    commands.AddCommands<RuleCommand>();
-    commands.AddCommands<RulesCommand>();
-    commands.AddCommands<SelfHistoryCommand>();
-    commands.AddCommands<StaffHistoryCommand>();
-    commands.AddCommands<UnbanCommand>();
-    commands.AddCommands<UnmuteCommand>();
-    commands.AddCommands<UserInfoCommand>();
-    commands.AddCommands<ViewInfractionCommand>();
-    commands.AddCommands<ViewMessageCommand>();
-    commands.AddCommands<WarnCommand>();
+    var guilds = new List<ulong>();
+    var configuration = services.GetRequiredService<IConfiguration>();
+
+    foreach (var key in configuration.GetChildren().Select(s => s.Key))
+    {
+        if (ulong.TryParse(key, out var guildId))
+        {
+            guilds.Add(guildId);
+        }
+    }
+
+    ulong[] guildIds = guilds.Count > 0 ? [.. guilds] : [];
+
+    commands.AddCommands<AltCommand>(guildIds);
+    commands.AddCommands<BadMessageCommand>(guildIds);
+    commands.AddCommands<BanCommand>(guildIds);
+    commands.AddCommands<DeleteMessageCommand>(guildIds);
+    commands.AddCommands<GagCommand>(guildIds);
+    commands.AddCommands<HistoryCommand>(guildIds);
+    commands.AddCommands<InfractionCommand>(guildIds);
+    commands.AddCommands<InfoCommand>(guildIds);
+    commands.AddCommands<KickCommand>(guildIds);
+    commands.AddCommands<MessageCommand>(guildIds);
+    commands.AddCommands<MessageHistoryCommand>(guildIds);
+    commands.AddCommands<MigrateDatabaseCommand>(guildIds);
+    commands.AddCommands<MuteCommand>(guildIds);
+    commands.AddCommands<NoteCommand>(guildIds);
+    commands.AddCommands<PruneInfractionsCommand>(guildIds);
+    commands.AddCommands<ReportCommands>(guildIds);
+    commands.AddCommands<RuleCommand>(guildIds);
+    commands.AddCommands<RulesCommand>(guildIds);
+    commands.AddCommands<SelfHistoryCommand>(guildIds);
+    commands.AddCommands<StaffHistoryCommand>(guildIds);
+    commands.AddCommands<UnbanCommand>(guildIds);
+    commands.AddCommands<UnmuteCommand>(guildIds);
+    commands.AddCommands<UserInfoCommand>(guildIds);
+    commands.AddCommands<ViewInfractionCommand>(guildIds);
+    commands.AddCommands<ViewMessageCommand>(guildIds);
+    commands.AddCommands<WarnCommand>(guildIds);
 });
 
 builder.Services.AddDbContextFactory<V5Context>();

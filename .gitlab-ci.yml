@@ -7,8 +7,8 @@ stages:
 build:
   stage: build
   script:
-    - dotnet restore Hammer.slnx
-    - dotnet build Hammer.slnx -c Release --no-restore
+    - dotnet restore Hammer.sln
+    - dotnet build Hammer.sln -c Release --no-restore
 
 release:
   stage: release

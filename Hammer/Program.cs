@@ -29,7 +29,7 @@ builder.Services.AddSingleton(new DiscordClient(new DiscordConfiguration
 {
     Token = Environment.GetEnvironmentVariable("DISCORD_TOKEN"),
     LoggerFactory = new SerilogLoggerFactory(),
-    Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers | DiscordIntents.MessageContents
+    Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents
 }));
 
 builder.Services.AddDbContextFactory<HammerContext>();

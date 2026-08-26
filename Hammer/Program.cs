@@ -3,6 +3,7 @@ using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Extensions;
 using FluentResults.Extensions.AspNetCore;
+using Hammer.Authentication;
 using Hammer.Commands;
 using Hammer.Commands.Infractions;
 using Hammer.Commands.Notes;
@@ -12,6 +13,7 @@ using Hammer.Controllers;
 using Hammer.Data;
 using Hammer.Data.v5_compat;
 using Hammer.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using X10D.Hosting.DependencyInjection;
@@ -32,6 +34,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddYamlFile(Path.Combine(dataDir, "config.yaml"), true, true);
 
 builder.Logging.ClearProviders();
@@ -45,6 +48,19 @@ builder.Services.AddApiVersioning(options =>
 }).AddMvc();
 
 AspNetCoreResult.Setup(config => config.DefaultProfile = new HttpErrorResultEndpointProfile());
+var apiToken = builder.Configuration.GetValue<string>("API_TOKEN") ?? throw new InvalidOperationException("API_TOKEN is not set");
+
+builder.Services.AddAuthentication(ApiTokenDefaults.AuthenticationScheme)
+    .AddScheme<ApiTokenAuthenticationSchemeOptions, ApiTokenAuthenticationHandler>(
+        ApiTokenDefaults.AuthenticationScheme, options => options.Token = apiToken);
+
+builder.Services.AddAuthorization(options =>
+{
+    // require a valid API token on every endpoint by default; opt out with [AllowAnonymous]
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 builder.Services.AddSingleton<ConfigurationService>();
 const DiscordIntents intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers | DiscordIntents.MessageContents;
@@ -122,6 +138,8 @@ builder.Services.AddHostedSingleton<RuleService>();
 builder.Services.AddHostedSingleton<BotService>();
 
 var app = builder.Build();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 await ConfigureMigrationsAsync<HammerContext>(app.Services);

@@ -19,8 +19,8 @@ internal sealed class InfractionConfiguration : IEntityTypeConfiguration<Infract
         builder.Property(e => e.StaffMemberId);
         builder.Property(e => e.Type);
         builder.Property(e => e.IssuedAt);
-        builder.Property(e => e.Reason).HasMaxLength(255);
-        builder.Property(e => e.AdditionalInformation).HasMaxLength(255);
+        builder.Property(e => e.Reason).HasMaxLength(1024);
+        builder.Property(e => e.AdditionalInformation).HasColumnType("text");
         builder.Property(e => e.RuleId);
         builder.Property(e => e.RuleText).HasMaxLength(255);
     }

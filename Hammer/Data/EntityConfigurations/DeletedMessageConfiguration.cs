@@ -19,7 +19,7 @@ internal sealed class DeletedMessageConfiguration : IEntityTypeConfiguration<Del
         builder.Property(e => e.ChannelId);
         builder.Property(e => e.AuthorId);
         builder.Property(e => e.StaffMemberId);
-        builder.Property(e => e.Content).HasMaxLength(1024);
+        builder.Property(e => e.Content).HasMaxLength(4000);
         builder.Property(e => e.Attachments).HasConversion<UriListToBytesConverter>();
         builder.Property(e => e.CreationTimestamp);
         builder.Property(e => e.DeletionTimestamp);

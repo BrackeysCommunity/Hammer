@@ -4,7 +4,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;

@@ -1,6 +1,5 @@
 using FluentResults.Extensions.AspNetCore;
 using Hammer.Data.Errors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hammer.Controllers;

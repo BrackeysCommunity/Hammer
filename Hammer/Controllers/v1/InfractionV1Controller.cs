@@ -1,8 +1,6 @@
 using Asp.Versioning;
 using FluentResults.Extensions.AspNetCore;
-using Hammer.Data;
 using Hammer.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hammer.Controllers.v1;

@@ -1,24 +1,14 @@
-.env
+# Local / machine-specific
+.local/
+compose.override.yaml
+tmp/
 *.swp
 *.*~
-project.lock.json
-.DS_Store
-*.pyc
-nupkg/
 
-# Visual Studio Code
-.vscode
-
-# Rider
-.idea
-
-# User-specific files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# Build results
+# .NET
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -27,12 +17,30 @@ x64/
 x86/
 build/
 bld/
-[Bb]in/
-[Oo]bj/
-[Oo]ut/
+.vs/
+nupkg/
+project.lock.json
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 msbuild.log
 msbuild.err
 msbuild.wrn
 
-# Visual Studio 2015
-.vs/
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# JetBrains IDEs (Rider, WebStorm, DataGrip, ...)
+.idea/
+
+# VS Code
+.vscode
+.vscode-test
+
+# OS
+.DS_Store

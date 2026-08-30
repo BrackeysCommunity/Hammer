@@ -131,9 +131,10 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
             return;
         }
 
-        Rule rule = _ruleService.GetRuleById(guild, ruleId);
-        string? oldBrief = rule.Brief?.AsNullIfWhiteSpace();
-        string oldDescription = rule.Description.AsNullIfWhiteSpace();
+        var ruleResult = _ruleService.GetRuleById(guild, ruleId);
+        Rule? rule = ruleResult.IsSuccess ? ruleResult.Value : null;
+        string? oldBrief = rule?.Brief?.AsNullIfWhiteSpace();
+        string oldDescription = rule?.Description.AsNullIfWhiteSpace() ?? string.Empty;
 
         string? brief = (e.Values["brief"] as TextInputModalSubmission)?.Value;
         string? description = (e.Values["description"] as TextInputModalSubmission)?.Value;
@@ -317,8 +318,12 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
         {
             if (_ruleService.GuildHasRule(guild, ruleId))
             {
-                rule = _ruleService.GetRuleById(guild, ruleId);
-                return true;
+                var ruleResult = _ruleService.GetRuleById(guild, ruleId);
+                if (ruleResult.IsSuccess)
+                {
+                    rule = ruleResult.Value;
+                    return true;
+                }
             }
         }
         else

@@ -44,7 +44,8 @@ internal sealed class WarningService : IWarningService
         Rule? rule = null;
         if (result.Infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(result.Infraction.GuildId, ruleId))
         {
-            rule = _ruleService.GetRuleById(result.Infraction.GuildId, ruleId);
+            var ruleResult = _ruleService.GetRuleById(result.Infraction.GuildId, ruleId);
+            rule = ruleResult.IsSuccess ? ruleResult.Value : null;
         }
 
         var embed = new DiscordEmbedBuilder();

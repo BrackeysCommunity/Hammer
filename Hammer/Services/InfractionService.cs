@@ -256,7 +256,8 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
         Rule? rule = null;
         if (infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(infraction.GuildId, ruleId))
         {
-            rule = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+            var ruleResult = _ruleService.GetRuleById(infraction.GuildId, ruleId);
+            rule = ruleResult.IsSuccess ? ruleResult.Value : null;
         }
 
         embedBuilder.WithTitle(infraction.Type.Humanize());
@@ -1036,7 +1037,13 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
                 continue;
             }
 
-            Rule rule = _ruleService.GetRuleById(infraction.GuildId, infraction.RuleId.Value);
+            var ruleResult = _ruleService.GetRuleById(infraction.GuildId, infraction.RuleId.Value);
+            if (!ruleResult.IsSuccess)
+            {
+                continue;
+            }
+
+            Rule rule = ruleResult.Value;
             infraction.RuleText = rule.Brief ?? rule.Description;
             updated.Add(infraction);
         }

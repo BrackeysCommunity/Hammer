@@ -77,7 +77,18 @@ internal sealed partial class InfractionCommand
                 return;
             }
 
-            rule = _ruleService.GetRuleById(guild, (int)ruleId.Value);
+            var ruleResult = _ruleService.GetRuleById(guild, (int)ruleId.Value);
+            if (!ruleResult.IsSuccess)
+            {
+                embed.WithColor(0xFF0000);
+                embed.WithTitle("Rule not found");
+                embed.WithDescription($"An error occurred while fetching the rule with the ID `{ruleId}`.");
+                builder.AddEmbed(embed);
+                await context.EditResponseAsync(builder);
+                return;
+            }
+
+            rule = ruleResult.Value;
         }
 
         // D#+ only accepts long, so we must cast because stupidity

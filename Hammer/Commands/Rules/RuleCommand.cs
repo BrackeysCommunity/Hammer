@@ -59,7 +59,14 @@ internal sealed class RuleCommand
                 return;
             }
 
-            rule = _ruleService.GetRuleById(guild, ruleId);
+            var ruleResult = _ruleService.GetRuleById(guild, ruleId);
+            if (!ruleResult.IsSuccess)
+            {
+                await context.RespondAsync("An error occurred while fetching the rule.", true);
+                return;
+            }
+
+            rule = ruleResult.Value;
         }
         else
         {

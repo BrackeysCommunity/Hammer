@@ -84,9 +84,10 @@ internal sealed class WarnCommand
                 DiscordGuild guild = context.Guild!;
                 if (int.TryParse(ruleSearch, out int ruleId))
                 {
-                    if (_ruleService.GuildHasRule(guild, ruleId))
+                    var ruleResult = _ruleService.GetRuleById(guild, ruleId);
+                    if (ruleResult.IsSuccess)
                     {
-                        rule = _ruleService.GetRuleById(guild, ruleId);
+                        rule = ruleResult.Value;
                     }
                     else
                     {

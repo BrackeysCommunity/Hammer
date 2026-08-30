@@ -1,7 +1,7 @@
 using DSharpPlus.Entities;
+using FluentResults;
 using Hammer.Configuration;
 using Hammer.Data;
-using Hammer.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -109,7 +109,13 @@ public sealed class RuleService : BackgroundService
             return;
         }
 
-        Rule ruleToDelete = GetRuleById(guild, id);
+        var ruleResult = GetRuleById(guild, id);
+        if (!ruleResult.IsSuccess)
+        {
+            return;
+        }
+        
+        Rule ruleToDelete = ruleResult.Value;
         _guildRules[guild.Id].Remove(ruleToDelete);
 
         using HammerContext context = _dbContextFactory.CreateDbContext();
@@ -132,16 +138,15 @@ public sealed class RuleService : BackgroundService
     /// </summary>
     /// <param name="guildId">The ID of the guild whose rules to retrieve.</param>
     /// <param name="id">The ID of the rule to retrieve.</param>
-    /// <returns>The matching rule, if found.</returns>
-    /// <exception cref="RuleNotFoundException">No rule with the specified ID was found.</exception>
-    public Rule GetRuleById(ulong guildId, int id)
+    /// <returns>A <see cref="Result{T}" /> containing the matching rule, if found; otherwise, a failure result.</returns>
+    public Result<Rule> GetRuleById(ulong guildId, int id)
     {
         if (!GuildHasRule(guildId, id))
         {
-            throw new RuleNotFoundException(id);
+            return Result.Fail($"No rule with ID {id} was found.");
         }
 
-        return _guildRules[guildId].First(r => r.Id == id);
+        return Result.Ok(_guildRules[guildId].First(r => r.Id == id));
     }
 
     /// <summary>
@@ -149,22 +154,16 @@ public sealed class RuleService : BackgroundService
     /// </summary>
     /// <param name="guild">The guild whose rules to retrieve.</param>
     /// <param name="id">The ID of the rule to retrieve.</param>
-    /// <returns>The matching rule, if found.</returns>
+    /// <returns>A <see cref="Result{T}" /> containing the matching rule, if found; otherwise, a failure result.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="guild" /> is <see langword="null" />.</exception>
-    /// <exception cref="RuleNotFoundException">No rule with the specified ID was found.</exception>
-    public Rule GetRuleById(DiscordGuild guild, int id)
+    public Result<Rule> GetRuleById(DiscordGuild guild, int id)
     {
         if (guild is null)
         {
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (!GuildHasRule(guild, id))
-        {
-            throw new RuleNotFoundException(id);
-        }
-
-        return _guildRules[guild.Id].First(r => r.Id == id);
+        return GetRuleById(guild.Id, id);
     }
 
     /// <summary>
@@ -378,7 +377,13 @@ public sealed class RuleService : BackgroundService
             return;
         }
 
-        Rule rule = GetRuleById(guild, ruleId);
+        var ruleResult = GetRuleById(guild, ruleId);
+        if (!ruleResult.IsSuccess)
+        {
+            return;
+        }
+
+        Rule rule = ruleResult.Value;
         SetRuleBrief(rule, brief);
     }
 
@@ -410,7 +415,13 @@ public sealed class RuleService : BackgroundService
             return;
         }
 
-        Rule rule = GetRuleById(guild, ruleId);
+        var ruleResult = GetRuleById(guild, ruleId);
+        if (!ruleResult.IsSuccess)
+        {
+            return;
+        }
+
+        Rule rule = ruleResult.Value;
         SetRuleContent(rule, content);
     }
 

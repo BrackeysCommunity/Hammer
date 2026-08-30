@@ -37,7 +37,14 @@ internal sealed partial class RulesCommand
             return;
         }
 
-        Rule rule = _ruleService.GetRuleById(guild, (int)ruleId);
+        var ruleResult = _ruleService.GetRuleById(guild, (int)ruleId);
+        if (!ruleResult.IsSuccess)
+        {
+            await context.RespondAsync("An error occurred while fetching the rule.", true);
+            return;
+        }
+
+        Rule rule = ruleResult.Value;
 
         var id = new CustomIdBuilder();
         id.Type(CustomIds.EditRule);

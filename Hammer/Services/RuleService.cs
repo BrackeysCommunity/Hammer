@@ -349,6 +349,17 @@ public sealed class RuleService : BackgroundService
             return null;
         }
 
+        if (int.TryParse(searchQuery, out int ruleId))
+        {
+            var ruleResult = GetRuleById(guild, ruleId);
+            if (ruleResult.IsSuccess)
+            {
+                return ruleResult.Value;
+            }
+
+            return null;
+        }
+
         string[] searchTerms = searchQuery.Split();
         var matches = new List<Rule>();
         IReadOnlyList<Rule> rules = GetGuildRules(guild);

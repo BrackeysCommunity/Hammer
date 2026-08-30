@@ -78,31 +78,13 @@ internal sealed class WarnCommand
 
         try
         {
-            Rule? rule = null;
-            if (!string.IsNullOrWhiteSpace(ruleSearch))
+            var hasSearch = !string.IsNullOrWhiteSpace(ruleSearch);
+            Rule? rule = hasSearch ? _ruleService.SearchForRule(context.Guild!, ruleSearch!) : null;
+            if (hasSearch && rule is null)
             {
-                DiscordGuild guild = context.Guild!;
-                if (int.TryParse(ruleSearch, out int ruleId))
-                {
-                    var ruleResult = _ruleService.GetRuleById(guild, ruleId);
-                    if (ruleResult.IsSuccess)
-                    {
-                        rule = ruleResult.Value;
-                    }
-                    else
-                    {
-                        importantNotes.Add("The specified rule does not exist - it will be omitted from the infraction.");
-                    }
-                }
-                else
-                {
-                    rule = _ruleService.SearchForRule(guild, ruleSearch);
-                    if (rule is null)
-                    {
-                        importantNotes.Add("The specified rule does not exist - it will be omitted from the infraction.");
-                    }
-                }
+                importantNotes.Add($"The rule search \"{ruleSearch}\" did not match any rules in this guild.");
             }
+
 
             var options = new WarningOptions(user: user, issuer: member, reason: reason, ruleBroken: rule);
             InfractionResult result = await _warningService.WarnAsync(options);

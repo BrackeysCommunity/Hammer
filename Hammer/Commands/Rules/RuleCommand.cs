@@ -49,33 +49,10 @@ internal sealed class RuleCommand
             return;
         }
 
-        Rule? rule;
-
-        if (int.TryParse(search, out int ruleId))
+        Rule? rule = _ruleService.SearchForRule(guild, search);
+        if (rule is null)
         {
-            if (!_ruleService.GuildHasRule(guild, ruleId))
-            {
-                await context.RespondAsync(RuleService.CreateRuleNotFoundEmbed(ruleId), true);
-                return;
-            }
-
-            var ruleResult = _ruleService.GetRuleById(guild, ruleId);
-            if (!ruleResult.IsSuccess)
-            {
-                await context.RespondAsync("An error occurred while fetching the rule.", true);
-                return;
-            }
-
-            rule = ruleResult.Value;
-        }
-        else
-        {
-            rule = _ruleService.SearchForRule(guild, search);
-            if (rule is null)
-            {
-                await context.RespondAsync(RuleService.CreateRuleNotFoundEmbed(search), true);
-                return;
-            }
+            await context.RespondAsync("An error occurred while fetching the rule.", true);
         }
 
         DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);

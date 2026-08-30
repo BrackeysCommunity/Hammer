@@ -111,29 +111,11 @@ internal sealed class MuteCommand
         var message = new DiscordWebhookBuilder();
         var importantNotes = new List<string>();
 
-        Rule? rule = null;
-        if (!string.IsNullOrWhiteSpace(ruleSearch))
+        var hasSearch = !string.IsNullOrWhiteSpace(ruleSearch);
+        Rule? rule = hasSearch ? _ruleService.SearchForRule(guild, ruleSearch!) : null;
+        if (hasSearch && rule is null)
         {
-            if (int.TryParse(ruleSearch, out int ruleId))
-            {
-                var ruleResult = _ruleService.GetRuleById(guild, ruleId);
-                if (ruleResult.IsSuccess)
-                {
-                    rule = ruleResult.Value;
-                }
-                else
-                {
-                    importantNotes.Add("The specified rule does not exist - it will be omitted from the infraction.");
-                }
-            }
-            else
-            {
-                rule = _ruleService.SearchForRule(guild, ruleSearch);
-                if (rule is null)
-                {
-                    importantNotes.Add("The specified rule does not exist - it will be omitted from the infraction.");
-                }
-            }
+            importantNotes.Add($"The rule search \"{ruleSearch}\" did not match any rules in this guild.");
         }
 
         ValueTask<InfractionResult> infractionTask;

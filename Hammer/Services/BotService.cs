@@ -81,6 +81,7 @@ internal sealed class BotService : BackgroundService
         slashCommands.RegisterCommands<HistoryCommand>();
         slashCommands.RegisterCommands<InfoCommand>();
         slashCommands.RegisterCommands<InfractionCommand>();
+        slashCommands.RegisterCommands<JamWarnCommand>();
         slashCommands.RegisterCommands<KickCommand>();
         slashCommands.RegisterCommands<MessageCommand>();
         slashCommands.RegisterCommands<MessageHistoryCommand>();

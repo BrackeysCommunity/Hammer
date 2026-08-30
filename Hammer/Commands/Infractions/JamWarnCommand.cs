@@ -2,6 +2,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Services;
 using Microsoft.Extensions.Logging;
@@ -52,9 +53,8 @@ internal sealed class JamWarnCommand : ApplicationCommandModule
         var builder = new DiscordEmbedBuilder();
         var message = new DiscordWebhookBuilder();
         var guild = context.Guild;
-        var configuration = _configurationService.GetGuildConfiguration(guild);
-
-        if (configuration is null)
+        
+        if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? configuration))
         {
             builder.WithColor(DiscordColor.Red);
             builder.WithTitle("⚠️ Error issuing warning");

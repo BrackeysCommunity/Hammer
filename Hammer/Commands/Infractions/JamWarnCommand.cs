@@ -89,7 +89,7 @@ internal sealed class JamWarnCommand : ApplicationCommandModule
 
         await _messageDeletionService.DeleteMessageAsync(context.TargetMessage, context.Member).ConfigureAwait(false);
 
-        DiscordUser user = context.Interaction.Data.Resolved.Users.First().Value;
+        DiscordUser user = context.TargetMessage.Author;
         var reason = $"Jam submissions/streams belong in <#{configuration.JamLinksChannel}>";
         var rule = _ruleService.GetRuleById(guild, configuration.JamLinksRule);
         var importantNotes = new List<string>();

@@ -6,6 +6,18 @@ namespace Hammer.Configuration;
 internal sealed class GuildConfiguration
 {
     /// <summary>
+    ///     Gets or sets the ID of the channel for jam links.
+    /// </summary>
+    /// <value>The ID of the channel for jam links.</value>
+    public ulong JamLinksChannel { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the rule number for misplaced jam links.
+    /// </summary>
+    /// <value>The rule number for misplaced jam links.</value>
+    public int JamLinksRule { get; set; }
+
+    /// <summary>
     ///     Gets or sets the ID of the log channel.
     /// </summary>
     public ulong LogChannel { get; set; }

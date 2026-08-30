@@ -127,8 +127,8 @@ internal sealed class MuteCommand
             shouldClampDuration = permissionLevel == PermissionLevel.Moderator;
         }
         else
-            // pattern match does not initialize to 0 on failure. explicit = 0 is required here, else the compiler complains
         {
+            // pattern match does not initialize to 0 on failure. explicit = 0 is required here, else the compiler complains
             maxModeratorMuteDuration = 0;
         }
 

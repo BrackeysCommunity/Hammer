@@ -15,6 +15,7 @@ internal sealed class JamWarnCommand : ApplicationCommandModule
 {
     private readonly ILogger<JamWarnCommand> _logger;
     private readonly ConfigurationService _configurationService;
+    private readonly MessageDeletionService _messageDeletionService;
     private readonly RuleService _ruleService;
     private readonly WarningService _warningService;
 
@@ -23,15 +24,18 @@ internal sealed class JamWarnCommand : ApplicationCommandModule
     /// </summary>
     /// <param name="logger">The logger.</param>
     /// <param name="configurationService">The configuration service.</param>
+    /// <param name="messageDeletionService">The message deletion service.</param>
     /// <param name="ruleService">The rule service.</param>
     /// <param name="warningService">The warning service.</param>
     public JamWarnCommand(ILogger<JamWarnCommand> logger,
         ConfigurationService configurationService,
+        MessageDeletionService messageDeletionService,
         RuleService ruleService,
         WarningService warningService)
     {
         _logger = logger;
         _configurationService = configurationService;
+        _messageDeletionService = messageDeletionService;
         _ruleService = ruleService;
         _warningService = warningService;
     }
@@ -50,7 +54,7 @@ internal sealed class JamWarnCommand : ApplicationCommandModule
         var guild = context.Guild;
         var configuration = _configurationService.GetGuildConfiguration(guild);
 
-        if (configuration is null || configuration.JamLinksChannel == 0 || configuration.JamLinksRule == 0)
+        if (configuration is null)
         {
             builder.WithColor(DiscordColor.Red);
             builder.WithTitle("⚠️ Error issuing warning");
@@ -60,6 +64,30 @@ internal sealed class JamWarnCommand : ApplicationCommandModule
             await context.EditResponseAsync(message).ConfigureAwait(false);
             return;
         }
+
+        if (configuration.JamLinksChannel == 0)
+        {
+            builder.WithColor(DiscordColor.Red);
+            builder.WithTitle("⚠️ Error issuing warning");
+            builder.WithDescription($"The jam links channel for guild {guild.Id} is not configured.");
+
+            message.AddEmbed(builder);
+            await context.EditResponseAsync(message).ConfigureAwait(false);
+            return;
+        }
+
+        if (configuration.JamLinksRule == 0)
+        {
+            builder.WithColor(DiscordColor.Red);
+            builder.WithTitle("⚠️ Error issuing warning");
+            builder.WithDescription($"The jam links rule for guild {guild.Id} is not configured.");
+
+            message.AddEmbed(builder);
+            await context.EditResponseAsync(message).ConfigureAwait(false);
+            return;
+        }
+
+        await _messageDeletionService.DeleteMessageAsync(context.TargetMessage, context.Member).ConfigureAwait(false);
 
         DiscordUser user = context.Interaction.Data.Resolved.Users.First().Value;
         var reason = $"Jam submissions/streams belong in <#{configuration.JamLinksChannel}>";

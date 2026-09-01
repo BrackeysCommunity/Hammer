@@ -5,16 +5,14 @@ using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Services;
-using Microsoft.Extensions.Logging;
 
-namespace Hammer.Commands.Infractions;
+namespace Hammer.Commands;
 
 /// <summary>
 ///     Represents a class which implements the <c>Misplaced Jam Link</c> context menu command.
 /// </summary>
 internal sealed class JamWarnCommand : ApplicationCommandModule
 {
-    private readonly ILogger<JamWarnCommand> _logger;
     private readonly ConfigurationService _configurationService;
     private readonly MessageDeletionService _messageDeletionService;
     private readonly RuleService _ruleService;
@@ -23,18 +21,15 @@ internal sealed class JamWarnCommand : ApplicationCommandModule
     /// <summary>
     ///     Initializes a new instance of the <see cref="JamWarnCommand" /> class.
     /// </summary>
-    /// <param name="logger">The logger.</param>
     /// <param name="configurationService">The configuration service.</param>
     /// <param name="messageDeletionService">The message deletion service.</param>
     /// <param name="ruleService">The rule service.</param>
     /// <param name="warningService">The warning service.</param>
-    public JamWarnCommand(ILogger<JamWarnCommand> logger,
-        ConfigurationService configurationService,
+    public JamWarnCommand(ConfigurationService configurationService,
         MessageDeletionService messageDeletionService,
         RuleService ruleService,
         WarningService warningService)
     {
-        _logger = logger;
         _configurationService = configurationService;
         _messageDeletionService = messageDeletionService;
         _ruleService = ruleService;
@@ -53,7 +48,7 @@ internal sealed class JamWarnCommand : ApplicationCommandModule
         var builder = new DiscordEmbedBuilder();
         var message = new DiscordWebhookBuilder();
         var guild = context.Guild;
-        
+
         if (!_configurationService.TryGetGuildConfiguration(context.Guild, out GuildConfiguration? configuration))
         {
             builder.WithColor(DiscordColor.Red);

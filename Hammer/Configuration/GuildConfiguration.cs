@@ -6,6 +6,18 @@ namespace Hammer.Configuration;
 internal sealed class GuildConfiguration
 {
     /// <summary>
+    ///     Gets or sets the ID of the channel for advertisements.
+    /// </summary>
+    /// <value>The ID of the channel for advertisements.</value>
+    public ulong AdvertiseChannel { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the rule number for misplaced advertisements.
+    /// </summary>
+    /// <value>The rule number for misplaced advertisements.</value>
+    public int AdvertiseRule { get; set; }
+
+    /// <summary>
     ///     Gets or sets the ID of the channel for jam links.
     /// </summary>
     /// <value>The ID of the channel for jam links.</value>

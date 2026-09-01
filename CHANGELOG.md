@@ -23,6 +23,26 @@ modification.
 ### Removed
 - Removed `/migrate` command.
 
+## [5.13.0] - 2026-09-01
+
+### Added
+- Added `Misplaced Ad` context menu action.
+
+## [5.12.2] - 2026-08-30
+
+### Fixed
+- Fixed `Misplaced Jam Link` not loading correct config.
+
+## [5.12.1] - 2026-08-30
+
+### Fixed
+- Fixed `Misplaced Jam Link` context menu action not deleting messages.
+
+## [5.12.0] - 2026-08-30
+
+### Added
+- Added `Misplaced Jam Link` context menu action.
+
 ## [5.11.0] - 2026-08-26
 
 ### Changed
@@ -494,6 +514,8 @@ No substantial changes. Commit 3b8259a6cfb82ec0f5f51804c1ac7f1f5880d014 fixed an
 
 - Hammer is released.
 
+[5.13.0]: https://git.brackeys.dev/bot/hammer/-/tags/v5.13.0
+[5.12.0]: https://git.brackeys.dev/bot/hammer/-/tags/v5.12.0
 [5.11.0]: https://git.brackeys.dev/bot/hammer/-/tags/v5.11.0
 [5.10.0]: https://git.brackeys.dev/bot/hammer/-/tags/v5.10.0
 [5.9.2]: https://git.brackeys.dev/bot/hammer/-/tags/v5.9.2

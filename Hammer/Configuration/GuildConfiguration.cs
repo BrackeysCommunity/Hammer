@@ -14,6 +14,18 @@ public sealed class GuildConfiguration
     public string DefaultBadMessageWarning { get; set; } = "Message violating server rules.";
 
     /// <summary>
+    ///     Gets or sets the ID of the channel for advertisements.
+    /// </summary>
+    /// <value>The ID of the channel for advertisements.</value>
+    public ulong AdvertiseChannel { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the rule number for misplaced advertisements.
+    /// </summary>
+    /// <value>The rule number for misplaced advertisements.</value>
+    public int AdvertiseRule { get; set; }
+
+    /// <summary>
     ///     Gets or sets the ID of the channel for jam links.
     /// </summary>
     /// <value>The ID of the channel for jam links.</value>

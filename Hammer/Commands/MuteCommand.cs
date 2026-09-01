@@ -5,7 +5,6 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
-using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
@@ -21,10 +20,10 @@ namespace Hammer.Commands;
 /// </summary>
 internal sealed class MuteCommand
 {
-    private readonly ILogger<MuteCommand> _logger;
     private readonly ConfigurationService _configurationService;
     private readonly InfractionCooldownService _cooldownService;
     private readonly InfractionService _infractionService;
+    private readonly ILogger<MuteCommand> _logger;
     private readonly MuteService _muteService;
     private readonly RuleService _ruleService;
 
@@ -59,31 +58,34 @@ internal sealed class MuteCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task MuteAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user to mute.")] DiscordUser user,
-        [Parameter("reason"), Description("The reason for the mute.")] string? reason = null,
-        [Parameter("duration"), Description("The duration of the mute.")] string? durationRaw = null,
-        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        [Parameter("user")] [Description("The user to mute.")]
+        DiscordUser user,
+        [Parameter("reason")] [Description("The reason for the mute.")]
+        string? reason = null,
+        [Parameter("duration")] [Description("The duration of the mute.")]
+        string? durationRaw = null,
+        [Parameter("rule")] [Description("The rule which was broken.")] [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null)
     {
         await context.DeferResponseAsync(true);
 
-        DiscordMember member = context.Member!;
+        var member = context.Member!;
         if (_cooldownService.IsCooldownActive(user, member) &&
-            _cooldownService.TryGetInfraction(user, out Infraction? infraction))
+            _cooldownService.TryGetInfraction(user, out var infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
-            DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
-            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            var embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
+            var result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
             if (!result)
             {
                 return;
             }
         }
 
-        DiscordGuild guild = context.Guild!;
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        var guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
-            DiscordWebhookBuilder responseBuilder = new DiscordWebhookBuilder().WithContent("This guild is not configured.");
+            var responseBuilder = new DiscordWebhookBuilder().WithContent("This guild is not configured.");
             await context.EditResponseAsync(responseBuilder);
             return;
         }
@@ -91,7 +93,7 @@ internal sealed class MuteCommand
         TimeSpan? duration = null;
         if (!string.IsNullOrWhiteSpace(durationRaw))
         {
-            if (TimeSpanParser.TryParse(durationRaw, out TimeSpan timeSpan))
+            if (TimeSpanParser.TryParse(durationRaw, out var timeSpan))
             {
                 duration = timeSpan;
             }
@@ -112,14 +114,14 @@ internal sealed class MuteCommand
         var importantNotes = new List<string>();
 
         var hasSearch = !string.IsNullOrWhiteSpace(ruleSearch);
-        Rule? rule = hasSearch ? _ruleService.SearchForRule(guild, ruleSearch!) : null;
+        var rule = hasSearch ? _ruleService.SearchForRule(guild, ruleSearch!) : null;
         if (hasSearch && rule is null)
         {
             importantNotes.Add($"The rule search \"{ruleSearch}\" did not match any rules in this guild.");
         }
 
         ValueTask<InfractionResult> infractionTask;
-        PermissionLevel permissionLevel = member.GetPermissionLevel(guildConfiguration);
+        var permissionLevel = member.GetPermissionLevel(guildConfiguration);
         var shouldClampDuration = false;
 
         if (guildConfiguration.Mute.MaxModeratorMuteDuration is { } maxModeratorMuteDuration and > 0)
@@ -158,7 +160,7 @@ internal sealed class MuteCommand
 
         try
         {
-            InfractionResult result = await infractionTask;
+            var result = await infractionTask;
 
             if (!result.DirectMessageSuccess)
             {

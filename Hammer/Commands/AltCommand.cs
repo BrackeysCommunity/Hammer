@@ -31,13 +31,15 @@ internal sealed class AltCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task AddAltAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user to add an alt account to.")] DiscordUser user,
-        [Parameter("alt"), Description("The alt account to add.")] DiscordUser alt)
+        [Parameter("user")] [Description("The user to add an alt account to.")]
+        DiscordUser user,
+        [Parameter("alt")] [Description("The alt account to add.")]
+        DiscordUser alt)
     {
         await context.DeferResponseAsync();
         _altAccountService.AddAlt(user, alt, context.Member!);
 
-        DiscordUser olderAccount = user.CreationTimestamp > alt.CreationTimestamp ? alt : user;
+        var olderAccount = user.CreationTimestamp > alt.CreationTimestamp ? alt : user;
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
@@ -55,8 +57,10 @@ internal sealed class AltCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task RemoveAltAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user to remove an alt account from.")] DiscordUser user,
-        [Parameter("alt"), Description("The alt account to remove.")] DiscordUser alt)
+        [Parameter("user")] [Description("The user to remove an alt account from.")]
+        DiscordUser user,
+        [Parameter("alt")] [Description("The alt account to remove.")]
+        DiscordUser alt)
     {
         await context.DeferResponseAsync();
         _altAccountService.RemoveAlt(user, alt, context.Member!);
@@ -77,10 +81,11 @@ internal sealed class AltCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task ViewAltsAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user to add an alt account to.")] DiscordUser user)
+        [Parameter("user")] [Description("The user to add an alt account to.")]
+        DiscordUser user)
     {
         await context.DeferResponseAsync();
-        IReadOnlyCollection<ulong> altAccounts = _altAccountService.GetAltsFor(user.Id);
+        var altAccounts = _altAccountService.GetAltsFor(user.Id);
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user.GetUsernameWithDiscriminator(), iconUrl: user.GetAvatarUrl(MediaFormat.Png));
@@ -92,7 +97,7 @@ internal sealed class AltCommand
             var builder = new StringBuilder();
             builder.AppendLine($"The following users are known alt accounts of {user.Mention}:");
 
-            foreach (ulong altAccount in altAccounts)
+            foreach (var altAccount in altAccounts)
             {
                 builder.AppendLine($"• {MentionUtility.MentionUser(altAccount)} ({altAccount})");
             }

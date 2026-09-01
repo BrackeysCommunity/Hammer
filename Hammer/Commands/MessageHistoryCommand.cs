@@ -4,7 +4,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using JetBrains.Annotations;
@@ -16,8 +15,8 @@ namespace Hammer.Commands;
 /// </summary>
 internal sealed class MessageHistoryCommand
 {
-    private readonly MessageService _messageService;
     private readonly MessageDeletionService _messageDeletionService;
+    private readonly MessageService _messageService;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="MessageHistoryCommand" /> class.
@@ -34,7 +33,8 @@ internal sealed class MessageHistoryCommand
     [UsedImplicitly]
     public async Task MessageHistoryAsync(
         SlashCommandContext context,
-        [Parameter("user"), Description("The user whose message history to view.")] DiscordUser user
+        [Parameter("user")] [Description("The user whose message history to view.")]
+        DiscordUser user
     )
     {
         if (user is null)
@@ -49,8 +49,8 @@ internal sealed class MessageHistoryCommand
         embed.WithAuthor(user);
 
         var staffMessages = new List<string>();
-        DiscordGuild guild = context.Guild!;
-        await foreach (StaffMessage staffMessage in _messageService.GetStaffMessages(user, guild))
+        var guild = context.Guild!;
+        await foreach (var staffMessage in _messageService.GetStaffMessages(user, guild))
         {
             staffMessages.Add($"**ID: {staffMessage.Id}** \u2022 " +
                               $"Sent by {MentionUtility.MentionUser(staffMessage.StaffMemberId)} \u2022 " +
@@ -59,7 +59,7 @@ internal sealed class MessageHistoryCommand
 
 
         var deletedMessages = new List<string>();
-        await foreach (DeletedMessage deletedMessage in _messageDeletionService.GetDeletedMessages(user, guild))
+        await foreach (var deletedMessage in _messageDeletionService.GetDeletedMessages(user, guild))
         {
             deletedMessages.Add($"**ID: {deletedMessage.MessageId}** \u2022 " +
                                 $"Sent in {MentionUtility.MentionChannel(deletedMessage.ChannelId)} \u2022 " +
@@ -72,8 +72,8 @@ internal sealed class MessageHistoryCommand
         staffMessages.Reverse();
         deletedMessages.Reverse();
 
-        string staffMessagesResult = staffMessages.Count > 0 ? string.Join("\n", staffMessages) : "*None*";
-        string deletedMessagesResult = deletedMessages.Count > 0 ? string.Join("\n", deletedMessages) : "*None*";
+        var staffMessagesResult = staffMessages.Count > 0 ? string.Join("\n", staffMessages) : "*None*";
+        var deletedMessagesResult = deletedMessages.Count > 0 ? string.Join("\n", deletedMessages) : "*None*";
 
         embed.WithDescription($"__**Staff Messages**__\n{staffMessagesResult}\n\n" +
                               $"__**Deleted Messages**__\n{deletedMessagesResult}");

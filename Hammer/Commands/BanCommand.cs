@@ -5,7 +5,6 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
-using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
@@ -20,10 +19,10 @@ namespace Hammer.Commands;
 /// </summary>
 internal sealed class BanCommand
 {
-    private readonly ILogger<BanCommand> _logger;
     private readonly BanService _banService;
     private readonly InfractionCooldownService _cooldownService;
     private readonly InfractionService _infractionService;
+    private readonly ILogger<BanCommand> _logger;
     private readonly RuleService _ruleService;
 
     /// <summary>
@@ -54,29 +53,32 @@ internal sealed class BanCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task BanAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user to ban.")] DiscordUser user,
-        [Parameter("reason"), Description("The reason for the ban.")] string? reason = null,
-        [Parameter("duration"), Description("The duration of the ban.")] string? durationRaw = null,
-        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        [Parameter("user")] [Description("The user to ban.")]
+        DiscordUser user,
+        [Parameter("reason")] [Description("The reason for the ban.")]
+        string? reason = null,
+        [Parameter("duration")] [Description("The duration of the ban.")]
+        string? durationRaw = null,
+        [Parameter("rule")] [Description("The rule which was broken.")] [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null,
-        [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
+        [Parameter("clearMessageHistory")] [Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)
     {
         await context.DeferResponseAsync(true);
 
         if (_cooldownService.IsCooldownActive(user, context.Member!) &&
-            _cooldownService.TryGetInfraction(user, out Infraction? infraction))
+            _cooldownService.TryGetInfraction(user, out var infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
-            DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
-            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            var embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
+            var result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
             if (!result)
             {
                 return;
             }
         }
 
-        DiscordGuild guild = context.Guild!;
+        var guild = context.Guild!;
         if (await _banService.IsUserBannedAsync(user, guild))
         {
             var responseBuilder = new DiscordWebhookBuilder();
@@ -93,7 +95,7 @@ internal sealed class BanCommand
         TimeSpan? duration = null;
         if (!string.IsNullOrWhiteSpace(durationRaw))
         {
-            if (TimeSpanParser.TryParse(durationRaw, out TimeSpan timeSpan))
+            if (TimeSpanParser.TryParse(durationRaw, out var timeSpan))
             {
                 duration = timeSpan;
             }
@@ -115,18 +117,18 @@ internal sealed class BanCommand
         var importantNotes = new List<string>();
 
         var hasSearch = !string.IsNullOrWhiteSpace(ruleSearch);
-        Rule? rule = hasSearch ? _ruleService.SearchForRule(guild, ruleSearch!) : null;
+        var rule = hasSearch ? _ruleService.SearchForRule(guild, ruleSearch!) : null;
         if (hasSearch && rule is null)
         {
             importantNotes.Add($"The rule search \"{ruleSearch}\" did not match any rules in this guild.");
         }
 
-        ValueTask<InfractionResult> infractionTask = duration is null
+        var infractionTask = duration is null
             ? _banService.BanAsync(user, context.Member!, reason, rule, clearMessageHistory)
             : _banService.TemporaryBanAsync(user, context.Member!, reason, duration.Value, rule, clearMessageHistory);
         try
         {
-            InfractionResult result = await infractionTask;
+            var result = await infractionTask;
 
             if (!result.DirectMessageSuccess)
             {

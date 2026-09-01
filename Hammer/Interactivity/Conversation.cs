@@ -40,7 +40,7 @@ public sealed class Conversation
     /// <param name="context">The command context.</param>
     public static async Task ConverseAsync(ConversationState initialState, ConversationContext context)
     {
-        ConversationState? currentState = initialState;
+        var currentState = initialState;
         do
         {
             currentState = await currentState.InteractAsync(context, context.CancellationTokenSource.Token);

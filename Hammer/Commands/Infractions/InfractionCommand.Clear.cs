@@ -3,7 +3,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
 using JetBrains.Annotations;
@@ -17,17 +16,17 @@ internal sealed partial class InfractionCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task ClearAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user whose infractions to clear.")]
+        [Parameter("user")] [Description("The user whose infractions to clear.")]
         DiscordUser user)
     {
         await context.DeferResponseAsync();
 
-        DiscordGuild guild = context.Guild!;
-        IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(user, guild);
+        var guild = context.Guild!;
+        var infractions = _infractionService.GetInfractions(user, guild);
         _infractionService.RemoveInfractions(infractions);
 
-        int infractionCount = _infractionService.GetInfractionCount(user, guild);
-        int differential = infractions.Count - infractionCount;
+        var infractionCount = _infractionService.GetInfractionCount(user, guild);
+        var differential = infractions.Count - infractionCount;
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user);

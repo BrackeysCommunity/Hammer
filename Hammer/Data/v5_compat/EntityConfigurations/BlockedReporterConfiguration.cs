@@ -13,7 +13,7 @@ internal sealed class BlockedReporterConfiguration : IEntityTypeConfiguration<Bl
     public void Configure(EntityTypeBuilder<BlockedReporter> builder)
     {
         builder.ToTable("BlockedReporter");
-        builder.HasKey(e => new {e.UserId, e.GuildId});
+        builder.HasKey(e => new { e.UserId, e.GuildId });
 
         builder.Property(e => e.UserId);
         builder.Property(e => e.GuildId);

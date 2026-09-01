@@ -95,6 +95,124 @@ public sealed class Infraction : IEquatable<Infraction>, IComparable<Infraction>
     public ulong UserId { get; internal set; }
 
     /// <summary>
+    ///     Compares the current infraction to another object.
+    /// </summary>
+    /// <param name="obj">The object against which to compare.</param>
+    /// <returns>
+    ///     A 32-bit signed integer that indicates whether this instance precedes, follows, or appears in the same position in the
+    ///     sort order as the <paramref name="obj" /> parameter.
+    ///     <list type="table">
+    ///         <listheader>
+    ///             <term>Value</term>
+    ///             <description>Condition</description>
+    ///         </listheader>
+    ///         <item>
+    ///             <term>Less than zero</term>
+    ///             <description>This instance precedes <paramref name="obj" />.</description>
+    ///         </item>
+    ///         <item>
+    ///             <term>Zero</term>
+    ///             <description>This instance has the same position in the sort order as <paramref name="obj" />.</description>
+    ///         </item>
+    ///         <item>
+    ///             <term>Greater than zero</term>
+    ///             <description>
+    ///                 <para>This instance follows <paramref name="obj" />.</para>
+    ///                 -or-
+    ///                 <para><paramref name="obj" /> is <see langword="null" />.</para>
+    ///             </description>
+    ///         </item>
+    ///     </list>
+    /// </returns>
+    /// <exception cref="ArgumentException"><paramref name="obj" /> is not of type <see cref="Infraction" />.</exception>
+    public int CompareTo(object? obj)
+    {
+        if (ReferenceEquals(null, obj))
+        {
+            return 1;
+        }
+
+        if (ReferenceEquals(this, obj))
+        {
+            return 0;
+        }
+
+        if (obj is not Infraction other)
+        {
+            throw new ArgumentException($"Object must be of type {nameof(Infraction)}");
+        }
+
+        return CompareTo(other);
+    }
+
+    /// <summary>
+    ///     Compares the current infraction to another infraction.
+    /// </summary>
+    /// <param name="other">The infraction against which to compare.</param>
+    /// <returns>
+    ///     A 32-bit signed integer that indicates whether this instance precedes, follows, or appears in the same position in the
+    ///     sort order as the <paramref name="other" /> parameter.
+    ///     <list type="table">
+    ///         <listheader>
+    ///             <term>Value</term>
+    ///             <description>Condition</description>
+    ///         </listheader>
+    ///         <item>
+    ///             <term>Less than zero</term>
+    ///             <description>This instance precedes <paramref name="other" />.</description>
+    ///         </item>
+    ///         <item>
+    ///             <term>Zero</term>
+    ///             <description>This instance has the same position in the sort order as <paramref name="other" />.</description>
+    ///         </item>
+    ///         <item>
+    ///             <term>Greater than zero</term>
+    ///             <description>
+    ///                 <para>This instance follows <paramref name="other" />.</para>
+    ///                 -or-
+    ///                 <para><paramref name="other" /> is <see langword="null" />.</para>
+    ///             </description>
+    ///         </item>
+    ///     </list>
+    /// </returns>
+    public int CompareTo(Infraction? other)
+    {
+        if (ReferenceEquals(this, other))
+        {
+            return 0;
+        }
+
+        if (ReferenceEquals(null, other))
+        {
+            return 1;
+        }
+
+        return IssuedAt.CompareTo(other.IssuedAt);
+    }
+
+    /// <summary>
+    ///     Returns a value indicating whether this <see cref="Infraction" /> is equal to another <see cref="Infraction" />.
+    /// </summary>
+    /// <param name="other">The other infraction.</param>
+    /// <returns>
+    ///     <see langword="true" /> if this infraction is equal to <paramref name="other" />; otherwise, <see langword="false" />.
+    /// </returns>
+    public bool Equals(Infraction? other)
+    {
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return Id == other.Id;
+    }
+
+    /// <summary>
     ///     Determines whether two <see cref="Infraction" /> instances are equal.
     /// </summary>
     /// <param name="left">The first infraction.</param>
@@ -180,130 +298,10 @@ public sealed class Infraction : IEquatable<Infraction>, IComparable<Infraction>
         return Comparer<Infraction>.Default.Compare(left, right) >= 0;
     }
 
-    /// <summary>
-    ///     Compares the current infraction to another infraction.
-    /// </summary>
-    /// <param name="other">The infraction against which to compare.</param>
-    /// <returns>
-    ///     A 32-bit signed integer that indicates whether this instance precedes, follows, or appears in the same position in the
-    ///     sort order as the <paramref name="other"/> parameter.
-    ///
-    ///     <list type="table">
-    ///         <listheader>
-    ///             <term>Value</term>
-    ///             <description>Condition</description>
-    ///         </listheader>
-    ///         <item>
-    ///             <term>Less than zero</term>
-    ///             <description>This instance precedes <paramref name="other" />.</description>
-    ///         </item>
-    ///         <item>
-    ///             <term>Zero</term>
-    ///             <description>This instance has the same position in the sort order as <paramref name="other" />.</description>
-    ///         </item>
-    ///         <item>
-    ///             <term>Greater than zero</term>
-    ///             <description>
-    ///                 <para>This instance follows <paramref name="other" />.</para>
-    ///                 -or-
-    ///                 <para><paramref name="other" /> is <see langword="null" />.</para>
-    ///             </description>
-    ///         </item>
-    ///     </list>
-    /// </returns>
-    public int CompareTo(Infraction? other)
-    {
-        if (ReferenceEquals(this, other))
-        {
-            return 0;
-        }
-
-        if (ReferenceEquals(null, other))
-        {
-            return 1;
-        }
-
-        return IssuedAt.CompareTo(other.IssuedAt);
-    }
-
-    /// <summary>
-    ///     Compares the current infraction to another object.
-    /// </summary>
-    /// <param name="obj">The object against which to compare.</param>
-    /// <returns>
-    ///     A 32-bit signed integer that indicates whether this instance precedes, follows, or appears in the same position in the
-    ///     sort order as the <paramref name="obj"/> parameter.
-    ///
-    ///     <list type="table">
-    ///         <listheader>
-    ///             <term>Value</term>
-    ///             <description>Condition</description>
-    ///         </listheader>
-    ///         <item>
-    ///             <term>Less than zero</term>
-    ///             <description>This instance precedes <paramref name="obj" />.</description>
-    ///         </item>
-    ///         <item>
-    ///             <term>Zero</term>
-    ///             <description>This instance has the same position in the sort order as <paramref name="obj" />.</description>
-    ///         </item>
-    ///         <item>
-    ///             <term>Greater than zero</term>
-    ///             <description>
-    ///                 <para>This instance follows <paramref name="obj" />.</para>
-    ///                 -or-
-    ///                 <para><paramref name="obj" /> is <see langword="null" />.</para>
-    ///             </description>
-    ///         </item>
-    ///     </list>
-    /// </returns>
-    /// <exception cref="ArgumentException"><paramref name="obj" /> is not of type <see cref="Infraction" />.</exception>
-    public int CompareTo(object? obj)
-    {
-        if (ReferenceEquals(null, obj))
-        {
-            return 1;
-        }
-
-        if (ReferenceEquals(this, obj))
-        {
-            return 0;
-        }
-
-        if (obj is not Infraction other)
-        {
-            throw new ArgumentException($"Object must be of type {nameof(Infraction)}");
-        }
-
-        return CompareTo(other);
-    }
-
-    /// <summary>
-    ///     Returns a value indicating whether this <see cref="Infraction" /> is equal to another <see cref="Infraction" />.
-    /// </summary>
-    /// <param name="other">The other infraction.</param>
-    /// <returns>
-    ///     <see langword="true" /> if this infraction is equal to <paramref name="other" />; otherwise, <see langword="false" />.
-    /// </returns>
-    public bool Equals(Infraction? other)
-    {
-        if (ReferenceEquals(null, other))
-        {
-            return false;
-        }
-
-        if (ReferenceEquals(this, other))
-        {
-            return true;
-        }
-
-        return Id == other.Id;
-    }
-
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
-        return ReferenceEquals(this, obj) || obj is Infraction other && Equals(other);
+        return ReferenceEquals(this, obj) || (obj is Infraction other && Equals(other));
     }
 
     /// <inheritdoc />

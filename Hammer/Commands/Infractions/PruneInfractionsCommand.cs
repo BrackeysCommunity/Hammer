@@ -3,8 +3,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Hammer.Services;
 using JetBrains.Annotations;
@@ -48,9 +46,9 @@ internal sealed class PruneInfractionsCommand
         var no = new DiscordButtonComponent(DiscordButtonStyle.Danger, "prune-cancel", "No");
         builder.AddActionRowComponent(yes, no);
 
-        DiscordMessage message = await context.EditResponseAsync(builder);
+        var message = await context.EditResponseAsync(builder);
 
-        InteractivityResult<ComponentInteractionCreatedEventArgs> result =
+        var result =
             await message.WaitForButtonAsync(i => i.User == context.User);
 
         builder.Clear();
@@ -82,7 +80,7 @@ internal sealed class PruneInfractionsCommand
         builder.AddEmbed(embed);
         await context.EditResponseAsync(builder);
 
-        int count = await _infractionService.PruneStaleInfractionsAsync();
+        var count = await _infractionService.PruneStaleInfractionsAsync();
 
         embed.WithColor(DiscordColor.Green);
         embed.WithTitle("Prune complete");

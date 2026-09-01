@@ -4,9 +4,7 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
-using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
-using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
 using JetBrains.Annotations;
@@ -21,17 +19,18 @@ internal sealed partial class NoteCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task ViewAsync(SlashCommandContext context,
-        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to view.")] long noteId)
+        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note")] [Description("The note to view.")]
+        long noteId)
     {
-        DiscordGuild guild = context.Guild!;
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        var guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        MemberNote? note = await _noteService.GetNoteAsync(noteId);
-        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
+        var note = await _noteService.GetNoteAsync(noteId);
+        var embed = guild.CreateDefaultEmbed(guildConfiguration, false);
 
         if (note?.GuildId != guild.Id)
             // cannot view notes saved for other guilds
@@ -55,9 +54,9 @@ internal sealed partial class NoteCommand
             return;
         }
 
-        DiscordUser author = await context.Client.GetUserAsync(note.AuthorId);
-        DiscordUser user = await context.Client.GetUserAsync(note.UserId);
-        string timestamp = Formatter.Timestamp(note.CreationTimestamp, TimestampFormat.ShortDateTime);
+        var author = await context.Client.GetUserAsync(note.AuthorId);
+        var user = await context.Client.GetUserAsync(note.UserId);
+        var timestamp = Formatter.Timestamp(note.CreationTimestamp, TimestampFormat.ShortDateTime);
 
         embed.WithAuthor(user);
         embed.AddField("Note ID", note.Id, true);

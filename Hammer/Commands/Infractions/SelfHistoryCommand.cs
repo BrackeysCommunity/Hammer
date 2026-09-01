@@ -38,7 +38,7 @@ internal sealed class SelfHistoryCommand
 
         for (var pageIndex = 0; pageIndex < response.Pages; pageIndex++)
         {
-            DiscordEmbedBuilder embed = _infractionService.BuildInfractionHistoryEmbed(response, pageIndex);
+            var embed = _infractionService.BuildInfractionHistoryEmbed(response, pageIndex);
             builder.AddEmbed(embed);
         }
 

@@ -10,7 +10,6 @@ using Hammer.Extensions;
 using Hammer.Resources;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using X10D.Text;
 using PermissionLevel = Hammer.Data.PermissionLevel;
 using Timer = System.Timers.Timer;
@@ -23,14 +22,14 @@ namespace Hammer.Services;
 internal sealed class MuteService : BackgroundService
 {
     private static readonly TimeSpan QueryInterval = TimeSpan.FromSeconds(30);
-    private readonly ConcurrentDictionary<DiscordGuild, DiscordRole> _mutedRoles = new();
-    private readonly List<Mute> _mutes = [];
-    private readonly ILogger<MuteService> _logger;
-    private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly ConfigurationService _configurationService;
-    private readonly DiscordLogService _logService;
+    private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly DiscordClient _discordClient;
     private readonly InfractionService _infractionService;
+    private readonly DiscordLogService _logService;
+    private readonly ILogger<MuteService> _logger;
+    private readonly ConcurrentDictionary<DiscordGuild, DiscordRole> _mutedRoles = new();
+    private readonly List<Mute> _mutes = [];
     private readonly RuleService _ruleService;
     private readonly Timer _timer = new();
 
@@ -83,7 +82,7 @@ internal sealed class MuteService : BackgroundService
             }
         }
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
         existingMute = await context.Mutes.FindAsync(mute.UserId, mute.GuildId);
         if (existingMute is not null)
@@ -117,7 +116,7 @@ internal sealed class MuteService : BackgroundService
 
         lock (_mutes)
         {
-            foreach (Mute mute in _mutes)
+            foreach (var mute in _mutes)
             {
                 if (mute.ExpiresAt.HasValue && mute.GuildId == guild.Id)
                 {
@@ -173,15 +172,15 @@ internal sealed class MuteService : BackgroundService
             throw new ArgumentNullException(nameof(issuer));
         }
 
-        DiscordGuild guild = issuer.Guild;
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        var guild = issuer.Guild;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
         }
 
         if (issuer.GetPermissionLevel(guildConfiguration) == PermissionLevel.Moderator)
         {
-            long? maxModeratorMuteDuration = guildConfiguration.Mute.MaxModeratorMuteDuration;
+            var maxModeratorMuteDuration = guildConfiguration.Mute.MaxModeratorMuteDuration;
             if (maxModeratorMuteDuration.HasValue)
             {
                 throw new InvalidOperationException(ExceptionMessages.ModeratorCannotPermanentlyMute);
@@ -190,7 +189,7 @@ internal sealed class MuteService : BackgroundService
 
         lock (_mutes)
         {
-            Mute? mute = _mutes.Find(x => x.UserId == user.Id && x.GuildId == issuer.Guild.Id);
+            var mute = _mutes.Find(x => x.UserId == user.Id && x.GuildId == issuer.Guild.Id);
             if (mute is not null)
             {
                 _mutes.Remove(mute);
@@ -200,7 +199,7 @@ internal sealed class MuteService : BackgroundService
         var options = new InfractionOptions { NotifyUser = true, Reason = reason.AsNullIfWhiteSpace(), RuleBroken = ruleBroken };
         await CreateMuteAsync(user, guild, null);
         var result = await _infractionService.CreateInfractionAsync(InfractionType.Mute, user, issuer, options);
-        int infractionCount = _infractionService.GetInfractionCount(user, issuer.Guild);
+        var infractionCount = _infractionService.GetInfractionCount(user, issuer.Guild);
 
         Rule? rule = null;
         if (result.Infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(result.Infraction.GuildId, ruleId))
@@ -212,11 +211,11 @@ internal sealed class MuteService : BackgroundService
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
         reason = $"Muted by {issuer.GetUsernameWithDiscriminator()}: {reason}";
 
-        if (TryGetMutedRole(issuer.Guild, out DiscordRole? mutedRole))
+        if (TryGetMutedRole(issuer.Guild, out var mutedRole))
         {
             try
             {
-                DiscordMember member = await issuer.Guild.GetMemberAsync(user.Id);
+                var member = await issuer.Guild.GetMemberAsync(user.Id);
                 await member.GrantRoleAsync(mutedRole, reason);
             }
             catch (Exception exception) when (exception is not NotFoundException)
@@ -264,8 +263,8 @@ internal sealed class MuteService : BackgroundService
             throw new ArgumentNullException(nameof(revoker));
         }
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-        Mute? mute = await context.Mutes.FirstOrDefaultAsync(b => b.UserId == user.Id && b.GuildId == revoker.Guild.Id);
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        var mute = await context.Mutes.FirstOrDefaultAsync(b => b.UserId == user.Id && b.GuildId == revoker.Guild.Id);
 
         if (mute is not null)
         {
@@ -292,11 +291,11 @@ internal sealed class MuteService : BackgroundService
         reason = reason.WithWhiteSpaceAlternative("No reason specified");
         reason = $"Unmuted by {revoker.GetUsernameWithDiscriminator()}: {reason}";
 
-        if (TryGetMutedRole(revoker.Guild, out DiscordRole? mutedRole))
+        if (TryGetMutedRole(revoker.Guild, out var mutedRole))
         {
             try
             {
-                DiscordMember member = await revoker.Guild.GetMemberAsync(user.Id);
+                var member = await revoker.Guild.GetMemberAsync(user.Id);
                 await member.RevokeRoleAsync(mutedRole, reason);
             }
             catch (Exception exception) when (exception is not NotFoundException)
@@ -340,16 +339,16 @@ internal sealed class MuteService : BackgroundService
             throw new ArgumentNullException(nameof(issuer));
         }
 
-        DiscordGuild guild = issuer.Guild;
+        var guild = issuer.Guild;
 
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
         }
 
         if (issuer.GetPermissionLevel(guildConfiguration) == PermissionLevel.Moderator)
         {
-            long? maxModeratorMuteDuration = guildConfiguration.Mute.MaxModeratorMuteDuration;
+            var maxModeratorMuteDuration = guildConfiguration.Mute.MaxModeratorMuteDuration;
 
             if (maxModeratorMuteDuration > 0 && duration.TotalMilliseconds > maxModeratorMuteDuration)
             {
@@ -369,7 +368,7 @@ internal sealed class MuteService : BackgroundService
 
 
         var result = await _infractionService.CreateInfractionAsync(InfractionType.TemporaryMute, user, issuer, options);
-        int infractionCount = _infractionService.GetInfractionCount(user, guild);
+        var infractionCount = _infractionService.GetInfractionCount(user, guild);
 
         Rule? rule = null;
         if (result.Infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(result.Infraction.GuildId, ruleId))
@@ -381,11 +380,11 @@ internal sealed class MuteService : BackgroundService
         reason = options.Reason.WithWhiteSpaceAlternative("No reason specified");
         reason = $"Temp-Muted by {issuer.GetUsernameWithDiscriminator()} ({duration.Humanize()}): {reason}";
 
-        if (TryGetMutedRole(issuer.Guild, out DiscordRole? mutedRole))
+        if (TryGetMutedRole(issuer.Guild, out var mutedRole))
         {
             try
             {
-                DiscordMember member = await issuer.Guild.GetMemberAsync(user.Id);
+                var member = await issuer.Guild.GetMemberAsync(user.Id);
                 await member.GrantRoleAsync(mutedRole, reason);
             }
             catch (Exception exception) when (exception is not NotFoundException)
@@ -442,7 +441,7 @@ internal sealed class MuteService : BackgroundService
 
     private async Task UpdateFromDatabaseAsync()
     {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
         lock (_mutes)
         {
             _mutes.Clear();
@@ -454,10 +453,10 @@ internal sealed class MuteService : BackgroundService
     {
         var temporaryMute = Mute.Create(user, guild, expirationTime);
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
         if (await context.Mutes.FindAsync(user.Id, guild.Id) is null)
         {
-            EntityEntry<Mute> entry = await context.Mutes.AddAsync(temporaryMute);
+            var entry = await context.Mutes.AddAsync(temporaryMute);
             await context.SaveChangesAsync();
             temporaryMute = entry.Entity;
         }
@@ -480,17 +479,17 @@ internal sealed class MuteService : BackgroundService
             mutes = [.. _mutes];
         }
 
-        foreach (Mute mute in mutes.Where(b => b.ExpiresAt.HasValue && b.ExpiresAt <= DateTimeOffset.UtcNow))
+        foreach (var mute in mutes.Where(b => b.ExpiresAt.HasValue && b.ExpiresAt <= DateTimeOffset.UtcNow))
         {
-            if (!_discordClient.Guilds.TryGetValue(mute.GuildId, out DiscordGuild? guild))
+            if (!_discordClient.Guilds.TryGetValue(mute.GuildId, out var guild))
             {
                 continue;
             }
 
             try
             {
-                DiscordMember botMember = await guild.GetMemberAsync(_discordClient.CurrentUser.Id);
-                DiscordUser user = await _discordClient.GetUserAsync(mute.UserId);
+                var botMember = await guild.GetMemberAsync(_discordClient.CurrentUser.Id);
+                var user = await _discordClient.GetUserAsync(mute.UserId);
                 await RevokeMuteAsync(user, botMember, "Temporary mute expired");
             }
             catch (NotFoundException)

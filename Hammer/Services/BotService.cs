@@ -1,6 +1,5 @@
 using System.Reflection;
 using DSharpPlus;
-using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 
 namespace Hammer.Services;
@@ -10,8 +9,8 @@ namespace Hammer.Services;
 /// </summary>
 internal sealed class BotService : BackgroundService, IEventHandler<ClientStartedEventArgs>
 {
-    private readonly ILogger<BotService> _logger;
     private readonly DiscordClient _discordClient;
+    private readonly ILogger<BotService> _logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="BotService" /> class.
@@ -42,7 +41,7 @@ internal sealed class BotService : BackgroundService, IEventHandler<ClientStarte
     /// <inheritdoc />
     public Task HandleEventAsync(DiscordClient sender, ClientStartedEventArgs e)
     {
-        DiscordUser user = sender.CurrentUser;
+        var user = sender.CurrentUser;
         _logger.LogInformation("Connected to Discord as {BotUsername}#{BotDiscriminator} ({BotId})",
             user.Username,
             user.Discriminator,

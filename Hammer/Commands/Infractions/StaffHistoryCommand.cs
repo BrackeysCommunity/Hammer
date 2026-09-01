@@ -34,9 +34,10 @@ internal sealed class StaffHistoryCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task StaffHistoryAsync(SlashCommandContext context,
-        [Parameter("staffMember"), Description("The staff member whose infractions to search.")] DiscordUser user)
+        [Parameter("staffMember")] [Description("The staff member whose infractions to search.")]
+        DiscordUser user)
     {
-        IEnumerable<Infraction> infractions = _infractionService.GetInfractions(context.Guild!)
+        var infractions = _infractionService.GetInfractions(context.Guild!)
             .Where(i => i.StaffMemberId == user.Id);
         Infraction[] staffInfractions =
         [
@@ -58,11 +59,11 @@ internal sealed class StaffHistoryCommand
         embed.AddField("Bans", staffInfractions.Count(i => i.Type == InfractionType.Ban).ToString("N0"), true);
 
         var builder = new StringBuilder();
-        int upperBound = Math.Min(10, staffInfractions.Length);
+        var upperBound = Math.Min(10, staffInfractions.Length);
 
         for (var index = 0; index < upperBound; index++)
         {
-            Infraction infraction = staffInfractions[index];
+            var infraction = staffInfractions[index];
             builder.Append($"**ID: {infraction.Id}** • ");
             builder.Append($"{infraction.Type.Humanize()} • ");
             if (!string.IsNullOrWhiteSpace(infraction.Reason))

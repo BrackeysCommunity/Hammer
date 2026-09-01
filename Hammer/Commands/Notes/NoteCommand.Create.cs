@@ -3,8 +3,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using Hammer.Configuration;
-using Hammer.Data;
 using Hammer.Extensions;
 using JetBrains.Annotations;
 
@@ -17,21 +15,23 @@ internal sealed partial class NoteCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task CreateAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user for whom to create a note.")] DiscordUser user,
-        [Parameter("content"), Description("The content of the note.")] string content)
+        [Parameter("user")] [Description("The user for whom to create a note.")]
+        DiscordUser user,
+        [Parameter("content")] [Description("The content of the note.")]
+        string content)
     {
-        DiscordGuild guild = context.Guild!;
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        var guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
+        var embed = guild.CreateDefaultEmbed(guildConfiguration, false);
 
         try
         {
-            MemberNote note = await _noteService.CreateNoteAsync(user, context.Member!, content);
+            var note = await _noteService.CreateNoteAsync(user, context.Member!, content);
 
             embed.WithColor(0x4CAF50);
             embed.WithTitle("Note Created");

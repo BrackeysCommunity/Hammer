@@ -5,7 +5,6 @@ using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using Hammer.Data;
 using Hammer.Extensions;
 using Humanizer;
 using JetBrains.Annotations;
@@ -20,29 +19,30 @@ internal sealed partial class ReportCommands
     [UsedImplicitly]
     public async Task ViewReportsAsync(
         SlashCommandContext context,
-        [Parameter("user"), Description("The user whose reported messages to view.")] DiscordUser user
+        [Parameter("user")] [Description("The user whose reported messages to view.")]
+        DiscordUser user
     )
     {
         await context.DeferResponseAsync();
 
         var list = new List<string>();
 
-        foreach (ReportedMessage reportedMessage in _reportService.EnumerateReports(user, context.Guild!))
+        foreach (var reportedMessage in _reportService.EnumerateReports(user, context.Guild!))
         {
             var id = reportedMessage.MessageId.ToString();
 
             try
             {
-                DiscordChannel channel = await context.Client.GetChannelAsync(reportedMessage.ChannelId);
-                DiscordMessage message = await channel.GetMessageAsync(reportedMessage.MessageId);
+                var channel = await context.Client.GetChannelAsync(reportedMessage.ChannelId);
+                var message = await channel.GetMessageAsync(reportedMessage.MessageId);
                 id = Formatter.MaskedUrl(id, message.JumpLink);
             }
             catch (DiscordException)
             {
             }
 
-            string channelMention = MentionUtility.MentionChannel(reportedMessage.ChannelId);
-            string userMention = MentionUtility.MentionUser(reportedMessage.ReporterId);
+            var channelMention = MentionUtility.MentionChannel(reportedMessage.ChannelId);
+            var userMention = MentionUtility.MentionUser(reportedMessage.ReporterId);
             list.Add($"**ID {reportedMessage.Id}** \u2022 {id} in {channelMention} by {userMention}");
         }
 

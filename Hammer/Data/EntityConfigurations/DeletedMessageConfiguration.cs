@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace Hammer.Data.EntityConfigurations;
 
 /// <summary>
-///     Represents a class which defines the configuration for the <see cref="DeletedMessage"/> entity.
+///     Represents a class which defines the configuration for the <see cref="DeletedMessage" /> entity.
 /// </summary>
 internal sealed class DeletedMessageConfiguration : IEntityTypeConfiguration<DeletedMessage>
 {

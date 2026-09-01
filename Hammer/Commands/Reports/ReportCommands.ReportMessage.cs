@@ -18,7 +18,7 @@ internal sealed partial class ReportCommands
     {
         await context.DeferResponseAsync(true);
 
-        DiscordUser user = context.User;
+        var user = context.User;
         await _reportService.ReportMessageAsync(message, (DiscordMember)user);
 
         var builder = new DiscordWebhookBuilder();

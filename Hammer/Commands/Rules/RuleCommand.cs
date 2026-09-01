@@ -5,8 +5,6 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
-using Hammer.Configuration;
-using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using JetBrains.Annotations;
@@ -37,25 +35,25 @@ internal sealed class RuleCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task RuleAsync(SlashCommandContext context,
-        [Parameter("rule"), Description("The rule to display.")]
-        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        [Parameter("rule")] [Description("The rule to display.")] [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string search,
-        [Parameter("mention"), Description("The user to mention.")] DiscordUser? mentionUser = null)
+        [Parameter("mention")] [Description("The user to mention.")]
+        DiscordUser? mentionUser = null)
     {
-        DiscordGuild guild = context.Guild!;
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        var guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        Rule? rule = _ruleService.SearchForRule(guild, search);
+        var rule = _ruleService.SearchForRule(guild, search);
         if (rule is null)
         {
             await context.RespondAsync("An error occurred while fetching the rule.", true);
         }
 
-        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
+        var embed = guild.CreateDefaultEmbed(guildConfiguration, false);
         embed.WithColor(DiscordColor.Orange);
         embed.WithTitle(string.IsNullOrWhiteSpace(rule.Brief) ? $"Rule #{rule.Id}" : $"Rule #{rule.Id}. {rule.Brief}");
         embed.WithDescription(rule.Description);

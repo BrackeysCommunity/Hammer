@@ -109,7 +109,7 @@ internal sealed class JamWarnCommand
 
     private Result<(GuildConfiguration, Rule)> ValidateConfiguration(DiscordGuild guild)
     {
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var configuration))
         {
             return Result.Fail($"The configuration for guild {guild.Id} could not be found.");
         }

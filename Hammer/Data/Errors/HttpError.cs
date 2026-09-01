@@ -22,5 +22,8 @@ internal class HttpError : Error
     ///     Gets the HTTP status code this error should be translated to.
     /// </summary>
     /// <value>The HTTP status code.</value>
-    public int StatusCode => (int)Metadata["StatusCode"];
+    public int StatusCode
+    {
+        get => (int)Metadata["StatusCode"];
+    }
 }

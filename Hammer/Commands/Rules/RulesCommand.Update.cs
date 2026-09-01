@@ -18,9 +18,10 @@ internal sealed partial class RulesCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task UpdateAsync(SlashCommandContext context,
-        [Parameter("messageLink"), Description("The link to the message to edit.")] string messageLink)
+        [Parameter("messageLink")] [Description("The link to the message to edit.")]
+        string messageLink)
     {
-        Match match = MessageLinkRegex.Match(messageLink);
+        var match = MessageLinkRegex.Match(messageLink);
 
         if (!match.Success)
         {

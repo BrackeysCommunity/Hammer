@@ -21,9 +21,12 @@ public readonly struct InfractionSearchOptions
     ///     Gets a value indicating whether the current search options are empty.
     /// </summary>
     /// <returns><see langword="true" /> if the options are empty; otherwise, <see langword="false" />.</returns>
-    public bool IsEmpty => !IdAfter.HasValue && !IdBefore.HasValue &&
-                           !IssuedAfter.HasValue && !IssuedBefore.HasValue &&
-                           !Type.HasValue;
+    public bool IsEmpty
+    {
+        get => !IdAfter.HasValue && !IdBefore.HasValue &&
+               !IssuedAfter.HasValue && !IssuedBefore.HasValue &&
+               !Type.HasValue;
+    }
 
     /// <summary>
     ///     Gets or initializes a timestamp before which all infractions are ignored.

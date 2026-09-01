@@ -18,9 +18,9 @@ namespace Hammer.Commands;
 /// </summary>
 internal sealed class WarnCommand
 {
-    private readonly ILogger<WarnCommand> _logger;
     private readonly InfractionCooldownService _cooldownService;
     private readonly InfractionService _infractionService;
+    private readonly ILogger<WarnCommand> _logger;
     private readonly RuleService _ruleService;
     private readonly WarningService _warningService;
 
@@ -52,20 +52,22 @@ internal sealed class WarnCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task WarnAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user to warn.")] DiscordUser user,
-        [Parameter("reason"), Description("The reason for the warning.")] string reason,
-        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        [Parameter("user")] [Description("The user to warn.")]
+        DiscordUser user,
+        [Parameter("reason")] [Description("The reason for the warning.")]
+        string reason,
+        [Parameter("rule")] [Description("The rule which was broken.")] [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null)
     {
         await context.DeferResponseAsync(true);
 
-        DiscordMember member = context.Member!;
+        var member = context.Member!;
         if (_cooldownService.IsCooldownActive(user, member) &&
-            _cooldownService.TryGetInfraction(user, out Infraction? infraction))
+            _cooldownService.TryGetInfraction(user, out var infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
-            DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
-            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            var embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
+            var result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
             if (!result)
             {
                 return;
@@ -79,15 +81,15 @@ internal sealed class WarnCommand
         try
         {
             var hasSearch = !string.IsNullOrWhiteSpace(ruleSearch);
-            Rule? rule = hasSearch ? _ruleService.SearchForRule(context.Guild!, ruleSearch!) : null;
+            var rule = hasSearch ? _ruleService.SearchForRule(context.Guild!, ruleSearch!) : null;
             if (hasSearch && rule is null)
             {
                 importantNotes.Add($"The rule search \"{ruleSearch}\" did not match any rules in this guild.");
             }
 
 
-            var options = new WarningOptions(user: user, issuer: member, reason: reason, ruleBroken: rule);
-            InfractionResult result = await _warningService.WarnAsync(options);
+            var options = new WarningOptions(user, member, reason, rule);
+            var result = await _warningService.WarnAsync(options);
 
             if (!result.DirectMessageSuccess)
             {

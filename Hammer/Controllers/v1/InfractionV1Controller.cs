@@ -8,7 +8,9 @@ namespace Hammer.Controllers.v1;
 /// <summary>
 ///     Represents the API controller for managing infractions.
 /// </summary>
-[ApiController, ApiVersion(1), Route("api/v{version:apiVersion}/infraction")]
+[ApiController]
+[ApiVersion(1)]
+[Route("api/v{version:apiVersion}/infraction")]
 public sealed class InfractionV1Controller : ControllerBase
 {
     private readonly InfractionService _infractionService;

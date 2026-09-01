@@ -45,10 +45,10 @@ public struct CustomIdBuilder
     public override string ToString()
     {
         // e.g. namespace:id;name=Foo;scope=guild
-        using Utf16ValueStringBuilder builder = ZString.CreateStringBuilder();
+        using var builder = ZString.CreateStringBuilder();
         builder.Append(_type ?? string.Empty);
 
-        foreach ((string key, string value) in _pairs)
+        foreach (var (key, value) in _pairs)
         {
             builder.Append(';');
             builder.Append(key);
@@ -77,7 +77,7 @@ public struct CustomIdBuilder
         [NotNullWhen(true)] out IReadOnlyDictionary<string, string>? pairs)
     {
         var dictionary = new Dictionary<string, string>();
-        int separatorIndex = input.IndexOf(';');
+        var separatorIndex = input.IndexOf(';');
 
         if (separatorIndex < 0)
         {
@@ -91,7 +91,7 @@ public struct CustomIdBuilder
 
         while (!input.IsEmpty)
         {
-            int eq = input.IndexOf('=');
+            var eq = input.IndexOf('=');
             if (eq < 0)
             {
                 break;
@@ -100,7 +100,7 @@ public struct CustomIdBuilder
             var key = input[..eq].ToString();
             input = input[(eq + 1)..];
 
-            int end = input.IndexOf(';');
+            var end = input.IndexOf(';');
             ReadOnlySpan<char> value;
 
             if (end < 0)

@@ -12,7 +12,7 @@ internal sealed class RuleConfiguration : IEntityTypeConfiguration<Rule>
     public void Configure(EntityTypeBuilder<Rule> builder)
     {
         builder.ToTable("Rule");
-        builder.HasKey(e => new {e.Id, e.GuildId});
+        builder.HasKey(e => new { e.Id, e.GuildId });
 
         builder.Property(e => e.Id);
         builder.Property(e => e.GuildId);

@@ -4,7 +4,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
@@ -17,8 +16,8 @@ namespace Hammer.Commands;
 /// </summary>
 internal sealed class UserInfoCommand
 {
-    private readonly ConfigurationService _configurationService;
     private readonly AltAccountService _altAccountService;
+    private readonly ConfigurationService _configurationService;
     private readonly InfractionService _infractionService;
 
     /// <summary>
@@ -40,19 +39,20 @@ internal sealed class UserInfoCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task UserInfoAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user whose information to view.")] DiscordUser user)
+        [Parameter("user")] [Description("The user whose information to view.")]
+        DiscordUser user)
     {
-        DiscordGuild guild = context.Guild!;
-        GuildConfiguration? configuration = _configurationService.GetGuildConfiguration(guild);
+        var guild = context.Guild!;
+        var configuration = _configurationService.GetGuildConfiguration(guild);
         if (configuration is null)
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        bool staffRequested = context.Member!.IsStaffMember(configuration);
-        DiscordMember? member = await user.GetAsMemberOfAsync(guild);
-        DiscordEmbed embed = CreateUserInfoEmbed(user, member, staffRequested, guild);
+        var staffRequested = context.Member!.IsStaffMember(configuration);
+        var member = await user.GetAsMemberOfAsync(guild);
+        var embed = CreateUserInfoEmbed(user, member, staffRequested, guild);
 
         await context.RespondAsync(embed);
     }
@@ -63,24 +63,24 @@ internal sealed class UserInfoCommand
     [UsedImplicitly]
     public async Task UserInfoContextMenuAsync(SlashCommandContext context, DiscordUser user)
     {
-        DiscordGuild guild = context.Guild!;
-        GuildConfiguration? configuration = _configurationService.GetGuildConfiguration(guild);
+        var guild = context.Guild!;
+        var configuration = _configurationService.GetGuildConfiguration(guild);
         if (configuration is null)
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        bool staffRequested = context.Member!.IsStaffMember(configuration);
+        var staffRequested = context.Member!.IsStaffMember(configuration);
         var member = await user.GetAsMemberOfAsync(guild);
-        DiscordEmbed embed = CreateUserInfoEmbed(user, member, staffRequested, guild);
+        var embed = CreateUserInfoEmbed(user, member, staffRequested, guild);
         await context.RespondAsync(embed, true);
     }
 
     private DiscordEmbed CreateUserInfoEmbed(DiscordUser user, DiscordMember? member, bool staffRequested, DiscordGuild guild)
     {
         var embed = new DiscordEmbedBuilder();
-        GuildConfiguration? configuration = _configurationService.GetGuildConfiguration(guild);
+        var configuration = _configurationService.GetGuildConfiguration(guild);
 
         if (member is null && !staffRequested)
         {
@@ -106,16 +106,16 @@ internal sealed class UserInfoCommand
 
         if (staffRequested)
         {
-            IReadOnlyCollection<ulong> altAccounts = _altAccountService.GetAltsFor(user.Id);
+            var altAccounts = _altAccountService.GetAltsFor(user.Id);
 
-            int infractionCount = _infractionService.GetInfractionCount(user, guild);
-            int altInfractions = altAccounts.SelectMany(alt => _infractionService.GetInfractions(alt, guild.Id)).Count();
+            var infractionCount = _infractionService.GetInfractionCount(user, guild);
+            var altInfractions = altAccounts.SelectMany(alt => _infractionService.GetInfractions(alt, guild.Id)).Count();
             embed.AddFieldIf(infractionCount > 0, "Infractions", $"{infractionCount} (+ {altInfractions})", true);
 
-            int altCount = altAccounts.Count;
+            var altCount = altAccounts.Count;
             embed.AddFieldIf(altCount > 0, "Alt Account".ToQuantity(altCount), () =>
             {
-                ulong firstAlt = altAccounts.First();
+                var firstAlt = altAccounts.First();
                 return altCount switch
                 {
                     1 => $"{MentionUtility.MentionUser(firstAlt)} ({firstAlt})",

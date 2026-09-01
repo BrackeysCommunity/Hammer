@@ -24,7 +24,10 @@ public sealed class ConfigurationService
     ///     Gets the bot configuration.
     /// </summary>
     /// <value>The bot configuration.</value>
-    public BotConfiguration BotConfiguration => _configuration.Get<BotConfiguration>() ?? new BotConfiguration();
+    public BotConfiguration BotConfiguration
+    {
+        get => _configuration.Get<BotConfiguration>() ?? new BotConfiguration();
+    }
 
     /// <summary>
     ///     Gets the bot configuration for the specified guild.

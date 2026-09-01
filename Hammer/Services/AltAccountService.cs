@@ -13,9 +13,9 @@ namespace Hammer.Services;
 /// </summary>
 public sealed class AltAccountService : BackgroundService
 {
+    private readonly ConcurrentDictionary<ulong, HashSet<ulong>> _altAccountCache = new();
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly DiscordLogService _discordLogService;
-    private readonly ConcurrentDictionary<ulong, HashSet<ulong>> _altAccountCache = new();
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="AltAccountService" /> class.
@@ -54,18 +54,18 @@ public sealed class AltAccountService : BackgroundService
             throw new ArgumentNullException(nameof(staffMember));
         }
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
         var record = new AltAccount { StaffMemberId = staffMember.Id, RegisteredAt = DateTimeOffset.UtcNow };
         context.AltAccounts.Add(record with { UserId = user.Id, AltId = alt.Id });
         context.AltAccounts.Add(record with { UserId = alt.Id, AltId = user.Id });
         context.SaveChanges();
 
-        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, []);
+        var cache = _altAccountCache.GetOrAdd(user.Id, []);
         cache.Add(alt.Id);
 
-        foreach (ulong altId in cache)
+        foreach (var altId in cache)
         {
-            HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altId, []);
+            var altCache = _altAccountCache.GetOrAdd(altId, []);
             altCache.Add(user.Id);
         }
 
@@ -90,7 +90,7 @@ public sealed class AltAccountService : BackgroundService
     /// <returns>The alt accounts.</returns>
     public IReadOnlyCollection<ulong> GetAltsFor(ulong userId)
     {
-        if (_altAccountCache.TryGetValue(userId, out HashSet<ulong>? alts))
+        if (_altAccountCache.TryGetValue(userId, out var alts))
         {
             // get alts of alts without this userId
             return [.. alts, .. alts.SelectMany(a => _altAccountCache[a]).Where(a => a != userId)];
@@ -125,9 +125,9 @@ public sealed class AltAccountService : BackgroundService
             throw new ArgumentNullException(nameof(staffMember));
         }
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
 
-        AltAccount? altAccount = context.AltAccounts.FirstOrDefault(a => a.UserId == user.Id && a.AltId == alt.Id);
+        var altAccount = context.AltAccounts.FirstOrDefault(a => a.UserId == user.Id && a.AltId == alt.Id);
         if (altAccount is not null)
         {
             context.AltAccounts.Remove(altAccount);
@@ -139,12 +139,12 @@ public sealed class AltAccountService : BackgroundService
             context.AltAccounts.RemoveRange(altAccounts);
         }
 
-        HashSet<ulong> cache = _altAccountCache.GetOrAdd(user.Id, []);
-        HashSet<ulong>? altCache = _altAccountCache.GetOrAdd(alt.Id, []);
+        var cache = _altAccountCache.GetOrAdd(user.Id, []);
+        var altCache = _altAccountCache.GetOrAdd(alt.Id, []);
         cache.Remove(alt.Id);
         altCache.Remove(user.Id);
 
-        foreach (ulong altId in GetAltsFor(alt.Id))
+        foreach (var altId in GetAltsFor(alt.Id))
         {
             altAccounts = [.. context.AltAccounts.Where(a => a.UserId == user.Id && a.AltId == altId)];
             if (altAccounts.Length > 0)
@@ -180,13 +180,13 @@ public sealed class AltAccountService : BackgroundService
 
     private async Task UpdateFromDatabase()
     {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-        foreach (IGrouping<ulong, AltAccount> group in context.AltAccounts.GroupBy(u => u.UserId))
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        foreach (var group in context.AltAccounts.GroupBy(u => u.UserId))
         {
-            HashSet<ulong> cache = _altAccountCache.GetOrAdd(group.Key, []);
-            foreach (AltAccount altAccount in group)
+            var cache = _altAccountCache.GetOrAdd(group.Key, []);
+            foreach (var altAccount in group)
             {
-                HashSet<ulong> altCache = _altAccountCache.GetOrAdd(altAccount.AltId, []);
+                var altCache = _altAccountCache.GetOrAdd(altAccount.AltId, []);
                 cache.Add(altAccount.AltId);
                 altCache.Add(group.Key);
             }

@@ -3,7 +3,6 @@ using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using Hammer.Configuration;
-using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using JetBrains.Annotations;
@@ -35,14 +34,14 @@ internal sealed class BadMessageCommand
     [UsedImplicitly]
     public async Task BadMessageAsync(SlashCommandContext context, DiscordMessage message)
     {
-        DiscordGuild guild = context.Guild!;
+        var guild = context.Guild!;
 
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var configuration))
         {
             configuration = new GuildConfiguration();
         }
 
-        string defaultReason = configuration.DefaultBadMessageWarning;
+        var defaultReason = configuration.DefaultBadMessageWarning;
 
         var id = new CustomIdBuilder();
         id.Type(CustomIds.BadMessageWarning);
@@ -53,15 +52,15 @@ internal sealed class BadMessageCommand
         modal.WithCustomId(id.ToString());
         modal.WithTitle("Warning Details");
 
-        IReadOnlyList<Rule> rules = _ruleService.GetGuildRules(guild);
+        var rules = _ruleService.GetGuildRules(guild);
         var options = new List<DiscordSelectComponentOption>();
-        foreach (Rule rule in rules)
+        foreach (var rule in rules)
         {
             var option = new DiscordSelectComponentOption
             (
-                label: $"#{rule.Id} - {rule.Brief}",
-                value: rule.Id.ToString(),
-                description: rule.Description
+                $"#{rule.Id} - {rule.Brief}",
+                rule.Id.ToString(),
+                rule.Description
             );
             options.Add(option);
         }

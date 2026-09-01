@@ -14,16 +14,16 @@ internal sealed class RuleAutoCompleteProvider : IAutoCompleteProvider
     public ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context)
     {
         var ruleService = context.ServiceProvider.GetRequiredService<RuleService>();
-        IReadOnlyList<Rule> rules = ruleService.GetGuildRules(context.Guild!);
+        var rules = ruleService.GetGuildRules(context.Guild!);
 
         var result = new List<DiscordAutoCompleteChoice>();
-        string optionValue = context.UserInput ?? string.Empty;
-        bool hasOptionValue = !string.IsNullOrWhiteSpace(optionValue);
-        string[] searchTerms = optionValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var optionValue = context.UserInput ?? string.Empty;
+        var hasOptionValue = !string.IsNullOrWhiteSpace(optionValue);
+        var searchTerms = optionValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        foreach (Rule rule in rules)
+        foreach (var rule in rules)
         {
-            if (!hasOptionValue || (int.TryParse(optionValue, out int ruleId) && rule.Id == ruleId) ||
+            if (!hasOptionValue || (int.TryParse(optionValue, out var ruleId) && rule.Id == ruleId) ||
                 RuleService.RuleMatches(rule, searchTerms))
             {
                 result.Add(new DiscordAutoCompleteChoice(GetRuleDescription(rule), rule.Id.ToString()));
@@ -41,7 +41,7 @@ internal sealed class RuleAutoCompleteProvider : IAutoCompleteProvider
 
     private static string GetRuleDescription(Rule rule)
     {
-        string? summary = rule.Brief;
+        var summary = rule.Brief;
         if (string.IsNullOrWhiteSpace(summary))
         {
             summary = rule.Description;

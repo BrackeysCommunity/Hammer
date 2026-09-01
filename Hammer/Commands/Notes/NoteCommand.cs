@@ -11,8 +11,8 @@ namespace Hammer.Commands.Notes;
 [Description("Manages member notes.")]
 internal sealed partial class NoteCommand
 {
-    private readonly ILogger<NoteCommand> _logger;
     private readonly ConfigurationService _configurationService;
+    private readonly ILogger<NoteCommand> _logger;
     private readonly MemberNoteService _noteService;
 
     /// <summary>

@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Hammer.Configuration;
 using Hammer.Data;
 
 namespace Hammer.Services;
@@ -12,8 +11,8 @@ namespace Hammer.Services;
 /// </summary>
 public sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
 {
-    private readonly DiscordClient _discordClient;
     private readonly ConfigurationService _configurationService;
+    private readonly DiscordClient _discordClient;
     private readonly Dictionary<DiscordGuild, DiscordChannel> _logChannels = new();
 
     /// <summary>
@@ -30,12 +29,12 @@ public sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
     /// <inheritdoc />
     public async Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
     {
-        if (!_configurationService.TryGetGuildConfiguration(e.Guild, out GuildConfiguration? configuration))
+        if (!_configurationService.TryGetGuildConfiguration(e.Guild, out var configuration))
         {
             return;
         }
 
-        ulong logChannel = configuration.LogChannel;
+        var logChannel = configuration.LogChannel;
         if (logChannel == 0)
         {
             return;
@@ -43,7 +42,7 @@ public sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
 
         try
         {
-            DiscordChannel channel = await _discordClient.GetChannelAsync(logChannel);
+            var channel = await _discordClient.GetChannelAsync(logChannel);
             _logChannels[e.Guild] = channel;
         }
         catch
@@ -76,14 +75,14 @@ public sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
             throw new ArgumentNullException(nameof(embed));
         }
 
-        if (_logChannels.TryGetValue(guild, out DiscordChannel? logChannel))
+        if (_logChannels.TryGetValue(guild, out var logChannel))
         {
             if (embed.Timestamp is null)
             {
                 embed = new DiscordEmbedBuilder(embed).WithTimestamp(DateTimeOffset.UtcNow);
             }
 
-            string? mentionString = BuildMentionString(guild, notificationOptions);
+            var mentionString = BuildMentionString(guild, notificationOptions);
             if (mentionString is null)
             {
                 await logChannel.SendMessageAsync(embed);
@@ -111,7 +110,7 @@ public sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var configuration))
         {
             channel = null;
             return false;
@@ -127,7 +126,7 @@ public sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
 
     private string? BuildMentionString(DiscordGuild guild, StaffNotificationOptions notificationOptions)
     {
-        if (!TryGetLogChannel(guild, out DiscordChannel? logChannel))
+        if (!TryGetLogChannel(guild, out var logChannel))
         {
             return null;
         }
@@ -137,14 +136,14 @@ public sealed class DiscordLogService : IEventHandler<GuildAvailableEventArgs>
             return null;
         }
 
-        if (!_configurationService.TryGetGuildConfiguration(logChannel.Guild, out GuildConfiguration? configuration))
+        if (!_configurationService.TryGetGuildConfiguration(logChannel.Guild, out var configuration))
         {
             return null;
         }
 
-        RoleConfiguration roleConfiguration = configuration.Roles;
-        DiscordRole administratorRole = logChannel.Guild.Roles[roleConfiguration.AdministratorRoleId];
-        DiscordRole moderatorRole = logChannel.Guild.Roles[roleConfiguration.ModeratorRoleId];
+        var roleConfiguration = configuration.Roles;
+        var administratorRole = logChannel.Guild.Roles[roleConfiguration.AdministratorRoleId];
+        var moderatorRole = logChannel.Guild.Roles[roleConfiguration.ModeratorRoleId];
 
         var mentions = new List<string>();
 

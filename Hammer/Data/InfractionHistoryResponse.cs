@@ -64,7 +64,10 @@ public sealed class InfractionHistoryResponse
     ///     Gets the count of infractions for <see cref="TargetUser" />.
     /// </summary>
     /// <value>The infraction count.</value>
-    public int InfractionCount => _infractionService.GetInfractionCount(TargetUser, Guild, _searchOptions);
+    public int InfractionCount
+    {
+        get => _infractionService.GetInfractionCount(TargetUser, Guild, _searchOptions);
+    }
 
     /// <summary>
     ///     Gets or sets the zero-based page index of infractions to display.

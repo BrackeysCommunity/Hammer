@@ -5,8 +5,8 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
-using Hammer.Configuration;
 using Hammer.Extensions;
+using Hammer.Services;
 using JetBrains.Annotations;
 
 namespace Hammer.Commands.Rules;
@@ -18,10 +18,11 @@ internal sealed partial class RulesCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task DeleteAsync(SlashCommandContext context,
-        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>] [Parameter("rule"), Description("The rule to modify")] long ruleId)
+        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>] [Parameter("rule")] [Description("The rule to modify")]
+        long ruleId)
     {
-        DiscordGuild guild = context.Guild!;
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        var guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
@@ -33,14 +34,14 @@ internal sealed partial class RulesCommand
 
         if (!_ruleService.GuildHasRule(guild, (int)ruleId))
         {
-            builder.AddEmbed(Services.RuleService.CreateRuleNotFoundEmbed((int)ruleId));
+            builder.AddEmbed(RuleService.CreateRuleNotFoundEmbed((int)ruleId));
             await context.EditResponseAsync(builder);
             return;
         }
 
         _ruleService.DeleteRule(guild, (int)ruleId);
 
-        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
+        var embed = guild.CreateDefaultEmbed(guildConfiguration, false);
         embed.WithColor(0x4CAF50);
         embed.WithTitle($"Rule {ruleId} deleted");
         embed.WithDescription("To view the new rules, use the `/rules` command.");

@@ -7,11 +7,11 @@ namespace Hammer.Data;
 /// </summary>
 internal sealed class InfractionBuilder
 {
-    private string? _reason;
-    private InfractionType? _type;
-    private DiscordUser? _target;
     private DiscordGuild? _guild;
+    private string? _reason;
     private DiscordUser? _staffMember;
+    private DiscordUser? _target;
+    private InfractionType? _type;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="InfractionBuilder" /> class.

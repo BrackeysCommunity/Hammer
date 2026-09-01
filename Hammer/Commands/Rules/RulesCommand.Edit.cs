@@ -5,9 +5,8 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
-using Hammer.Configuration;
-using Hammer.Data;
 using Hammer.Extensions;
+using Hammer.Services;
 using JetBrains.Annotations;
 using X10D.Text;
 
@@ -20,11 +19,12 @@ internal sealed partial class RulesCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task EditAsync(SlashCommandContext context,
-        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>] [Parameter("rule"), Description("The rule to modify.")] long ruleId)
+        [SlashAutoCompleteProvider<RuleAutoCompleteProvider>] [Parameter("rule")] [Description("The rule to modify.")]
+        long ruleId)
     {
-        DiscordGuild guild = context.Guild!;
+        var guild = context.Guild!;
 
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? _))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var _))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
@@ -32,7 +32,7 @@ internal sealed partial class RulesCommand
 
         if (!_ruleService.GuildHasRule(guild, (int)ruleId))
         {
-            DiscordEmbed embed = Services.RuleService.CreateRuleNotFoundEmbed((int)ruleId);
+            var embed = RuleService.CreateRuleNotFoundEmbed((int)ruleId);
             await context.RespondAsync(embed, true);
             return;
         }
@@ -44,7 +44,7 @@ internal sealed partial class RulesCommand
             return;
         }
 
-        Rule rule = ruleResult.Value;
+        var rule = ruleResult.Value;
 
         var id = new CustomIdBuilder();
         id.Type(CustomIds.EditRule);
@@ -55,14 +55,14 @@ internal sealed partial class RulesCommand
         modal.WithTitle("Edit Rule");
 
         var briefInput = new DiscordTextInputComponent(
-            customId: "brief",
-            placeholder: "e.g. Be respectful",
+            "brief",
+            "e.g. Be respectful",
             required: false,
             value: rule.Brief?.AsNullIfWhiteSpace());
 
         var descriptionInput = new DiscordTextInputComponent(
-            customId: "description",
-            placeholder: "e.g. Please treat other members with respect. Refrain from verbal insults and attacks.",
+            "description",
+            "e.g. Please treat other members with respect. Refrain from verbal insults and attacks.",
             required: true,
             style: DiscordTextInputStyle.Paragraph,
             value: rule.Description.AsNullIfWhiteSpace());

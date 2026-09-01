@@ -15,8 +15,8 @@ namespace Hammer.Commands;
 /// </summary>
 internal sealed class GagCommand
 {
-    private readonly ILogger<GagCommand> _logger;
     private readonly InfractionService _infractionService;
+    private readonly ILogger<GagCommand> _logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="GagCommand" /> class.
@@ -38,7 +38,7 @@ internal sealed class GagCommand
         var builder = new DiscordEmbedBuilder();
         var message = new DiscordWebhookBuilder();
 
-        DiscordMember? staffMember = context.Member;
+        var staffMember = context.Member;
 
         if (staffMember is null)
         {
@@ -77,13 +77,15 @@ internal sealed class GagCommand
     [UsedImplicitly]
     public async Task GagAsync(
         SlashCommandContext context,
-        [Parameter("user"), Description("The user to gag.")] DiscordUser user,
-        [Parameter("duration"), Description("The duration of the gag. Defaults to 5 minutes.")] string? duration = null
+        [Parameter("user")] [Description("The user to gag.")]
+        DiscordUser user,
+        [Parameter("duration")] [Description("The duration of the gag. Defaults to 5 minutes.")]
+        string? duration = null
     )
     {
         var builder = new DiscordEmbedBuilder();
         var message = new DiscordWebhookBuilder();
-        DiscordMember? staffMember = context.Member;
+        var staffMember = context.Member;
 
         if (staffMember is null)
         {
@@ -95,7 +97,7 @@ internal sealed class GagCommand
 
         try
         {
-            if (TimeSpanParser.TryParse(duration, out TimeSpan timeout))
+            if (TimeSpanParser.TryParse(duration, out var timeout))
             {
                 await _infractionService.GagAsync(user, staffMember, duration: timeout);
             }

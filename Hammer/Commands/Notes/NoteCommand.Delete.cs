@@ -5,7 +5,6 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
-using Hammer.Data;
 using Hammer.Extensions;
 using JetBrains.Annotations;
 
@@ -18,10 +17,11 @@ internal sealed partial class NoteCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task DeleteAsync(SlashCommandContext context,
-        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to delete.")] long noteId)
+        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note")] [Description("The note to delete.")]
+        long noteId)
     {
         var embed = new DiscordEmbedBuilder();
-        MemberNote? note = await _noteService.GetNoteAsync(noteId);
+        var note = await _noteService.GetNoteAsync(noteId);
 
         if (note is null)
         {

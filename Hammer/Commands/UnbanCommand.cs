@@ -15,8 +15,8 @@ namespace Hammer.Commands;
 /// </summary>
 internal sealed class UnbanCommand
 {
-    private readonly ILogger<UnbanCommand> _logger;
     private readonly BanService _banService;
+    private readonly ILogger<UnbanCommand> _logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="UnbanCommand" /> class.
@@ -34,15 +34,17 @@ internal sealed class UnbanCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task UnbanAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user to unban.")] DiscordUser user,
-        [Parameter("reason"), Description("The reason for the ban revocation.")] string? reason = null)
+        [Parameter("user")] [Description("The user to unban.")]
+        DiscordUser user,
+        [Parameter("reason")] [Description("The reason for the ban revocation.")]
+        string? reason = null)
     {
         await context.DeferResponseAsync(true);
 
         var embed = new DiscordEmbedBuilder();
         try
         {
-            DiscordMember member = context.Member!;
+            var member = context.Member!;
             await _banService.RevokeBanAsync(user, member, reason);
 
             embed.WithAuthor(user);

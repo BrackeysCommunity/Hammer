@@ -30,6 +30,28 @@ public sealed class Rule : IEquatable<Rule>
     public int Id { get; internal set; }
 
     /// <summary>
+    ///     Returns a value indicating whether this <see cref="Rule" /> is equal to another <see cref="Rule" />.
+    /// </summary>
+    /// <param name="other">The other rule.</param>
+    /// <returns>
+    ///     <see langword="true" /> if this rule is equal to <paramref name="other" />; otherwise, <see langword="false" />.
+    /// </returns>
+    public bool Equals(Rule? other)
+    {
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return Id == other.Id && GuildId == other.GuildId;
+    }
+
+    /// <summary>
     ///     Determines whether two <see cref="Rule" /> instances are equal.
     /// </summary>
     /// <param name="left">The first rule.</param>
@@ -55,28 +77,6 @@ public sealed class Rule : IEquatable<Rule>
     public static bool operator !=(Rule? left, Rule? right)
     {
         return !(left == right);
-    }
-
-    /// <summary>
-    ///     Returns a value indicating whether this <see cref="Rule" /> is equal to another <see cref="Rule" />.
-    /// </summary>
-    /// <param name="other">The other rule.</param>
-    /// <returns>
-    ///     <see langword="true" /> if this rule is equal to <paramref name="other" />; otherwise, <see langword="false" />.
-    /// </returns>
-    public bool Equals(Rule? other)
-    {
-        if (ReferenceEquals(null, other))
-        {
-            return false;
-        }
-
-        if (ReferenceEquals(this, other))
-        {
-            return true;
-        }
-
-        return Id == other.Id && GuildId == other.GuildId;
     }
 
     /// <inheritdoc />

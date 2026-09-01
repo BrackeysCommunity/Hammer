@@ -67,6 +67,22 @@ public sealed class DeletedMessage : IEquatable<DeletedMessage>
     /// <value>The staff member's user ID.</value>
     public ulong StaffMemberId { get; internal set; }
 
+    /// <inheritdoc />
+    public bool Equals(DeletedMessage? other)
+    {
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return MessageId == other.MessageId;
+    }
+
     /// <summary>
     ///     Determines whether two <see cref="DeletedMessage" /> instances are equal.
     /// </summary>
@@ -117,25 +133,9 @@ public sealed class DeletedMessage : IEquatable<DeletedMessage>
     }
 
     /// <inheritdoc />
-    public bool Equals(DeletedMessage? other)
-    {
-        if (ReferenceEquals(null, other))
-        {
-            return false;
-        }
-
-        if (ReferenceEquals(this, other))
-        {
-            return true;
-        }
-
-        return MessageId == other.MessageId;
-    }
-
-    /// <inheritdoc />
     public override bool Equals(object? obj)
     {
-        return ReferenceEquals(this, obj) || obj is DeletedMessage other && Equals(other);
+        return ReferenceEquals(this, obj) || (obj is DeletedMessage other && Equals(other));
     }
 
     /// <inheritdoc />

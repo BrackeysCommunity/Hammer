@@ -20,10 +20,10 @@ internal sealed partial class RulesCommand
         modal.WithCustomId(CustomIds.AddRule);
         modal.WithTitle("Add Rule");
 
-        var briefInput = new DiscordTextInputComponent(customId: "brief", placeholder: "e.g. Be respectful", required: false);
+        var briefInput = new DiscordTextInputComponent("brief", "e.g. Be respectful", required: false);
         var descriptionInput = new DiscordTextInputComponent(
-            customId: "description",
-            placeholder: "e.g. Please treat other members with respect. Refrain from verbal insults and attacks.",
+            "description",
+            "e.g. Please treat other members with respect. Refrain from verbal insults and attacks.",
             required: true,
             style: DiscordTextInputStyle.Paragraph);
 

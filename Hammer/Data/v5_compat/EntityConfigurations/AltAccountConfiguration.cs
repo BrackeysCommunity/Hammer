@@ -13,7 +13,7 @@ internal sealed class AltAccountConfiguration : IEntityTypeConfiguration<AltAcco
     public void Configure(EntityTypeBuilder<AltAccount> builder)
     {
         builder.ToTable("AltAccount");
-        builder.HasKey(e => new {e.UserId, e.AltId});
+        builder.HasKey(e => new { e.UserId, e.AltId });
 
         builder.Property(e => e.UserId);
         builder.Property(e => e.AltId);

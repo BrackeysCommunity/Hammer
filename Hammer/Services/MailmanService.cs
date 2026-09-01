@@ -39,12 +39,12 @@ public sealed class MailmanService
             throw new ArgumentNullException(nameof(infraction));
         }
 
-        if (!_discordClient.Guilds.TryGetValue(infraction.GuildId, out DiscordGuild? guild))
+        if (!_discordClient.Guilds.TryGetValue(infraction.GuildId, out var guild))
         {
             return null;
         }
 
-        DiscordMember? member = await guild.GetMemberOrNullAsync(infraction.UserId);
+        var member = await guild.GetMemberOrNullAsync(infraction.UserId);
         if (member is null)
         {
             return null; // bots can only DM members
@@ -52,7 +52,7 @@ public sealed class MailmanService
 
         try
         {
-            DiscordEmbed? embed = CreatePrivateEmbed(infraction, infractionCount, options, member);
+            var embed = CreatePrivateEmbed(infraction, infractionCount, options, member);
             if (embed is not null)
             {
                 return await member.SendMessageAsync(embed);
@@ -75,15 +75,15 @@ public sealed class MailmanService
             return null;
         }
 
-        if (!_discordClient.Guilds.TryGetValue(infraction.GuildId, out DiscordGuild? guild))
+        if (!_discordClient.Guilds.TryGetValue(infraction.GuildId, out var guild))
         {
             return null;
         }
 
-        string? description = infraction.Type.GetEmbedMessage();
-        string reason = infraction.Reason.WithWhiteSpaceAlternative(Formatter.Italic("No reason given."));
+        var description = infraction.Type.GetEmbedMessage();
+        var reason = infraction.Reason.WithWhiteSpaceAlternative(Formatter.Italic("No reason given."));
         var embed = new DiscordEmbedBuilder();
-        string iconUrl = guild.GetIconUrl(MediaFormat.Png) ?? guild.IconUrl;
+        var iconUrl = guild.GetIconUrl(MediaFormat.Png) ?? guild.IconUrl;
 
         embed.WithColor(0xFF0000);
         embed.WithTitle(infraction.Type.Humanize());

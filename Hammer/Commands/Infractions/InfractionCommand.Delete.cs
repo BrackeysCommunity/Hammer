@@ -15,7 +15,7 @@ internal sealed partial class InfractionCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task DeleteAsync(SlashCommandContext context,
-        [Parameter("infraction"), Description("The infraction to delete.")]
+        [Parameter("infraction")] [Description("The infraction to delete.")]
         long infractionId
     )
     {

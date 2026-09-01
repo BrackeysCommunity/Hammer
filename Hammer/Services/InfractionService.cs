@@ -6,7 +6,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using FluentResults;
-using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Data.Errors;
 using Hammer.Extensions;
@@ -26,15 +25,15 @@ namespace Hammer.Services;
 /// <seealso cref="MuteService" />
 public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, IEventHandler<GuildUnavailableEventArgs>
 {
-    private readonly ConcurrentDictionary<ulong, List<Infraction>> _infractionCache = new();
-    private readonly ConcurrentDictionary<long, Infraction> _infractionIdCache = new();
-    private readonly ILogger<InfractionService> _logger;
-    private readonly IDbContextFactory<HammerContext> _dbContextFactory;
-    private readonly DiscordClient _discordClient;
     private readonly AltAccountService _altAccountService;
     private readonly ConfigurationService _configurationService;
-    private readonly DiscordLogService _logService;
     private readonly InfractionCooldownService _cooldownService;
+    private readonly IDbContextFactory<HammerContext> _dbContextFactory;
+    private readonly DiscordClient _discordClient;
+    private readonly ConcurrentDictionary<ulong, List<Infraction>> _infractionCache = new();
+    private readonly ConcurrentDictionary<long, Infraction> _infractionIdCache = new();
+    private readonly DiscordLogService _logService;
+    private readonly ILogger<InfractionService> _logger;
     private readonly MailmanService _mailmanService;
     private readonly RuleService _ruleService;
 
@@ -64,6 +63,25 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
         _ruleService = ruleService;
     }
 
+    /// <inheritdoc />
+    public Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
+    {
+        LoadGuildInfractions(e.Guild);
+        UpdateInfractionRules(e.Guild);
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public Task HandleEventAsync(DiscordClient sender, GuildUnavailableEventArgs e)
+    {
+        if (_infractionCache.TryRemove(e.Guild.Id, out var infractions))
+        {
+            infractions.Clear();
+        }
+
+        return Task.CompletedTask;
+    }
+
     /// <summary>
     ///     Adds an infraction to the database.
     /// </summary>
@@ -85,7 +103,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             throw new InvalidOperationException("The specified guild is invalid.");
         }
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
 
         try
         {
@@ -109,7 +127,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             context.SaveChanges();
         }
 
-        List<Infraction> infractions = _infractionCache.AddOrUpdate(guild.Id, _ => [], (_, list) => list);
+        var infractions = _infractionCache.AddOrUpdate(guild.Id, _ => [], (_, list) => list);
         infractions.Add(infraction);
         return infraction;
     }
@@ -123,14 +141,14 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
     {
         infractions = [.. infractions];
 
-        foreach (IGrouping<ulong, Infraction> group in infractions.GroupBy(i => i.GuildId))
+        foreach (var group in infractions.GroupBy(i => i.GuildId))
         {
-            ulong guildId = group.Key;
-            List<Infraction> cache = _infractionCache.AddOrUpdate(guildId, _ => [], (_, list) => list);
+            var guildId = group.Key;
+            var cache = _infractionCache.AddOrUpdate(guildId, _ => [], (_, list) => list);
             cache.AddRange(group);
         }
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
         context.AddRange(infractions);
         context.SaveChangesAsync();
     }
@@ -162,11 +180,11 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
         InfractionOptions options
     )
     {
-        string? reason = options.Reason.AsNullIfWhiteSpace();
+        var reason = options.Reason.AsNullIfWhiteSpace();
         var result = true;
 
-        DiscordGuild guild = staffMember.Guild;
-        DateTimeOffset? expirationTime = options.ExpirationTime;
+        var guild = staffMember.Guild;
+        var expirationTime = options.ExpirationTime;
 
         if (type == InfractionType.Gag)
         {
@@ -193,7 +211,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
 
         builder.WithAdditionalInformation(string.Join('\n', additionalInfo));
 
-        Infraction infraction = AddInfraction(builder.Build(), guild);
+        var infraction = AddInfraction(builder.Build(), guild);
 
         var logMessageBuilder = new StringBuilder();
         logMessageBuilder.Append($"{type.ToString("G")} issued to {user} by {staffMember} in {guild}. ");
@@ -204,8 +222,8 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
 
         if (type != InfractionType.Gag && options.NotifyUser)
         {
-            int count = GetInfractionCount(user, staffMember.Guild);
-            DiscordMessage? dm = await _mailmanService.SendInfractionAsync(infraction, count, options);
+            var count = GetInfractionCount(user, staffMember.Guild);
+            var dm = await _mailmanService.SendInfractionAsync(infraction, count, options);
             result &= dm is not null;
         }
 
@@ -235,9 +253,9 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             user = null;
         }
 
-        int infractionCount = GetInfractionCount(infraction.UserId, infraction.GuildId);
+        var infractionCount = GetInfractionCount(infraction.UserId, infraction.GuildId);
 
-        string reason = string.IsNullOrWhiteSpace(infraction.Reason)
+        var reason = string.IsNullOrWhiteSpace(infraction.Reason)
             ? Formatter.Italic("<none>")
             : infraction.Reason;
 
@@ -303,20 +321,20 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
                 throw new ArgumentException(ExceptionMessages.MinIdGreaterThanMaxId, nameof(searchOptions));
         }
 
-        DiscordUser user = response.TargetUser;
-        IReadOnlyList<Infraction> infractions = GetInfractions(user, response.Guild, searchOptions);
-        bool hasSearchQuery = !searchOptions.IsEmpty;
+        var user = response.TargetUser;
+        var infractions = GetInfractions(user, response.Guild, searchOptions);
+        var hasSearchQuery = !searchOptions.IsEmpty;
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(DiscordColor.Orange);
         embed.WithAuthor(user);
-        IReadOnlyCollection<ulong> alts = _altAccountService.GetAltsFor(user.Id);
+        var alts = _altAccountService.GetAltsFor(user.Id);
         Infraction[] altInfractions = [.. alts.SelectMany(alt => GetInfractions(alt, response.Guild.Id, searchOptions))];
 
         if (response.StaffRequested && page == response.Pages - 1 && alts.Count > 0 && altInfractions.Length > 0)
         {
-            string infractionNumber = "additional infraction".ToQuantity(altInfractions.Length);
-            string altNumber = "alt account".ToQuantity(alts.Count);
+            var infractionNumber = "additional infraction".ToQuantity(altInfractions.Length);
+            var altNumber = "alt account".ToQuantity(alts.Count);
             embed.WithFooter($"⚠️ This user has {infractionNumber} on {altNumber}.");
         }
 
@@ -349,7 +367,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
         string BuildInfractionString(Infraction infraction, int index)
         {
             var builder = new StringBuilder();
-            var content = $"ID: {(response.StaffRequested ? infraction.Id : index + 1 + page * infractionsPerPage)}";
+            var content = $"ID: {(response.StaffRequested ? infraction.Id : index + 1 + (page * infractionsPerPage))}";
 
             builder.Append(Formatter.Bold(content)).Append(" \u2022 ");
             builder.Append(infraction.Type.Humanize()).Append(" \u2022 ");
@@ -382,12 +400,12 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        if (!_infractionCache.TryGetValue(guild.Id, out var cache))
         {
             yield break;
         }
 
-        foreach (Infraction infraction in cache)
+        foreach (var infraction in cache)
         {
             yield return infraction;
         }
@@ -401,12 +419,12 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
     /// <returns>An enumerable collection of <see cref="Infraction" /> objects.</returns>
     public IEnumerable<Infraction> EnumerateInfractions(ulong userId, ulong guildId)
     {
-        if (!_infractionCache.TryGetValue(guildId, out List<Infraction>? cache))
+        if (!_infractionCache.TryGetValue(guildId, out var cache))
         {
             yield break;
         }
 
-        foreach (Infraction infraction in cache.Where(i => i.UserId == userId))
+        foreach (var infraction in cache.Where(i => i.UserId == userId))
         {
             yield return infraction;
         }
@@ -435,12 +453,12 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        if (!_infractionCache.TryGetValue(guild.Id, out var cache))
         {
             yield break;
         }
 
-        foreach (Infraction infraction in cache.Where(i => i.UserId == user.Id))
+        foreach (var infraction in cache.Where(i => i.UserId == user.Id))
         {
             yield return infraction;
         }
@@ -463,23 +481,23 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
         TimeSpan? duration = null
     )
     {
-        DiscordGuild guild = staffMember.Guild;
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        var guild = staffMember.Guild;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             return default;
         }
 
         if (!duration.HasValue)
         {
-            long gagDurationMilliseconds = guildConfiguration.Mute.GagDuration;
+            var gagDurationMilliseconds = guildConfiguration.Mute.GagDuration;
             duration = TimeSpan.FromMilliseconds(gagDurationMilliseconds);
         }
 
-        DateTimeOffset gagUntil = DateTimeOffset.UtcNow + duration.Value;
+        var gagUntil = DateTimeOffset.UtcNow + duration.Value;
 
         try
         {
-            DiscordMember member = await guild.GetMemberAsync(user.Id);
+            var member = await guild.GetMemberAsync(user.Id);
             await member.TimeoutAsync(gagUntil, $"Gagged by {staffMember.GetUsernameWithDiscriminator()}");
         }
         catch (NotFoundException)
@@ -487,7 +505,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             // user is not in the guild. we can safely ignore this
         }
 
-        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
+        var embed = guild.CreateDefaultEmbed(guildConfiguration, false);
         embed.WithAuthor(user);
         embed.WithColor(DiscordColor.Orange);
         embed.WithTitle("User Gagged");
@@ -497,13 +515,13 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
 
         if (sourceMessage is not null)
         {
-            bool hasContent = !string.IsNullOrWhiteSpace(sourceMessage.Content);
-            bool hasAttachments = sourceMessage.Attachments.Count > 0;
+            var hasContent = !string.IsNullOrWhiteSpace(sourceMessage.Content);
+            var hasAttachments = sourceMessage.Attachments.Count > 0;
 
-            string? content = hasContent ? Formatter.BlockCode(Formatter.Sanitize(sourceMessage.Content)) : null;
-            string? attachments = hasAttachments ? string.Join('\n', sourceMessage.Attachments.Select(a => a.Url)) : null;
-            string messageLink = Formatter.MaskedUrl(sourceMessage.Id.ToString(), sourceMessage.JumpLink);
-            string timestamp = Formatter.Timestamp(sourceMessage.CreationTimestamp, TimestampFormat.ShortDateTime);
+            var content = hasContent ? Formatter.BlockCode(Formatter.Sanitize(sourceMessage.Content)) : null;
+            var attachments = hasAttachments ? string.Join('\n', sourceMessage.Attachments.Select(a => a.Url)) : null;
+            var messageLink = Formatter.MaskedUrl(sourceMessage.Id.ToString(), sourceMessage.JumpLink);
+            var timestamp = Formatter.Timestamp(sourceMessage.CreationTimestamp, TimestampFormat.ShortDateTime);
 
             embed.AddField("Message ID", messageLink, true);
             embed.AddField("Message Time", timestamp, true);
@@ -524,7 +542,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
     /// <returns>A <see cref="Result{T}" /> containing the infraction if found, or an error message if not.</returns>
     public Result<Infraction> GetInfraction(long infractionId)
     {
-        if (_infractionIdCache.TryGetValue(infractionId, out Infraction? infraction))
+        if (_infractionIdCache.TryGetValue(infractionId, out var infraction))
         {
             return Result.Ok(infraction);
         }
@@ -553,7 +571,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             throw new ArgumentNullException(nameof(guild));
         }
 
-        return _infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache) ? cache.Count : 0;
+        return _infractionCache.TryGetValue(guild.Id, out var cache) ? cache.Count : 0;
     }
 
     /// <summary>
@@ -580,18 +598,18 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        if (!_infractionCache.TryGetValue(guild.Id, out var cache))
         {
             return 0;
         }
 
         var total = 0;
-        int count = cache.Count;
-        ulong userId = user.Id;
+        var count = cache.Count;
+        var userId = user.Id;
 
         for (var index = 0; index < count; index++)
         {
-            Infraction infraction = cache[index];
+            var infraction = cache[index];
 
             if (searchOptions.Type is { } type && infraction.Type != type)
             {
@@ -626,17 +644,17 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
     /// <returns>The count of infractions for <paramref name="userId" /> in <paramref name="guildId" />.</returns>
     public int GetInfractionCount(ulong userId, ulong guildId, InfractionSearchOptions searchOptions = default)
     {
-        if (!_infractionCache.TryGetValue(guildId, out List<Infraction>? cache))
+        if (!_infractionCache.TryGetValue(guildId, out var cache))
         {
             return 0;
         }
 
         var total = 0;
-        int count = cache.Count;
+        var count = cache.Count;
 
         for (var index = 0; index < count; index++)
         {
-            Infraction infraction = cache[index];
+            var infraction = cache[index];
 
             if (searchOptions.Type is { } type && infraction.Type != type)
             {
@@ -685,17 +703,17 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
                 throw new ArgumentException(ExceptionMessages.MinIdGreaterThanMaxId, nameof(searchOptions));
         }
 
-        if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        if (!_infractionCache.TryGetValue(guild.Id, out var cache))
         {
             return ArraySegment<Infraction>.Empty;
         }
 
-        Infraction[] infractions = ArrayPool<Infraction>.Shared.Rent(cache.Count);
+        var infractions = ArrayPool<Infraction>.Shared.Rent(cache.Count);
         var resultIndex = 0;
 
         for (var index = 0; index < infractions.Length; index++)
         {
-            Infraction infraction = cache[index];
+            var infraction = cache[index];
 
             if (searchOptions.Type is { } type && infraction.Type != type)
             {
@@ -788,18 +806,18 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
                 throw new ArgumentException(ExceptionMessages.MinIdGreaterThanMaxId, nameof(searchOptions));
         }
 
-        if (!_infractionCache.TryGetValue(guildId, out List<Infraction>? cache))
+        if (!_infractionCache.TryGetValue(guildId, out var cache))
         {
             return ArraySegment<Infraction>.Empty;
         }
 
-        int count = cache.Count;
+        var count = cache.Count;
         var infractions = new Infraction[count];
         var resultIndex = 0;
 
         for (var index = 0; index < infractions.Length; index++)
         {
-            Infraction infraction = cache[index];
+            var infraction = cache[index];
 
             if (infraction.UserId != userId)
             {
@@ -849,7 +867,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             throw new ArgumentNullException(nameof(infraction));
         }
 
-        DiscordEmbed embed = await CreateInfractionEmbedAsync(infraction);
+        var embed = await CreateInfractionEmbedAsync(infraction);
         await _logService.LogAsync(guild, embed);
     }
 
@@ -875,8 +893,8 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             throw new ArgumentNullException(nameof(action));
         }
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
-        Infraction? existing = context.Infractions.Find(infraction.Id);
+        using var context = _dbContextFactory.CreateDbContext();
+        var existing = context.Infractions.Find(infraction.Id);
         if (existing is null)
         {
             return;
@@ -886,7 +904,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
         context.Update(existing);
         context.SaveChanges();
 
-        if (_infractionCache.TryGetValue(infraction.GuildId, out List<Infraction>? cache))
+        if (_infractionCache.TryGetValue(infraction.GuildId, out var cache))
         {
             cache.Remove(infraction);
             cache.Remove(existing);
@@ -899,15 +917,15 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
     /// </summary>
     public async Task<int> PruneStaleInfractionsAsync()
     {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
         var idCache = new Dictionary<ulong, bool>();
         var pruneInfractions = new List<Infraction>();
 
-        await foreach (Infraction infraction in context.Infractions)
+        await foreach (var infraction in context.Infractions)
         {
-            ulong userId = infraction.UserId;
+            var userId = infraction.UserId;
 
-            if (!idCache.TryGetValue(userId, out bool isStale))
+            if (!idCache.TryGetValue(userId, out var isStale))
             {
                 try
                 {
@@ -927,9 +945,9 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             }
         }
 
-        foreach (Infraction infraction in pruneInfractions)
+        foreach (var infraction in pruneInfractions)
         {
-            if (_infractionCache.TryGetValue(infraction.GuildId, out List<Infraction>? cache))
+            if (_infractionCache.TryGetValue(infraction.GuildId, out var cache))
             {
                 cache.Remove(infraction);
             }
@@ -957,7 +975,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
         _cooldownService.StopCooldown(infraction.UserId);
         _infractionCache[infraction.GuildId].Remove(infraction);
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
         if (!context.Infractions.Any(i => i.Id == infraction.Id))
         {
             return Result.Fail(new NotFoundError("Infraction not found."));
@@ -980,12 +998,12 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
             throw new ArgumentNullException(nameof(infractions));
         }
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
 
-        foreach (IGrouping<ulong, Infraction> group in infractions.GroupBy(i => i.GuildId))
+        foreach (var group in infractions.GroupBy(i => i.GuildId))
         {
-            List<Infraction> list = _infractionCache[group.Key];
-            foreach (Infraction infraction in group)
+            var list = _infractionCache[group.Key];
+            foreach (var infraction in group)
             {
                 _cooldownService.StopCooldown(infraction.UserId);
                 context.Remove(infraction);
@@ -998,7 +1016,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
 
     private void LoadGuildInfractions(DiscordGuild guild)
     {
-        if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        if (!_infractionCache.TryGetValue(guild.Id, out var cache))
         {
             cache = [];
             _infractionCache.AddOrUpdate(guild.Id, cache, (_, _) => cache);
@@ -1006,10 +1024,10 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
 
         cache.Clear();
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
         cache.AddRange(context.Infractions.Where(i => i.GuildId == guild.Id));
 
-        foreach (Infraction infraction in cache)
+        foreach (var infraction in cache)
         {
             _infractionIdCache.AddOrUpdate(infraction.Id, infraction, (_, _) => infraction);
         }
@@ -1019,13 +1037,13 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
 
     private void UpdateInfractionRules(DiscordGuild guild)
     {
-        if (!_infractionCache.TryGetValue(guild.Id, out List<Infraction>? cache))
+        if (!_infractionCache.TryGetValue(guild.Id, out var cache))
         {
             return;
         }
 
         var updated = new List<Infraction>();
-        foreach (Infraction infraction in cache)
+        foreach (var infraction in cache)
         {
             if (!infraction.RuleId.HasValue || !string.IsNullOrWhiteSpace(infraction.RuleText))
             {
@@ -1043,7 +1061,7 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
                 continue;
             }
 
-            Rule rule = ruleResult.Value;
+            var rule = ruleResult.Value;
             infraction.RuleText = rule.Brief ?? rule.Description;
             updated.Add(infraction);
         }
@@ -1052,28 +1070,9 @@ public sealed class InfractionService : IEventHandler<GuildAvailableEventArgs>, 
         {
             _logger.LogInformation("Updating {Count} infraction rules for {Guild}", updated.Count, guild);
 
-            using HammerContext context = _dbContextFactory.CreateDbContext();
+            using var context = _dbContextFactory.CreateDbContext();
             context.UpdateRange(updated);
             context.SaveChanges();
         }
-    }
-
-    /// <inheritdoc />
-    public Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
-    {
-        LoadGuildInfractions(e.Guild);
-        UpdateInfractionRules(e.Guild);
-        return Task.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public Task HandleEventAsync(DiscordClient sender, GuildUnavailableEventArgs e)
-    {
-        if (_infractionCache.TryRemove(e.Guild.Id, out List<Infraction>? infractions))
-        {
-            infractions.Clear();
-        }
-
-        return Task.CompletedTask;
     }
 }

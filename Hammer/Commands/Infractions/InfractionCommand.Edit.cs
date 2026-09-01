@@ -18,12 +18,14 @@ internal sealed partial class InfractionCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task EditAsync(SlashCommandContext context,
-        [Parameter("infraction"), Description("The infraction to modify.")]
+        [Parameter("infraction")] [Description("The infraction to modify.")]
         long infractionId,
-        [Parameter("reason"), Description("The new reason for the infraction. To remove the reason, enter a single hyphen ( - ).")]
+        [Parameter("reason")]
+        [Description("The new reason for the infraction. To remove the reason, enter a single hyphen ( - ).")]
         string? reason = null,
         [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
-        [Parameter("rule"), Description("The new rule which was broken. To remove the rule, enter 0.")]
+        [Parameter("rule")]
+        [Description("The new rule which was broken. To remove the rule, enter 0.")]
         long? ruleId = null
     )
     {
@@ -64,7 +66,7 @@ internal sealed partial class InfractionCommand
         }
 
         Rule? rule = null;
-        DiscordGuild guild = context.Guild!;
+        var guild = context.Guild!;
         if (ruleId is not null)
         {
             if (!_ruleService.GuildHasRule(guild, (int)ruleId.Value))
@@ -93,8 +95,8 @@ internal sealed partial class InfractionCommand
 
         // D#+ only accepts long, so we must cast because stupidity
         // yeah, I hate it too.
-        int? oldRuleId = infraction.RuleId;
-        string? oldReason = infraction.Reason;
+        var oldRuleId = infraction.RuleId;
+        var oldReason = infraction.Reason;
         var newRuleId = (int?)ruleId;
 
         embed.WithColor(DiscordColor.Green);

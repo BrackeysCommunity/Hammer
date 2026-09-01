@@ -15,11 +15,12 @@ internal sealed partial class ReportCommands
     [RequireGuild]
     [UsedImplicitly]
     public async Task UnblockReportsAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user to unblock.")] DiscordUser user)
+        [Parameter("user")] [Description("The user to unblock.")]
+        DiscordUser user)
     {
         await context.DeferResponseAsync(true);
 
-        DiscordGuild guild = context.Guild!;
+        var guild = context.Guild!;
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(user);

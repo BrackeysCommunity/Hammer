@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hammer.Data.v5_compat.EntityConfigurations;
 
 /// <summary>
-///     Represents a class which defines the configuration for the <see cref="DeletedMessage"/> entity.
+///     Represents a class which defines the configuration for the <see cref="DeletedMessage" /> entity.
 /// </summary>
 internal sealed class DeletedMessageConfiguration : IEntityTypeConfiguration<DeletedMessage>
 {

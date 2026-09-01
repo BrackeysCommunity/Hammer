@@ -4,7 +4,6 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Hammer.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Hammer.Services;
 
@@ -15,8 +14,8 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
     IEventHandler<MessageDeletedEventArgs>,
     IEventHandler<MessageUpdatedEventArgs>
 {
-    private readonly ILogger<MessageTrackingService> _logger;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
+    private readonly ILogger<MessageTrackingService> _logger;
     private readonly List<TrackedMessage> _trackedMessages = [];
 
     /// <summary>
@@ -29,6 +28,50 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
         _dbContextFactory = dbContextFactory;
     }
 
+    /// <inheritdoc />
+    public Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
+    {
+        return RefreshFromDatabaseAsync(e.Guild);
+    }
+
+    /// <inheritdoc />
+    public async Task HandleEventAsync(DiscordClient sender, MessageDeletedEventArgs e)
+    {
+        if (GetMessageTrackState(e.Message) != MessageTrackState.Tracked)
+        {
+            return;
+        }
+
+        var trackedMessage = await GetTrackedMessageAsync(e.Message);
+        trackedMessage.IsDeleted = true;
+        trackedMessage.DeletionTimestamp = DateTimeOffset.UtcNow;
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        context.Update(trackedMessage);
+        await context.SaveChangesAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task HandleEventAsync(DiscordClient sender, MessageUpdatedEventArgs e)
+    {
+        if (e.Message.Channel?.Guild is null)
+        {
+            return;
+        }
+
+        if (GetMessageTrackState(e.Message) != MessageTrackState.Tracked)
+        {
+            return;
+        }
+
+        var trackedMessage = await GetTrackedMessageAsync(e.Message);
+        trackedMessage.Content = e.Message.Content;
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        context.Update(trackedMessage);
+        await context.SaveChangesAsync();
+    }
+
     /// <summary>
     ///     Enumerates the tracked messages written by a user in a specified guild.
     /// </summary>
@@ -37,9 +80,9 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
     /// <returns>An enumerable collection of <see cref="TrackedMessage" /> instances.</returns>
     public async IAsyncEnumerable<TrackedMessage> EnumerateTrackedMessagesAsync(DiscordUser user, DiscordGuild guild)
     {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-        foreach (TrackedMessage message in context.TrackedMessages.Where(m => m.AuthorId == user.Id && m.GuildId == guild.Id))
+        foreach (var message in context.TrackedMessages.Where(m => m.AuthorId == user.Id && m.GuildId == guild.Id))
         {
             yield return message;
         }
@@ -54,9 +97,9 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
     /// <returns>A <see cref="MessageTrackState" /> representing the tracked state of the specified message.</returns>
     public MessageTrackState GetMessageTrackState(ulong guildId, ulong channelId, ulong messageId)
     {
-        TrackedMessage? trackedMessage = _trackedMessages.Find(m => messageId == m.Id
-                                                                    && m.ChannelId == channelId
-                                                                    && m.GuildId == guildId);
+        var trackedMessage = _trackedMessages.Find(m => messageId == m.Id
+                                                        && m.ChannelId == channelId
+                                                        && m.GuildId == guildId);
 
         if (trackedMessage is null)
         {
@@ -92,9 +135,9 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
     /// </returns>
     public async Task<TrackedMessage> GetTrackedMessageAsync(DiscordMessage message, bool deleted = false)
     {
-        TrackedMessage? trackedMessage = _trackedMessages.Find(m => m.Id == message.Id);
+        var trackedMessage = _trackedMessages.Find(m => m.Id == message.Id);
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
         if (trackedMessage is null)
         {
@@ -109,7 +152,7 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
                     trackedMessage.DeletionTimestamp = DateTimeOffset.UtcNow;
                 }
 
-                EntityEntry<TrackedMessage> entry = await context.AddAsync(trackedMessage);
+                var entry = await context.AddAsync(trackedMessage);
                 trackedMessage = entry.Entity;
             }
             else
@@ -148,58 +191,14 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
         return trackedMessage;
     }
 
-    /// <inheritdoc />
-    public Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
-    {
-        return RefreshFromDatabaseAsync(e.Guild);
-    }
-
-    /// <inheritdoc />
-    public async Task HandleEventAsync(DiscordClient sender, MessageDeletedEventArgs e)
-    {
-        if (GetMessageTrackState(e.Message) != MessageTrackState.Tracked)
-        {
-            return;
-        }
-
-        TrackedMessage trackedMessage = await GetTrackedMessageAsync(e.Message);
-        trackedMessage.IsDeleted = true;
-        trackedMessage.DeletionTimestamp = DateTimeOffset.UtcNow;
-
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-        context.Update(trackedMessage);
-        await context.SaveChangesAsync();
-    }
-
-    /// <inheritdoc />
-    public async Task HandleEventAsync(DiscordClient sender, MessageUpdatedEventArgs e)
-    {
-        if (e.Message.Channel?.Guild is null)
-        {
-            return;
-        }
-
-        if (GetMessageTrackState(e.Message) != MessageTrackState.Tracked)
-        {
-            return;
-        }
-
-        TrackedMessage trackedMessage = await GetTrackedMessageAsync(e.Message);
-        trackedMessage.Content = e.Message.Content;
-
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-        context.Update(trackedMessage);
-        await context.SaveChangesAsync();
-    }
-
     private async Task RefreshFromDatabaseAsync(DiscordGuild guild)
     {
-        ulong guildId = guild.Id;
+        var guildId = guild.Id;
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-        IEnumerable<TrackedMessage> messages = context.TrackedMessages.Where(m => m.GuildId == guildId).AsEnumerable();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        var messages = context.TrackedMessages.Where(m => m.GuildId == guildId).AsEnumerable();
 
-        foreach (IGrouping<ulong, TrackedMessage> channelGroups in messages.GroupBy(m => m.ChannelId))
+        foreach (var channelGroups in messages.GroupBy(m => m.ChannelId))
         {
             DiscordChannel channel;
             try
@@ -208,7 +207,7 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
             }
             catch (NotFoundException)
             {
-                foreach (TrackedMessage trackedMessage in channelGroups)
+                foreach (var trackedMessage in channelGroups)
                 {
                     trackedMessage.IsDeleted = true;
                 }
@@ -217,7 +216,7 @@ internal sealed class MessageTrackingService : IEventHandler<GuildAvailableEvent
                 continue;
             }
 
-            foreach (TrackedMessage trackedMessage in channelGroups)
+            foreach (var trackedMessage in channelGroups)
             {
                 try
                 {

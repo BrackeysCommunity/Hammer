@@ -15,9 +15,9 @@ namespace Hammer.Services;
 /// </summary>
 public sealed class InfractionCooldownService : BackgroundService
 {
-    private readonly ILogger<InfractionCooldownService> _logger;
-    private readonly Dictionary<Infraction, DateTimeOffset> _hotInfractions = new();
     private readonly Timer _cooldownTimer = new();
+    private readonly Dictionary<Infraction, DateTimeOffset> _hotInfractions = new();
+    private readonly ILogger<InfractionCooldownService> _logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="InfractionCooldownService" /> class.
@@ -51,7 +51,7 @@ public sealed class InfractionCooldownService : BackgroundService
 
         lock (_hotInfractions)
         {
-            foreach ((Infraction infraction, _) in _hotInfractions.OrderByDescending(p => p.Value))
+            foreach (var (infraction, _) in _hotInfractions.OrderByDescending(p => p.Value))
             {
                 if (infraction.UserId == user.Id)
                 {
@@ -78,9 +78,9 @@ public sealed class InfractionCooldownService : BackgroundService
         DiscordEmbed infractionEmbed
     )
     {
-        string content = $"Hold on! This may be a duplicate. {user.Mention} was {GetInfractionVerb(infraction.Type)} " +
-                         $"{infraction.IssuedAt.Humanize()} by {MentionUtility.MentionUser(infraction.StaffMemberId)} " +
-                         "(see details below).\nPlease confirm whether or not you'd like to proceed with the infraction.";
+        var content = $"Hold on! This may be a duplicate. {user.Mention} was {GetInfractionVerb(infraction.Type)} " +
+                      $"{infraction.IssuedAt.Humanize()} by {MentionUtility.MentionUser(infraction.StaffMemberId)} " +
+                      "(see details below).\nPlease confirm whether or not you'd like to proceed with the infraction.";
 
         var builder = new DiscordWebhookBuilder();
         builder.WithContent(content);
@@ -90,7 +90,7 @@ public sealed class InfractionCooldownService : BackgroundService
         var cancel = new DiscordButtonComponent(DiscordButtonStyle.Danger, "infr-cancel", "Cancel");
         builder.AddActionRowComponent(proceed, cancel);
 
-        DiscordMessage message = await context.EditResponseAsync(builder);
+        var message = await context.EditResponseAsync(builder);
         var result = await message.WaitForButtonAsync(TimeSpan.FromMinutes(1));
 
         if (result.TimedOut)
@@ -142,7 +142,7 @@ public sealed class InfractionCooldownService : BackgroundService
                 throw new InvalidOperationException("Infraction is already on cooldown.");
             }
 
-            foreach (Infraction current in _hotInfractions.Keys.ToArray())
+            foreach (var current in _hotInfractions.Keys.ToArray())
             {
                 if (current.UserId == infraction.UserId)
                 {
@@ -171,7 +171,7 @@ public sealed class InfractionCooldownService : BackgroundService
     {
         lock (_hotInfractions)
         {
-            foreach (Infraction infraction in _hotInfractions.Keys.ToArray())
+            foreach (var infraction in _hotInfractions.Keys.ToArray())
             {
                 if (infraction.UserId == userId)
                 {
@@ -195,7 +195,7 @@ public sealed class InfractionCooldownService : BackgroundService
 
         lock (_hotInfractions)
         {
-            foreach (Infraction infraction in _hotInfractions.Keys.ToArray())
+            foreach (var infraction in _hotInfractions.Keys.ToArray())
             {
                 if (infraction.UserId == user.Id)
                 {
@@ -228,7 +228,7 @@ public sealed class InfractionCooldownService : BackgroundService
 
         lock (_hotInfractions)
         {
-            foreach ((Infraction current, _) in _hotInfractions)
+            foreach (var (current, _) in _hotInfractions)
             {
                 if (current.UserId == user.Id)
                 {
@@ -255,7 +255,7 @@ public sealed class InfractionCooldownService : BackgroundService
     {
         lock (_hotInfractions)
         {
-            foreach ((Infraction infraction, DateTimeOffset cooldownStart) in _hotInfractions.ToArray())
+            foreach (var (infraction, cooldownStart) in _hotInfractions.ToArray())
             {
                 if (DateTimeOffset.Now - cooldownStart > TimeSpan.FromMinutes(30))
                 {

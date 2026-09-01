@@ -3,7 +3,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using Hammer.Data;
 using JetBrains.Annotations;
 
 namespace Hammer.Commands.Infractions;
@@ -15,11 +14,11 @@ internal sealed partial class InfractionCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task StatsAsync(SlashCommandContext context,
-        [Parameter("staffMember"), Description("The staff member whose infractions to view.")]
+        [Parameter("staffMember")] [Description("The staff member whose infractions to view.")]
         DiscordMember? staffMember = null)
     {
-        DiscordGuild guild = context.Guild!;
-        IReadOnlyList<Infraction> infractions = _infractionService.GetInfractions(guild);
+        var guild = context.Guild!;
+        var infractions = _infractionService.GetInfractions(guild);
 
         if (infractions.Count == 0)
         {
@@ -39,7 +38,7 @@ internal sealed partial class InfractionCommand
         }
 
         await context.DeferResponseAsync();
-        DiscordEmbed result = await _infractionStatisticsService.CreateStatisticsEmbedAsync(guild);
+        var result = await _infractionStatisticsService.CreateStatisticsEmbedAsync(guild);
 
         var builder = new DiscordWebhookBuilder();
         builder.AddEmbed(result);

@@ -1,9 +1,7 @@
 using DSharpPlus.Entities;
 using FluentResults;
-using Hammer.Configuration;
 using Hammer.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Hammer.Services;
 
@@ -12,9 +10,9 @@ namespace Hammer.Services;
 /// </summary>
 public sealed class RuleService : BackgroundService
 {
-    private readonly Dictionary<ulong, List<Rule>> _guildRules = new();
-    private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly ConfigurationService _configurationService;
+    private readonly IDbContextFactory<HammerContext> _dbContextFactory;
+    private readonly Dictionary<ulong, List<Rule>> _guildRules = new();
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="RuleService" /> class.
@@ -45,15 +43,15 @@ public sealed class RuleService : BackgroundService
             throw new ArgumentNullException(nameof(description));
         }
 
-        if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules))
+        if (!_guildRules.TryGetValue(guild.Id, out var rules))
         {
             _guildRules.Add(guild.Id, rules = []);
         }
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
 
         var rule = new Rule { Id = rules.Count + 1, GuildId = guild.Id, Description = description, Brief = brief };
-        EntityEntry<Rule> entry = context.Add(rule);
+        var entry = context.Add(rule);
         rules.Add(rule = entry.Entity);
 
         context.SaveChanges();
@@ -114,18 +112,18 @@ public sealed class RuleService : BackgroundService
         {
             return;
         }
-        
-        Rule ruleToDelete = ruleResult.Value;
+
+        var ruleToDelete = ruleResult.Value;
         _guildRules[guild.Id].Remove(ruleToDelete);
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
         context.RemoveRange(context.Rules.Where(r => r.GuildId == guild.Id));
 
         // propagate IDs downwards
-        IReadOnlyList<Rule> remainder = GetGuildRules(guild);
+        var remainder = GetGuildRules(guild);
         for (var index = 0; index < remainder.Count; index++)
         {
-            Rule rule = remainder[index];
+            var rule = remainder[index];
             rule.Id = index + 1;
             context.Add(rule);
         }
@@ -179,7 +177,7 @@ public sealed class RuleService : BackgroundService
             throw new ArgumentNullException(nameof(guild));
         }
 
-        if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules))
+        if (!_guildRules.TryGetValue(guild.Id, out var rules))
         {
             return ArraySegment<Rule>.Empty;
         }
@@ -203,7 +201,7 @@ public sealed class RuleService : BackgroundService
             return false;
         }
 
-        if (!_guildRules.TryGetValue(guildId, out List<Rule>? rules))
+        if (!_guildRules.TryGetValue(guildId, out var rules))
         {
             return false;
         }
@@ -233,7 +231,7 @@ public sealed class RuleService : BackgroundService
             return false;
         }
 
-        if (!_guildRules.TryGetValue(guild.Id, out List<Rule>? rules))
+        if (!_guildRules.TryGetValue(guild.Id, out var rules))
         {
             return false;
         }
@@ -246,19 +244,19 @@ public sealed class RuleService : BackgroundService
     /// </summary>
     public async Task ModifyRulesMessageAsync(DiscordMessage message)
     {
-        DiscordColor color = DiscordColor.Orange;
-        DiscordChannel channel = message.Channel!;
-        DiscordGuild guild = channel.Guild;
-        IReadOnlyList<Rule> rules = GetGuildRules(guild);
+        var color = DiscordColor.Orange;
+        var channel = message.Channel!;
+        var guild = channel.Guild;
+        var rules = GetGuildRules(guild);
         var builder = new DiscordMessageBuilder();
         var index = 0;
 
-        if (_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        if (_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             color = guildConfiguration.PrimaryColor;
         }
 
-        foreach (Rule[] ruleChunk in rules.Chunk(25)) // embeds cannot have more than 25 fields
+        foreach (var ruleChunk in rules.Chunk(25)) // embeds cannot have more than 25 fields
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithThumbnail(guild.IconUrl);
@@ -273,9 +271,9 @@ public sealed class RuleService : BackgroundService
                                       "rules:");
             }
 
-            foreach (Rule rule in ruleChunk)
+            foreach (var rule in ruleChunk)
             {
-                string name = rule.Brief is { } brief ? $"#{rule.Id} - {brief}" : $"#{rule.Id}";
+                var name = rule.Brief is { } brief ? $"#{rule.Id} - {brief}" : $"#{rule.Id}";
                 embed.AddField(name, rule.Description);
             }
 
@@ -298,11 +296,11 @@ public sealed class RuleService : BackgroundService
     /// </returns>
     public static bool RuleMatches(Rule rule, IEnumerable<string> searchTerms)
     {
-        foreach (string term in searchTerms)
+        foreach (var term in searchTerms)
         {
             if (!string.IsNullOrWhiteSpace(rule.Brief))
             {
-                foreach (string word in rule.Brief.Split())
+                foreach (var word in rule.Brief.Split())
                 {
                     if (word.StartsWith(term, StringComparison.OrdinalIgnoreCase))
                     {
@@ -311,7 +309,7 @@ public sealed class RuleService : BackgroundService
                 }
             }
 
-            foreach (string word in rule.Description.Split())
+            foreach (var word in rule.Description.Split())
             {
                 if (word.StartsWith(term, StringComparison.OrdinalIgnoreCase))
                 {
@@ -349,7 +347,7 @@ public sealed class RuleService : BackgroundService
             return null;
         }
 
-        if (int.TryParse(searchQuery, out int ruleId))
+        if (int.TryParse(searchQuery, out var ruleId))
         {
             var ruleResult = GetRuleById(guild, ruleId);
             if (ruleResult.IsSuccess)
@@ -360,11 +358,11 @@ public sealed class RuleService : BackgroundService
             return null;
         }
 
-        string[] searchTerms = searchQuery.Split();
+        var searchTerms = searchQuery.Split();
         var matches = new List<Rule>();
-        IReadOnlyList<Rule> rules = GetGuildRules(guild);
+        var rules = GetGuildRules(guild);
 
-        foreach (Rule item in rules)
+        foreach (var item in rules)
         {
             if (RuleMatches(item, searchTerms))
             {
@@ -394,7 +392,7 @@ public sealed class RuleService : BackgroundService
             return;
         }
 
-        Rule rule = ruleResult.Value;
+        var rule = ruleResult.Value;
         SetRuleBrief(rule, brief);
     }
 
@@ -407,7 +405,7 @@ public sealed class RuleService : BackgroundService
     {
         rule.Brief = brief;
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
         context.Entry(rule).State = EntityState.Modified;
         context.Update(rule);
         context.SaveChanges();
@@ -432,7 +430,7 @@ public sealed class RuleService : BackgroundService
             return;
         }
 
-        Rule rule = ruleResult.Value;
+        var rule = ruleResult.Value;
         SetRuleContent(rule, content);
     }
 
@@ -445,7 +443,7 @@ public sealed class RuleService : BackgroundService
     {
         rule.Description = content;
 
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
         context.Entry(rule).State = EntityState.Modified;
         context.Update(rule);
         context.SaveChanges();
@@ -456,18 +454,18 @@ public sealed class RuleService : BackgroundService
     /// </summary>
     public async Task SendRulesMessageAsync(DiscordChannel channel)
     {
-        DiscordColor color = DiscordColor.Orange;
-        DiscordGuild guild = channel.Guild;
-        IReadOnlyList<Rule> rules = GetGuildRules(guild);
+        var color = DiscordColor.Orange;
+        var guild = channel.Guild;
+        var rules = GetGuildRules(guild);
         var builder = new DiscordMessageBuilder();
         var index = 0;
 
-        if (_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        if (_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             color = guildConfiguration.PrimaryColor;
         }
 
-        foreach (Rule[] ruleChunk in rules.Chunk(25)) // embeds cannot have more than 25 fields
+        foreach (var ruleChunk in rules.Chunk(25)) // embeds cannot have more than 25 fields
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithThumbnail(guild.IconUrl);
@@ -482,9 +480,9 @@ public sealed class RuleService : BackgroundService
                                       "rules:");
             }
 
-            foreach (Rule rule in ruleChunk)
+            foreach (var rule in ruleChunk)
             {
-                string name = rule.Brief is { } brief ? $"#{rule.Id} - {brief}" : $"#{rule.Id}";
+                var name = rule.Brief is { } brief ? $"#{rule.Id} - {brief}" : $"#{rule.Id}";
                 embed.AddField(name, rule.Description);
             }
 
@@ -505,11 +503,11 @@ public sealed class RuleService : BackgroundService
 
     private void Load()
     {
-        using HammerContext context = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
 
-        foreach (IGrouping<ulong, Rule> guildRules in context.Rules.AsEnumerable().GroupBy(r => r.GuildId))
+        foreach (var guildRules in context.Rules.AsEnumerable().GroupBy(r => r.GuildId))
         {
-            if (!_guildRules.TryGetValue(guildRules.Key, out List<Rule>? rules))
+            if (!_guildRules.TryGetValue(guildRules.Key, out var rules))
             {
                 _guildRules.Add(guildRules.Key, rules = []);
             }

@@ -19,19 +19,20 @@ internal sealed class MessageCommand
     [UsedImplicitly]
     public static async Task MessageAsync(
         SlashCommandContext context,
-        [Parameter("member"), Description("The member to message.")] DiscordUser user
+        [Parameter("member")] [Description("The member to message.")]
+        DiscordUser user
     )
     {
         var embed = new DiscordEmbedBuilder();
-        DiscordGuild guild = context.Guild!;
-        DiscordMember? member = await user.GetAsMemberOfAsync(guild);
+        var guild = context.Guild!;
+        var member = await user.GetAsMemberOfAsync(guild);
 
         if (member is null)
         {
             embed.WithColor(DiscordColor.Red);
             embed.WithTitle("Not In Guild");
             embed.WithDescription($"User {user.Id} ({user.Mention}) was found, but is not in this guild.");
-            await context.RespondAsync(embed, ephemeral: true);
+            await context.RespondAsync(embed, true);
         }
         else
         {
@@ -41,7 +42,7 @@ internal sealed class MessageCommand
 
 
             var messageInput = new DiscordTextInputComponent(
-                customId: "message",
+                "message",
                 required: true,
                 style: DiscordTextInputStyle.Paragraph);
 

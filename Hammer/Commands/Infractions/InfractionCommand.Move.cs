@@ -3,7 +3,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using Hammer.Data;
 using Hammer.Extensions;
 using JetBrains.Annotations;
 
@@ -16,9 +15,9 @@ internal sealed partial class InfractionCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task MoveAsync(SlashCommandContext context,
-        [Parameter("source"), Description("The user whose infractions to move.")]
+        [Parameter("source")] [Description("The user whose infractions to move.")]
         DiscordUser source,
-        [Parameter("destination"), Description("The user who will acquire the moved infractions.")]
+        [Parameter("destination")] [Description("The user who will acquire the moved infractions.")]
         DiscordUser destination)
     {
         if (source == destination)
@@ -29,10 +28,10 @@ internal sealed partial class InfractionCommand
 
         await context.DeferResponseAsync();
 
-        DiscordGuild guild = context.Guild!;
-        IEnumerable<Infraction> infractions = _infractionService.EnumerateInfractions(source, guild);
+        var guild = context.Guild!;
+        var infractions = _infractionService.EnumerateInfractions(source, guild);
         var count = 0;
-        foreach (Infraction infraction in infractions)
+        foreach (var infraction in infractions)
         {
             _infractionService.ModifyInfraction(infraction, i => i.UserId = destination.Id);
             count++;

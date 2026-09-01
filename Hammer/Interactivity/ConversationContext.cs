@@ -53,7 +53,10 @@ public sealed class ConversationContext
     /// <summary>
     ///     Gets the guild in which the conversation is being held, if any.
     /// </summary>
-    public DiscordGuild? Guild => Channel.Guild;
+    public DiscordGuild? Guild
+    {
+        get => Channel.Guild;
+    }
 
     /// <summary>
     ///     Gets the interaction which triggered this conversation, if any.

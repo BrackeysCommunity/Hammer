@@ -14,7 +14,7 @@ internal sealed partial class RulesCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task DisplayAsync(SlashCommandContext context,
-        [Parameter("channel"), Description("The channel in which to display the rules. Defaults to the current channel.")]
+        [Parameter("channel")] [Description("The channel in which to display the rules. Defaults to the current channel.")]
         DiscordChannel? channel = null)
     {
         channel ??= context.Channel;

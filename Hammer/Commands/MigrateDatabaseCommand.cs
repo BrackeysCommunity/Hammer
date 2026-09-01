@@ -10,8 +10,8 @@ namespace Hammer.Commands;
 
 internal sealed class MigrateDatabaseCommand
 {
-    private readonly ILogger<MigrateDatabaseCommand> _logger;
     private readonly DatabaseService _databaseService;
+    private readonly ILogger<MigrateDatabaseCommand> _logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="MigrateDatabaseCommand" /> class.
@@ -38,7 +38,7 @@ internal sealed class MigrateDatabaseCommand
         await context.RespondAsync(embed);
         try
         {
-            int rows = await _databaseService.MigrateAsync();
+            var rows = await _databaseService.MigrateAsync();
 
             var builder = new DiscordWebhookBuilder();
             embed.WithColor(DiscordColor.Green);

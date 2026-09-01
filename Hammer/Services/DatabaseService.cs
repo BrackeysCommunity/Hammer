@@ -9,8 +9,8 @@ namespace Hammer.Services;
 /// </summary>
 internal sealed class DatabaseService
 {
-    private readonly ILogger<DatabaseService> _logger;
     private readonly IDbContextFactory<HammerContext> _dbContextFactory;
+    private readonly ILogger<DatabaseService> _logger;
     private readonly IDbContextFactory<V5Context> _migrationContextFactory;
 
     /// <summary>
@@ -68,7 +68,7 @@ internal sealed class DatabaseService
         var inserted = 0;
         var buffer = new List<T>(batchSize);
 
-        await foreach (T row in source.AsAsyncEnumerable())
+        await foreach (var row in source.AsAsyncEnumerable())
         {
             buffer.Add(row);
             if (buffer.Count >= batchSize)

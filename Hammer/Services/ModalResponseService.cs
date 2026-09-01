@@ -13,12 +13,12 @@ namespace Hammer.Services;
 /// </summary>
 internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventArgs>
 {
-    private readonly Dictionary<string, Func<ModalSubmittedEventArgs, Task>> _modalHandlers = [];
-    private readonly ILogger<ModalResponseService> _logger;
-    private readonly DiscordClient _discordClient;
     private readonly ConfigurationService _configurationService;
+    private readonly DiscordClient _discordClient;
+    private readonly ILogger<ModalResponseService> _logger;
     private readonly MessageDeletionService _messageDeletionService;
     private readonly MessageService _messageService;
+    private readonly Dictionary<string, Func<ModalSubmittedEventArgs, Task>> _modalHandlers = [];
     private readonly RuleService _ruleService;
     private readonly WarningService _warningService;
 
@@ -57,7 +57,7 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
     /// <inheritdoc />
     public async Task HandleEventAsync(DiscordClient sender, ModalSubmittedEventArgs e)
     {
-        foreach ((string prefix, Func<ModalSubmittedEventArgs, Task> handler) in _modalHandlers)
+        foreach (var (prefix, handler) in _modalHandlers)
         {
             if (!e.Id.StartsWith(prefix))
             {
@@ -71,9 +71,9 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
 
     private async Task AddRuleAsync(ModalSubmittedEventArgs e)
     {
-        DiscordGuild guild = e.Interaction.Guild!;
+        var guild = e.Interaction.Guild!;
 
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             var builder = new DiscordInteractionResponseBuilder();
             builder.AsEphemeral();
@@ -82,12 +82,12 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
             return;
         }
 
-        string? brief = (e.Values["brief"] as TextInputModalSubmission)?.Value;
-        string description = (e.Values["description"] as TextInputModalSubmission)?.Value ?? string.Empty;
+        var brief = (e.Values["brief"] as TextInputModalSubmission)?.Value;
+        var description = (e.Values["description"] as TextInputModalSubmission)?.Value ?? string.Empty;
 
-        Rule rule = _ruleService.AddRule(guild, description, brief);
+        var rule = _ruleService.AddRule(guild, description, brief);
 
-        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
+        var embed = guild.CreateDefaultEmbed(guildConfiguration, false);
         embed.WithColor(DiscordColor.Green);
         embed.WithTitle($"Rule #{rule.Id} added");
 
@@ -105,9 +105,9 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
 
     private async Task EditRuleAsync(ModalSubmittedEventArgs e)
     {
-        DiscordGuild guild = e.Interaction.Guild!;
+        var guild = e.Interaction.Guild!;
 
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             var builder = new DiscordInteractionResponseBuilder();
             builder.AsEphemeral();
@@ -118,12 +118,12 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
 
         var ruleId = 0;
 
-        if (!CustomIdBuilder.TryParse(e.Id, out string? _, out IReadOnlyDictionary<string, string>? parameters) ||
-            !parameters.TryGetValue("rule", out string? ruleIdString) ||
+        if (!CustomIdBuilder.TryParse(e.Id, out var _, out var parameters) ||
+            !parameters.TryGetValue("rule", out var ruleIdString) ||
             !int.TryParse(ruleIdString, out ruleId) ||
             !_ruleService.GuildHasRule(guild, ruleId))
         {
-            DiscordEmbed responseEmbed = RuleService.CreateRuleNotFoundEmbed(ruleId);
+            var responseEmbed = RuleService.CreateRuleNotFoundEmbed(ruleId);
             var response = new DiscordFollowupMessageBuilder();
             response.AsEphemeral();
             response.AddEmbed(responseEmbed);
@@ -132,15 +132,15 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
         }
 
         var ruleResult = _ruleService.GetRuleById(guild, ruleId);
-        Rule? rule = ruleResult.IsSuccess ? ruleResult.Value : null;
-        string? oldBrief = rule?.Brief?.AsNullIfWhiteSpace();
-        string oldDescription = rule?.Description.AsNullIfWhiteSpace() ?? string.Empty;
+        var rule = ruleResult.IsSuccess ? ruleResult.Value : null;
+        var oldBrief = rule?.Brief?.AsNullIfWhiteSpace();
+        var oldDescription = rule?.Description.AsNullIfWhiteSpace() ?? string.Empty;
 
-        string? brief = (e.Values["brief"] as TextInputModalSubmission)?.Value;
-        string? description = (e.Values["description"] as TextInputModalSubmission)?.Value;
+        var brief = (e.Values["brief"] as TextInputModalSubmission)?.Value;
+        var description = (e.Values["description"] as TextInputModalSubmission)?.Value;
 
-        string? newBrief = brief?.AsNullIfWhiteSpace();
-        string? newDescription = description.AsNullIfWhiteSpace();
+        var newBrief = brief?.AsNullIfWhiteSpace();
+        var newDescription = description.AsNullIfWhiteSpace();
         var changed = false;
 
         if (!string.Equals(oldBrief, newBrief) && (changed = true))
@@ -153,7 +153,7 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
             _ruleService.SetRuleContent(rule, newDescription!);
         }
 
-        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
+        var embed = guild.CreateDefaultEmbed(guildConfiguration, false);
 
         if (changed)
         {
@@ -183,7 +183,7 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
 
     private async Task BadMessageAsync(ModalSubmittedEventArgs e)
     {
-        DiscordGuild guild = e.Interaction.Guild!;
+        var guild = e.Interaction.Guild!;
 
         if (e.Values["rule-id"] is not TextInputModalSubmission ruleInput)
         {
@@ -195,30 +195,30 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
             throw new InvalidOperationException("Reason input is missing.");
         }
 
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var configuration))
         {
             configuration = new GuildConfiguration();
         }
 
-        string defaultReason = configuration.DefaultBadMessageWarning;
+        var defaultReason = configuration.DefaultBadMessageWarning;
 
         var importantNotes = new List<string>();
-        DiscordMember staffMember = (await e.Interaction.User.GetAsMemberOfAsync(guild))!;
-        DiscordMessage message = e.Interaction.Message!;
-        DiscordUser user = message.Author!;
+        var staffMember = (await e.Interaction.User.GetAsMemberOfAsync(guild))!;
+        var message = e.Interaction.Message!;
+        var user = message.Author!;
 
-        if (!TryGetRule(guild, ruleInput.Value, out Rule? rule))
+        if (!TryGetRule(guild, ruleInput.Value, out var rule))
         {
             importantNotes.Add("The specified rule does not exist - it will be omitted from the infraction.");
         }
 
-        string reason = MentionUtility.ReplaceChannelMentions(guild, reasonInput.Value.WithWhiteSpaceAlternative(defaultReason));
+        var reason = MentionUtility.ReplaceChannelMentions(guild, reasonInput.Value.WithWhiteSpaceAlternative(defaultReason));
         await _messageDeletionService.DeleteMessageAsync(message, staffMember);
 
-        DiscordChannel channel = message.Channel!;
+        var channel = message.Channel!;
         var additionalInfo = $"Message {message.Id} in {channel.Mention} (#{channel.Name})";
         var options = new WarningOptions(user, staffMember, reason, rule, additionalInfo);
-        InfractionResult result = await _warningService.WarnAsync(options);
+        var result = await _warningService.WarnAsync(options);
 
         if (!result.DirectMessageSuccess)
         {
@@ -248,22 +248,22 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
 
     private async Task MessageAsync(ModalSubmittedEventArgs e)
     {
-        DiscordGuild guild = e.Interaction.Guild!;
-        if (!CustomIdBuilder.TryParse(e.Id, out string? _, out IReadOnlyDictionary<string, string>? parameters))
+        var guild = e.Interaction.Guild!;
+        if (!CustomIdBuilder.TryParse(e.Id, out var _, out var parameters))
         {
             return;
         }
 
-        ulong userId = ulong.Parse(parameters["user"]);
-        DiscordUser user = await _discordClient.GetUserAsync(userId);
-        DiscordMember member = (await user.GetAsMemberOfAsync(guild))!;
+        var userId = ulong.Parse(parameters["user"]);
+        var user = await _discordClient.GetUserAsync(userId);
+        var member = (await user.GetAsMemberOfAsync(guild))!;
 
         if (e.Values["message"] is not TextInputModalSubmission message)
         {
             throw new InvalidOperationException("Message input is missing.");
         }
 
-        string content = MentionUtility.ReplaceChannelMentions(guild, message.Value.Trim());
+        var content = MentionUtility.ReplaceChannelMentions(guild, message.Value.Trim());
         var builder = new DiscordFollowupMessageBuilder();
         builder.AsEphemeral();
 
@@ -280,8 +280,8 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
             return;
         }
 
-        DiscordMember staffMember = (await e.Interaction.User.GetAsMemberOfAsync(guild))!;
-        bool success = await _messageService.MessageMemberAsync(member, staffMember, content);
+        var staffMember = (await e.Interaction.User.GetAsMemberOfAsync(guild))!;
+        var success = await _messageService.MessageMemberAsync(member, staffMember, content);
 
         if (success)
         {
@@ -314,7 +314,7 @@ internal sealed class ModalResponseService : IEventHandler<ModalSubmittedEventAr
             return true;
         }
 
-        if (int.TryParse(query, out int ruleId))
+        if (int.TryParse(query, out var ruleId))
         {
             if (_ruleService.GuildHasRule(guild, ruleId))
             {

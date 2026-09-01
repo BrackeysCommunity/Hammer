@@ -62,6 +62,33 @@ public sealed class TrackedMessage : IEquatable<TrackedMessage>, IEquatable<Disc
     /// <value>The guild ID.</value>
     public ulong GuildId { get; set; }
 
+    /// <inheritdoc />
+    public bool Equals(DiscordMessage? other)
+    {
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        return Id == other.Id && ChannelId == other.Channel?.Id && GuildId == other.Channel?.Guild.Id;
+    }
+
+    /// <inheritdoc />
+    public bool Equals(TrackedMessage? other)
+    {
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return ChannelId == other.ChannelId && Id == other.Id && GuildId == other.GuildId;
+    }
+
     public static bool operator ==(TrackedMessage left, DiscordMessage right)
     {
         return left.Equals(right);
@@ -99,33 +126,6 @@ public sealed class TrackedMessage : IEquatable<TrackedMessage>, IEquatable<Disc
             CreationTimestamp = message.CreationTimestamp,
             Attachments = [.. message.Attachments.Select(a => new Uri(a.Url!))]
         };
-    }
-
-    /// <inheritdoc />
-    public bool Equals(DiscordMessage? other)
-    {
-        if (ReferenceEquals(null, other))
-        {
-            return false;
-        }
-
-        return Id == other.Id && ChannelId == other.Channel?.Id && GuildId == other.Channel?.Guild.Id;
-    }
-
-    /// <inheritdoc />
-    public bool Equals(TrackedMessage? other)
-    {
-        if (ReferenceEquals(null, other))
-        {
-            return false;
-        }
-
-        if (ReferenceEquals(this, other))
-        {
-            return true;
-        }
-
-        return ChannelId == other.ChannelId && Id == other.Id && GuildId == other.GuildId;
     }
 
     /// <inheritdoc />

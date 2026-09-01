@@ -15,15 +15,12 @@ internal sealed class HttpErrorResultEndpointProfile : DefaultAspNetCoreResultEn
     /// <inheritdoc />
     public override ActionResult TransformFailedResultToActionResult(FailedResultToActionResultTransformationContext context)
     {
-        int statusCode = context.Result.Errors
+        var statusCode = context.Result.Errors
             .OfType<HttpError>()
             .Select(e => e.StatusCode)
             .DefaultIfEmpty(StatusCodes.Status400BadRequest)
             .Max();
 
-        return new ObjectResult(new { Errors = context.Result.Errors.Select(e => e.Message) })
-        {
-            StatusCode = statusCode
-        };
+        return new ObjectResult(new { Errors = context.Result.Errors.Select(e => e.Message) }) { StatusCode = statusCode };
     }
 }

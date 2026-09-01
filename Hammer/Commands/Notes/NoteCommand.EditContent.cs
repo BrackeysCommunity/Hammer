@@ -5,7 +5,6 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using Hammer.AutocompleteProviders;
-using Hammer.Data;
 using Hammer.Extensions;
 using JetBrains.Annotations;
 
@@ -18,9 +17,9 @@ internal sealed partial class NoteCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task EditContentAsync(SlashCommandContext context,
-        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to edit.")]
+        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note")] [Description("The note to edit.")]
         long noteId,
-        [Parameter("content"), Description("The new content of the note.")]
+        [Parameter("content")] [Description("The new content of the note.")]
         string content)
     {
         var embed = new DiscordEmbedBuilder();
@@ -30,7 +29,7 @@ internal sealed partial class NoteCommand
             return;
         }
 
-        MemberNote? note = await _noteService.GetNoteAsync(noteId);
+        var note = await _noteService.GetNoteAsync(noteId);
 
         if (note is null)
         {

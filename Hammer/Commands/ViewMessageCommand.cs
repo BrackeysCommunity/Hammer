@@ -4,7 +4,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using Hammer.Configuration;
 using Hammer.Extensions;
 using Hammer.Resources;
 using Hammer.Services;
@@ -18,8 +17,8 @@ namespace Hammer.Commands;
 internal sealed class ViewMessageCommand
 {
     private readonly ConfigurationService _configurationService;
-    private readonly MessageService _messageService;
     private readonly MessageDeletionService _messageDeletionService;
+    private readonly MessageService _messageService;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="ViewMessageCommand" /> class.
@@ -40,19 +39,20 @@ internal sealed class ViewMessageCommand
     [UsedImplicitly]
     public async Task ViewMessageAsync(
         SlashCommandContext context,
-        [Parameter("id"), Description("The ID of the message to retrieve.")] string rawId
+        [Parameter("id")] [Description("The ID of the message to retrieve.")]
+        string rawId
     )
     {
         await context.DeferResponseAsync();
         var embed = new DiscordEmbedBuilder();
         var guild = context.Guild!;
 
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             throw new InvalidOperationException(ExceptionMessages.NoConfigurationForGuild);
         }
 
-        if (long.TryParse(rawId, out long staffMessageId) &&
+        if (long.TryParse(rawId, out var staffMessageId) &&
             await _messageService.GetStaffMessage(staffMessageId) is { } staffMessage &&
             staffMessage.GuildId == guild.Id)
         {
@@ -63,7 +63,7 @@ internal sealed class ViewMessageCommand
             embed.AddField("Sent", Formatter.Timestamp(staffMessage.SentAt), true);
             embed.AddField("Content", Formatter.BlockCode(staffMessage.Content));
         }
-        else if (ulong.TryParse(rawId, out ulong deletedMessageId) &&
+        else if (ulong.TryParse(rawId, out var deletedMessageId) &&
                  await _messageDeletionService.GetDeletedMessage(deletedMessageId) is { } deletedMessage &&
                  deletedMessage.GuildId == guild.Id)
         {
@@ -75,11 +75,11 @@ internal sealed class ViewMessageCommand
             embed.AddField("Deleted", Formatter.Timestamp(deletedMessage.DeletionTimestamp), true);
             embed.AddField("Staff Member", MentionUtility.MentionUser(deletedMessage.StaffMemberId), true);
 
-            bool hasContent = !string.IsNullOrWhiteSpace(deletedMessage.Content);
-            bool hasAttachments = deletedMessage.Attachments.Count > 0;
+            var hasContent = !string.IsNullOrWhiteSpace(deletedMessage.Content);
+            var hasAttachments = deletedMessage.Attachments.Count > 0;
 
-            string? content = hasContent ? Formatter.Sanitize(deletedMessage.Content!) : null;
-            string? attachments =
+            var content = hasContent ? Formatter.Sanitize(deletedMessage.Content!) : null;
+            var attachments =
                 hasAttachments ? string.Join('\n', deletedMessage.Attachments.Select(a => a.AbsoluteUri)) : null;
 
             embed.AddFieldIf(hasContent, "Content",

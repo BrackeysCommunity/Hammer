@@ -8,8 +8,8 @@ namespace Hammer.Services;
 /// <inheritdoc />
 internal sealed class WarningService : IWarningService
 {
-    private readonly DiscordLogService _logService;
     private readonly InfractionService _infractionService;
+    private readonly DiscordLogService _logService;
     private readonly RuleService _ruleService;
 
     /// <summary>
@@ -39,7 +39,7 @@ internal sealed class WarningService : IWarningService
         };
 
         var result = await _infractionService.CreateInfractionAsync(InfractionType.Warning, options.User, options.Issuer, opt);
-        int infractionCount = _infractionService.GetInfractionCount(options.User, options.Issuer.Guild);
+        var infractionCount = _infractionService.GetInfractionCount(options.User, options.Issuer.Guild);
 
         Rule? rule = null;
         if (result.Infraction.RuleId is { } ruleId && _ruleService.GuildHasRule(result.Infraction.GuildId, ruleId))
@@ -58,7 +58,8 @@ internal sealed class WarningService : IWarningService
         embed.AddFieldIf(infractionCount > 0, "Total User Infractions", infractionCount, true);
         embed.AddFieldIf(rule is not null, "Rule Broken", () => $"{rule!.Id} - {rule.Brief ?? rule.Description}", true);
         embed.AddFieldIf(!string.IsNullOrWhiteSpace(opt.Reason), "Reason", opt.Reason);
-        embed.AddFieldIf(!string.IsNullOrWhiteSpace(opt.AdditionalInformation), "Additional Information", opt.AdditionalInformation);
+        embed.AddFieldIf(!string.IsNullOrWhiteSpace(opt.AdditionalInformation), "Additional Information",
+            opt.AdditionalInformation);
         embed.WithFooter($"Infraction {result.Infraction.Id}");
 
         await _logService.LogAsync(options.Issuer.Guild, embed);

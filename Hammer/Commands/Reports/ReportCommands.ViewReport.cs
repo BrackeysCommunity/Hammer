@@ -4,7 +4,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using Hammer.Data;
 using Hammer.Extensions;
 using JetBrains.Annotations;
 
@@ -17,13 +16,14 @@ internal sealed partial class ReportCommands
     [RequireGuild]
     [UsedImplicitly]
     public async Task ViewReportAsync(CommandContext context,
-        [Parameter("id"), Description("The ID of the report to view.")] long id)
+        [Parameter("id")] [Description("The ID of the report to view.")]
+        long id)
     {
         await context.DeferResponseAsync();
 
         var embed = new DiscordEmbedBuilder();
 
-        if (_reportService.TryGetReport(id, out ReportedMessage? reportedMessage))
+        if (_reportService.TryGetReport(id, out var reportedMessage))
         {
             embed.WithColor(DiscordColor.Orange);
             embed.WithTitle($"Report {id}");
@@ -33,8 +33,8 @@ internal sealed partial class ReportCommands
 
             try
             {
-                DiscordChannel channel = await context.Client.GetChannelAsync(reportedMessage.ChannelId);
-                DiscordMessage message = await channel.GetMessageAsync(reportedMessage.MessageId);
+                var channel = await context.Client.GetChannelAsync(reportedMessage.ChannelId);
+                var message = await channel.GetMessageAsync(reportedMessage.MessageId);
                 embed.AddField("Message ID", Formatter.MaskedUrl(message.Id.ToString(), message.JumpLink), true);
                 embed.AddField("Message Time", Formatter.Timestamp(message.CreationTimestamp, TimestampFormat.LongDateTime),
                     true);
@@ -55,7 +55,7 @@ internal sealed partial class ReportCommands
                 embed.AddField("Attachments", string.Join('\n', reportedMessage.Attachments));
             }
 
-            DiscordUser user = await context.Client.GetUserAsync(reportedMessage.AuthorId);
+            var user = await context.Client.GetUserAsync(reportedMessage.AuthorId);
             embed.WithAuthor(user);
         }
         else

@@ -13,7 +13,7 @@ internal sealed class TemporaryBanConfiguration : IEntityTypeConfiguration<Tempo
     public void Configure(EntityTypeBuilder<TemporaryBan> builder)
     {
         builder.ToTable("TemporaryBan");
-        builder.HasKey(e => new {e.UserId, e.GuildId});
+        builder.HasKey(e => new { e.UserId, e.GuildId });
 
         builder.Property(e => e.GuildId);
         builder.Property(e => e.UserId);

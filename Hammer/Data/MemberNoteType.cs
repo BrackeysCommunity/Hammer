@@ -11,7 +11,7 @@ public enum MemberNoteType
     Guru,
 
     /// <summary>
-    ///     Indicates that the note has been created by a staff member. 
+    ///     Indicates that the note has been created by a staff member.
     /// </summary>
     Staff
 }

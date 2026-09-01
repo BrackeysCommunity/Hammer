@@ -16,9 +16,9 @@ internal sealed partial class InfractionCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task CopyAsync(SlashCommandContext context,
-        [Parameter("source"), Description("The user whose infractions to copy.")]
+        [Parameter("source")] [Description("The user whose infractions to copy.")]
         DiscordUser source,
-        [Parameter("destination"), Description("The user who will acquire the copied infractions.")]
+        [Parameter("destination")] [Description("The user who will acquire the copied infractions.")]
         DiscordUser destination)
     {
         if (source == destination)
@@ -29,8 +29,8 @@ internal sealed partial class InfractionCommand
 
         await context.DeferResponseAsync();
 
-        DiscordGuild guild = context.Guild!;
-        IEnumerable<Infraction> infractions = _infractionService.EnumerateInfractions(source, guild);
+        var guild = context.Guild!;
+        var infractions = _infractionService.EnumerateInfractions(source, guild);
         List<Infraction> copies = [.. infractions.Select(infraction => new Infraction(infraction) { UserId = destination.Id })];
 
         _infractionService.AddInfractions(copies);

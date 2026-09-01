@@ -38,23 +38,23 @@ internal sealed class InfoCommand
     [UsedImplicitly]
     public async Task InfoAsync(SlashCommandContext context)
     {
-        DiscordGuild guild = context.Guild!;
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
+        var guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var configuration))
         {
             configuration = new GuildConfiguration();
         }
 
-        DiscordClient client = context.Client;
-        DiscordMember member = (await client.CurrentUser.GetAsMemberOfAsync(guild))!;
-        string botVersion = _botService.Version;
-        DiscordColor embedColor = member.Color.PrimaryColor;
+        var client = context.Client;
+        var member = (await client.CurrentUser.GetAsMemberOfAsync(guild))!;
+        var botVersion = _botService.Version;
+        var embedColor = member.Color.PrimaryColor;
         if (embedColor.Value == 0)
         {
             embedColor = configuration.PrimaryColor;
         }
 
-        TimeSpan latency = client.GetConnectionLatency(guild.Id);
-        string ping = latency.Humanize(minUnit: TimeUnit.Millisecond, maxUnit: TimeUnit.Second);
+        var latency = client.GetConnectionLatency(guild.Id);
+        var ping = latency.Humanize(minUnit: TimeUnit.Millisecond, maxUnit: TimeUnit.Second);
 
         var embed = new DiscordEmbedBuilder();
         embed.WithAuthor(member);

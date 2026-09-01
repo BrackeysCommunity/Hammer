@@ -42,7 +42,7 @@ internal sealed class UriListToBytesConverter : ValueConverter<IReadOnlyList<Uri
     {
         using var stream = new MemoryStream(bytes);
         using var reader = new BinaryReader(stream);
-        int listCount = reader.Read7BitEncodedInt();
+        var listCount = reader.Read7BitEncodedInt();
 
         var list = new List<Uri>(listCount);
 

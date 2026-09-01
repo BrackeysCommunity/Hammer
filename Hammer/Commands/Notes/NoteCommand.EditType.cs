@@ -18,8 +18,10 @@ internal sealed partial class NoteCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task EditTypeAsync(SlashCommandContext context,
-        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note"), Description("The note to edit.")] long noteId,
-        [Parameter("type"), Description("The new type of the note.")] MemberNoteType type)
+        [SlashAutoCompleteProvider<NoteAutoCompleteProvider>] [Parameter("note")] [Description("The note to edit.")]
+        long noteId,
+        [Parameter("type")] [Description("The new type of the note.")]
+        MemberNoteType type)
     {
         var embed = new DiscordEmbedBuilder();
 
@@ -34,7 +36,7 @@ internal sealed partial class NoteCommand
             return;
         }
 
-        MemberNote? note = await _noteService.GetNoteAsync(noteId);
+        var note = await _noteService.GetNoteAsync(noteId);
 
         if (note is null)
         {

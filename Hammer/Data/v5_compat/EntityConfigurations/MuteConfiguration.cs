@@ -13,7 +13,7 @@ internal sealed class MuteConfiguration : IEntityTypeConfiguration<Mute>
     public void Configure(EntityTypeBuilder<Mute> builder)
     {
         builder.ToTable("Mute");
-        builder.HasKey(e => new {e.UserId, e.GuildId});
+        builder.HasKey(e => new { e.UserId, e.GuildId });
 
         builder.Property(e => e.GuildId);
         builder.Property(e => e.UserId);

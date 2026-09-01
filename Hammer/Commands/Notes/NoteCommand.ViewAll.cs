@@ -4,7 +4,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
 using JetBrains.Annotations;
@@ -18,28 +17,29 @@ internal sealed partial class NoteCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task ViewAllAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user whose notes to view.")] DiscordUser user)
+        [Parameter("user")] [Description("The user whose notes to view.")]
+        DiscordUser user)
     {
-        DiscordGuild guild = context.Guild!;
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? guildConfiguration))
+        var guild = context.Guild!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var guildConfiguration))
         {
             await context.RespondAsync("This guild is not configured.", true);
             return;
         }
 
-        DiscordEmbedBuilder embed = guild.CreateDefaultEmbed(guildConfiguration, false);
+        var embed = guild.CreateDefaultEmbed(guildConfiguration, false);
 
         try
         {
             var builder = new StringBuilder();
 
             // guru can only retrieve guru notes
-            IAsyncEnumerable<MemberNote> notes =
+            var notes =
                 context.Member!.GetPermissionLevel(guildConfiguration) >= PermissionLevel.Moderator
                     ? _noteService.GetNotesAsync(user, guild)
                     : _noteService.GetNotesAsync(user, guild, MemberNoteType.Guru);
 
-            await foreach (MemberNote note in notes)
+            await foreach (var note in notes)
             {
                 if (note.GuildId != guild.Id)
                 {

@@ -3,11 +3,9 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
-using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Hammer.Services;
 
@@ -16,11 +14,11 @@ namespace Hammer.Services;
 /// </summary>
 internal sealed class MessageReportService : BackgroundService, IEventHandler<GuildAvailableEventArgs>
 {
-    private readonly ILogger<MessageReportService> _logger;
-    private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly List<BlockedReporter> _blockedReporters = [];
     private readonly ConfigurationService _configurationService;
+    private readonly IDbContextFactory<HammerContext> _dbContextFactory;
     private readonly DiscordLogService _logService;
+    private readonly ILogger<MessageReportService> _logger;
     private readonly MessageTrackingService _messageTrackingService;
     private readonly List<ReportedMessage> _reportedMessages = [];
 
@@ -40,6 +38,28 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
         _configurationService = configurationService;
         _logService = logService;
         _messageTrackingService = messageTrackingService;
+    }
+
+    /// <inheritdoc />
+    public async Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
+    {
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        foreach (var reportedMessage in context.ReportedMessages.Where(r => r.GuildId == e.Guild.Id))
+        {
+            try
+            {
+                var channel = await e.Guild.GetChannelAsync(reportedMessage.ChannelId);
+                await channel.GetMessageAsync(reportedMessage.MessageId);
+                _reportedMessages.Add(reportedMessage);
+            }
+            catch (NotFoundException)
+            {
+                context.Entry(reportedMessage).State = EntityState.Deleted;
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 
     /// <summary>
@@ -77,7 +97,7 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
             BlockedAt = DateTimeOffset.UtcNow
         };
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
         blockedReporter = (await context.AddAsync(blockedReporter)).Entity;
         await context.SaveChangesAsync();
@@ -113,10 +133,10 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
             throw new ArgumentNullException(nameof(reporter));
         }
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
         var reportedMessage = new ReportedMessage(message, reporter);
-        EntityEntry<ReportedMessage> entry = await context.AddAsync(reportedMessage);
+        var entry = await context.AddAsync(reportedMessage);
 
         await context.SaveChangesAsync();
         reportedMessage = entry.Entity;
@@ -142,7 +162,7 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
     /// <returns>An enumerable collection of <see cref="ReportedMessage" /> values.</returns>
     public IEnumerable<ReportedMessage> EnumerateReports(DiscordUser user, DiscordGuild guild)
     {
-        foreach (ReportedMessage reportedMessage in _reportedMessages)
+        foreach (var reportedMessage in _reportedMessages)
         {
             if (reportedMessage.AuthorId == user.Id && reportedMessage.GuildId == guild.Id)
             {
@@ -179,7 +199,7 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
             throw new ArgumentNullException(nameof(guild));
         }
 
-        foreach (ReportedMessage reportedMessage in _reportedMessages)
+        foreach (var reportedMessage in _reportedMessages)
         {
             if (reportedMessage.ReporterId == user.Id && reportedMessage.GuildId == guild.Id)
             {
@@ -245,7 +265,7 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
 
         var list = new List<ReportedMessage>();
 
-        foreach (ReportedMessage reportedMessage in EnumerateReports(user, guild))
+        foreach (var reportedMessage in EnumerateReports(user, guild))
         {
             list.Add(reportedMessage);
         }
@@ -294,7 +314,7 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
 
         var list = new List<ReportedMessage>();
 
-        foreach (ReportedMessage reportedMessage in EnumerateSubmittedReports(user, guild))
+        foreach (var reportedMessage in EnumerateSubmittedReports(user, guild))
         {
             list.Add(reportedMessage);
         }
@@ -388,14 +408,14 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
             return false;
         }
 
-        DiscordUser? author = message.Author;
-        DiscordChannel channel = message.Channel!;
+        var author = message.Author;
+        var channel = message.Channel!;
         if (author is null)
         {
             message = await channel.GetMessageAsync(message.Id);
         }
 
-        MessageTrackState trackState = _messageTrackingService.GetMessageTrackState(message);
+        var trackState = _messageTrackingService.GetMessageTrackState(message);
         if ((trackState & MessageTrackState.Deleted) != 0)
         {
             _logger.LogWarning("{Reporter} attempted to report {Message} but the message is deleted!", reporter, message);
@@ -405,7 +425,7 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
             return false;
         }
 
-        bool duplicateReport = HasUserReportedMessage(message, reporter);
+        var duplicateReport = HasUserReportedMessage(message, reporter);
         if (duplicateReport)
         {
             _logger.LogInformation("{Reporter} attempted to create a duplicate report on {Message} by {Author} in {Channel}",
@@ -417,13 +437,13 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
         _logger.LogInformation("{Reporter} reported {Message} by {Author} in {Channel}", reporter, message, author, channel);
         await CreateNewMessageReportAsync(message, reporter);
 
-        if (!_configurationService.TryGetGuildConfiguration(channel.Guild, out GuildConfiguration? guildConfiguration))
+        if (!_configurationService.TryGetGuildConfiguration(channel.Guild, out var guildConfiguration))
         {
             return false;
         }
 
-        int urgentReportThreshold = guildConfiguration.UrgentReportThreshold;
-        int reportCount = GetReportCount(message);
+        var urgentReportThreshold = guildConfiguration.UrgentReportThreshold;
+        var reportCount = GetReportCount(message);
 
         StaffNotificationOptions notificationOptions;
 
@@ -482,9 +502,9 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
             return;
         }
 
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-        BlockedReporter? blockedReporter =
+        var blockedReporter =
             await context.BlockedReporters.FirstOrDefaultAsync(r => r.UserId == user.Id && r.GuildId == staffMember.Guild.Id);
 
         if (blockedReporter is null)
@@ -512,7 +532,7 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync(stoppingToken);
+        await using var context = await _dbContextFactory.CreateDbContextAsync(stoppingToken);
 
         _blockedReporters.Clear();
         _blockedReporters.AddRange(context.BlockedReporters);
@@ -520,38 +540,16 @@ internal sealed class MessageReportService : BackgroundService, IEventHandler<Gu
         _reportedMessages.Clear();
     }
 
-    /// <inheritdoc />
-    public async Task HandleEventAsync(DiscordClient sender, GuildAvailableEventArgs e)
-    {
-        await using HammerContext context = await _dbContextFactory.CreateDbContextAsync();
-
-        foreach (ReportedMessage reportedMessage in context.ReportedMessages.Where(r => r.GuildId == e.Guild.Id))
-        {
-            try
-            {
-                DiscordChannel channel = await e.Guild.GetChannelAsync(reportedMessage.ChannelId);
-                await channel.GetMessageAsync(reportedMessage.MessageId);
-                _reportedMessages.Add(reportedMessage);
-            }
-            catch (NotFoundException)
-            {
-                context.Entry(reportedMessage).State = EntityState.Deleted;
-            }
-        }
-
-        await context.SaveChangesAsync();
-    }
-
     private static DiscordEmbed CreateStaffReportEmbed(DiscordMessage message, DiscordMember reporter)
     {
-        DiscordColor color = DiscordColor.Orange;
+        var color = DiscordColor.Orange;
 
-        bool hasContent = !string.IsNullOrWhiteSpace(message.Content);
-        bool hasAttachments = message.Attachments.Count > 0;
+        var hasContent = !string.IsNullOrWhiteSpace(message.Content);
+        var hasAttachments = message.Attachments.Count > 0;
 
-        string? content = hasContent ? Formatter.BlockCode(Formatter.Sanitize(message.Content)) : null;
-        string? attachments = hasAttachments ? string.Join('\n', message.Attachments.Select(a => a.Url)) : null;
-        string channelMention = message.Channel?.Mention ?? MentionUtility.MentionChannel(message.ChannelId);
+        var content = hasContent ? Formatter.BlockCode(Formatter.Sanitize(message.Content)) : null;
+        var attachments = hasAttachments ? string.Join('\n', message.Attachments.Select(a => a.Url)) : null;
+        var channelMention = message.Channel?.Mention ?? MentionUtility.MentionChannel(message.ChannelId);
 
         return new DiscordEmbedBuilder()
             .WithColor(color)

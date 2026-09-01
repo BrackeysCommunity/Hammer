@@ -32,7 +32,7 @@ public sealed class WarningOptions
     ///     Gets additional information about the warning.
     /// </summary>
     /// <value>Additional information about the warning, or <see langword="null" /> if none is specified.</value>
-    public string? AdditionalInfo { get; } = null;
+    public string? AdditionalInfo { get; }
 
     /// <summary>
     ///     Gets the staff member who issued the warning.

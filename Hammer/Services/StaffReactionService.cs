@@ -1,7 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Hammer.Configuration;
 using Hammer.Data;
 using Hammer.Extensions;
 
@@ -36,7 +35,7 @@ internal sealed class StaffReactionService : IEventHandler<MessageReactionAddedE
             return;
         }
 
-        DiscordMessage message = e.Message;
+        var message = e.Message;
 
         if (message.Author is null)
         {
@@ -44,8 +43,8 @@ internal sealed class StaffReactionService : IEventHandler<MessageReactionAddedE
             message = await message.Channel!.GetMessageAsync(message.Id);
         }
 
-        DiscordUser author = message.Author!;
-        if (!_configurationService.TryGetGuildConfiguration(guild, out GuildConfiguration? configuration))
+        var author = message.Author!;
+        if (!_configurationService.TryGetGuildConfiguration(guild, out var configuration))
         {
             return;
         }
@@ -56,9 +55,9 @@ internal sealed class StaffReactionService : IEventHandler<MessageReactionAddedE
             return;
         }
 
-        ReactionConfiguration reactionConfiguration = configuration.Reactions;
-        DiscordEmoji emoji = e.Emoji;
-        string reaction = emoji.GetDiscordName();
+        var reactionConfiguration = configuration.Reactions;
+        var emoji = e.Emoji;
+        var reaction = emoji.GetDiscordName();
 
         if (reaction == reactionConfiguration.GagReaction)
         {
@@ -74,7 +73,7 @@ internal sealed class StaffReactionService : IEventHandler<MessageReactionAddedE
 
             for (var pageIndex = 0; pageIndex < response.Pages; pageIndex++)
             {
-                DiscordEmbedBuilder embed = _infractionService.BuildInfractionHistoryEmbed(response, pageIndex);
+                var embed = _infractionService.BuildInfractionHistoryEmbed(response, pageIndex);
                 builder.AddEmbed(embed);
             }
 

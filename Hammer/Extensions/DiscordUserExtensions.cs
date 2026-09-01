@@ -84,7 +84,7 @@ internal static class DiscordUserExtensions
             return PermissionLevel.Administrator;
         }
 
-        RoleConfiguration roleConfiguration = guildConfiguration.Roles;
+        var roleConfiguration = guildConfiguration.Roles;
         List<ulong> roles = [.. member.Roles.Select(r => r.Id)];
 
         if (roles.Contains(roleConfiguration.AdministratorRoleId))
@@ -134,7 +134,7 @@ internal static class DiscordUserExtensions
     /// <param name="other">The member whose permission level to compare with.</param>
     /// <param name="guildConfiguration">The guild configuration.</param>
     /// <returns>
-    ///     <see langword="true" /> if <paramref name="member" /> is a higher permission level than <paramref name="other"/>;
+    ///     <see langword="true" /> if <paramref name="member" /> is a higher permission level than <paramref name="other" />;
     ///     otherwise, <see langword="false" />.
     /// </returns>
     /// <exception cref="ArgumentNullException">
@@ -166,7 +166,7 @@ internal static class DiscordUserExtensions
             return true;
         }
 
-        if (GetPermissionLevel(member, guildConfiguration) > GetPermissionLevel(other, guildConfiguration))
+        if (member.GetPermissionLevel(guildConfiguration) > other.GetPermissionLevel(guildConfiguration))
         {
             return true;
         }
@@ -182,7 +182,7 @@ internal static class DiscordUserExtensions
     /// <param name="guildConfiguration">The guild configuration.</param>
     /// <returns>
     ///     <see langword="true" /> if <paramref name="member" /> is a higher or equal permission level than
-    ///     <paramref name="other"/>; otherwise, <see langword="false" />.
+    ///     <paramref name="other" />; otherwise, <see langword="false" />.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     ///     <para><paramref name="member" /> is <see langword="null" />.</para>
@@ -208,7 +208,7 @@ internal static class DiscordUserExtensions
             throw new ArgumentNullException(nameof(guildConfiguration));
         }
 
-        if (GetPermissionLevel(member, guildConfiguration) >= GetPermissionLevel(other, guildConfiguration))
+        if (member.GetPermissionLevel(guildConfiguration) >= other.GetPermissionLevel(guildConfiguration))
         {
             return true;
         }
@@ -241,6 +241,6 @@ internal static class DiscordUserExtensions
             throw new ArgumentNullException(nameof(guildConfiguration));
         }
 
-        return GetPermissionLevel(member, guildConfiguration) >= PermissionLevel.Moderator;
+        return member.GetPermissionLevel(guildConfiguration) >= PermissionLevel.Moderator;
     }
 }

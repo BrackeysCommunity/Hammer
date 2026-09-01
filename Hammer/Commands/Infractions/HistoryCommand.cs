@@ -15,8 +15,8 @@ namespace Hammer.Commands.Infractions;
 /// </summary>
 internal sealed class HistoryCommand
 {
-    private readonly ILogger<HistoryCommand> _logger;
     private readonly InfractionService _infractionService;
+    private readonly ILogger<HistoryCommand> _logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="HistoryCommand" /> class.
@@ -34,10 +34,14 @@ internal sealed class HistoryCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task HistoryAsync(SlashCommandContext context,
-        [Parameter("user"), Description("The user whose history to view.")] DiscordUser user,
-        [Parameter("before"), Description("If set, limits to infractions before the specified date.")] string? beforeRaw = null,
-        [Parameter("after"), Description("If set, limits to infractions after the specified date.")] string? afterRaw = null,
-        [Parameter("type"), Description("If set, limits to infractions of the specified type.")] InfractionType? type = null
+        [Parameter("user")] [Description("The user whose history to view.")]
+        DiscordUser user,
+        [Parameter("before")] [Description("If set, limits to infractions before the specified date.")]
+        string? beforeRaw = null,
+        [Parameter("after")] [Description("If set, limits to infractions after the specified date.")]
+        string? afterRaw = null,
+        [Parameter("type")] [Description("If set, limits to infractions of the specified type.")]
+        InfractionType? type = null
     )
     {
         DateTimeOffset? afterDate = null;
@@ -47,17 +51,17 @@ internal sealed class HistoryCommand
 
         if (!string.IsNullOrWhiteSpace(afterRaw))
         {
-            if (TimeSpanParser.TryParse(afterRaw, out TimeSpan difference))
+            if (TimeSpanParser.TryParse(afterRaw, out var difference))
             {
                 afterDate = DateTimeOffset.UtcNow - difference;
                 afterId = null;
             }
-            else if (DateTimeOffset.TryParse(afterRaw, out DateTimeOffset result))
+            else if (DateTimeOffset.TryParse(afterRaw, out var result))
             {
                 afterDate = result;
                 afterId = null;
             }
-            else if (long.TryParse(afterRaw, out long longValue))
+            else if (long.TryParse(afterRaw, out var longValue))
             {
                 afterDate = null;
                 afterId = longValue;
@@ -66,17 +70,17 @@ internal sealed class HistoryCommand
 
         if (!string.IsNullOrWhiteSpace(beforeRaw))
         {
-            if (TimeSpanParser.TryParse(beforeRaw, out TimeSpan difference))
+            if (TimeSpanParser.TryParse(beforeRaw, out var difference))
             {
                 beforeDate = DateTimeOffset.UtcNow - difference;
                 beforeId = null;
             }
-            else if (DateTimeOffset.TryParse(beforeRaw, out DateTimeOffset result))
+            else if (DateTimeOffset.TryParse(beforeRaw, out var result))
             {
                 beforeDate = result;
                 beforeId = null;
             }
-            else if (long.TryParse(beforeRaw, out long longValue))
+            else if (long.TryParse(beforeRaw, out var longValue))
             {
                 beforeDate = null;
                 beforeId = longValue;
@@ -106,7 +110,7 @@ internal sealed class HistoryCommand
         {
             try
             {
-                DiscordEmbedBuilder embed = _infractionService.BuildInfractionHistoryEmbed(response, pageIndex, searchOptions);
+                var embed = _infractionService.BuildInfractionHistoryEmbed(response, pageIndex, searchOptions);
                 builder.AddEmbed(embed);
             }
             catch (ArgumentException exception)
@@ -139,7 +143,7 @@ internal sealed class HistoryCommand
 
         for (var pageIndex = 0; pageIndex < response.Pages; pageIndex++)
         {
-            DiscordEmbedBuilder embed = _infractionService.BuildInfractionHistoryEmbed(response, pageIndex);
+            var embed = _infractionService.BuildInfractionHistoryEmbed(response, pageIndex);
             builder.AddEmbed(embed);
         }
 

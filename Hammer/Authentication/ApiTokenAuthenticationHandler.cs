@@ -43,7 +43,7 @@ internal sealed class ApiTokenAuthenticationHandler : AuthenticationHandler<ApiT
             return Task.FromResult(AuthenticateResult.Fail("Authorization header must use the Bearer scheme."));
         }
 
-        ReadOnlySpan<char> token = header.AsSpan()[BearerPrefix.Length..].Trim();
+        var token = header.AsSpan()[BearerPrefix.Length..].Trim();
         if (!TokensMatch(token, Options.Token))
         {
             return Task.FromResult(AuthenticateResult.Fail("Invalid API token."));

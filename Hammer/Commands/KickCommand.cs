@@ -6,7 +6,6 @@ using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Hammer.AutocompleteProviders;
-using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using JetBrains.Annotations;
@@ -19,10 +18,10 @@ namespace Hammer.Commands;
 /// </summary>
 internal sealed class KickCommand
 {
-    private readonly ILogger<KickCommand> _logger;
     private readonly BanService _banService;
     private readonly InfractionCooldownService _cooldownService;
     private readonly InfractionService _infractionService;
+    private readonly ILogger<KickCommand> _logger;
     private readonly RuleService _ruleService;
 
     /// <summary>
@@ -53,21 +52,23 @@ internal sealed class KickCommand
     [RequireGuild]
     [UsedImplicitly]
     public async Task KickAsync(SlashCommandContext context,
-        [Parameter("member"), Description("The member to kick.")] DiscordUser user,
-        [Parameter("reason"), Description("The reason for the kick.")] string? reason = null,
-        [Parameter("rule"), Description("The rule which was broken."), SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
+        [Parameter("member")] [Description("The member to kick.")]
+        DiscordUser user,
+        [Parameter("reason")] [Description("The reason for the kick.")]
+        string? reason = null,
+        [Parameter("rule")] [Description("The rule which was broken.")] [SlashAutoCompleteProvider<RuleAutoCompleteProvider>]
         string? ruleSearch = null,
-        [Parameter("clearMessageHistory"), Description("Clear the user's recent messages in text channels.")]
+        [Parameter("clearMessageHistory")] [Description("Clear the user's recent messages in text channels.")]
         bool clearMessageHistory = false)
     {
         await context.DeferResponseAsync(true);
 
         if (_cooldownService.IsCooldownActive(user, context.Member!) &&
-            _cooldownService.TryGetInfraction(user, out Infraction? infraction))
+            _cooldownService.TryGetInfraction(user, out var infraction))
         {
             _logger.LogInformation("{User} is on cooldown. Prompting for confirmation", user);
-            DiscordEmbed embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
-            bool result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
+            var embed = await _infractionService.CreateInfractionEmbedAsync(infraction);
+            var result = await InfractionCooldownService.ShowConfirmationAsync(context, user, infraction, embed);
             if (!result)
             {
                 return;
@@ -79,7 +80,7 @@ internal sealed class KickCommand
         var importantNotes = new List<string>();
         DiscordMember member;
 
-        DiscordGuild guild = context.Guild!;
+        var guild = context.Guild!;
         try
         {
             member = await guild.GetMemberAsync(user.Id);
@@ -100,13 +101,13 @@ internal sealed class KickCommand
         try
         {
             var hasSearch = !string.IsNullOrWhiteSpace(ruleSearch);
-            Rule? rule = hasSearch ? _ruleService.SearchForRule(guild, ruleSearch!) : null;
+            var rule = hasSearch ? _ruleService.SearchForRule(guild, ruleSearch!) : null;
             if (hasSearch && rule is null)
             {
                 importantNotes.Add($"The rule search \"{ruleSearch}\" did not match any rules in this guild.");
             }
 
-            InfractionResult result = await _banService.KickAsync(member, context.Member!, reason, rule, clearMessageHistory);
+            var result = await _banService.KickAsync(member, context.Member!, reason, rule, clearMessageHistory);
 
             if (!result.DirectMessageSuccess)
             {

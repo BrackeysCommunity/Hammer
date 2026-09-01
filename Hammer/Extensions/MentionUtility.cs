@@ -11,7 +11,8 @@ namespace Hammer.Extensions;
 ///     available
 ///     <a href="https://github.com/discord-net/Discord.Net/blob/dev/src/Discord.Net.Core/Utils/MentionUtils.cs">
 ///         here
-///     </a>.
+///     </a>
+///     .
 /// </remarks>
 public static class MentionUtility
 {
@@ -115,7 +116,7 @@ public static class MentionUtility
     /// <returns>The sanitized input.</returns>
     public static string ReplaceChannelMentions(DiscordGuild guild, string input)
     {
-        foreach (DiscordChannel channel in guild.Channels.Values)
+        foreach (var channel in guild.Channels.Values)
         {
             input = input.Replace($"#{channel.Name}", channel.Mention);
         }
@@ -149,7 +150,7 @@ public static class MentionUtility
         }
 
         value = value.Substring(2, value.Length - 3); // <#123>
-        if (!ulong.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out ulong actual))
+        if (!ulong.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var actual))
         {
             return false;
         }
@@ -213,7 +214,7 @@ public static class MentionUtility
         }
 
         value = value.Substring(3, value.Length - 4); // <@&123>
-        if (!ulong.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out ulong actual))
+        if (!ulong.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var actual))
         {
             return false;
         }
@@ -287,7 +288,7 @@ public static class MentionUtility
             value = value.Substring(2, value.Length - 3); // <@123>
         }
 
-        if (!ulong.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out ulong actual))
+        if (!ulong.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var actual))
         {
             return false;
         }

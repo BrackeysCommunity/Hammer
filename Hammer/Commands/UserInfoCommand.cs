@@ -3,6 +3,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using Hammer.Configuration;
+using Hammer.Data;
 using Hammer.Extensions;
 using Hammer.Services;
 using Humanizer;
@@ -17,6 +18,7 @@ internal sealed class UserInfoCommand : ApplicationCommandModule
     private readonly ConfigurationService _configurationService;
     private readonly AltAccountService _altAccountService;
     private readonly InfractionService _infractionService;
+    private readonly MessageDeletionService _messageDeletionService;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="UserInfoCommand" /> class.
@@ -24,12 +26,14 @@ internal sealed class UserInfoCommand : ApplicationCommandModule
     /// <param name="configurationService">The configuration service.</param>
     /// <param name="altAccountService">The alt account service.</param>
     /// <param name="infractionService">The infraction service.</param>
+    /// <param name="messageDeletionService">The message deletion service.</param>
     public UserInfoCommand(ConfigurationService configurationService, AltAccountService altAccountService,
-        InfractionService infractionService)
+        InfractionService infractionService, MessageDeletionService messageDeletionService)
     {
         _configurationService = configurationService;
         _altAccountService = altAccountService;
         _infractionService = infractionService;
+        _messageDeletionService = messageDeletionService;
     }
 
     [SlashCommand("userinfo", "Displays information about a user.")]
@@ -117,6 +121,9 @@ internal sealed class UserInfoCommand : ApplicationCommandModule
                     _ => $"Use `/alt view user:{user.Id}` to view."
                 };
             });
+
+            var count = GetDeletedMessageCount(user, guild).GetAwaiter().GetResult();
+            embed.AddFieldIf(count > 0, "Deleted Messages", count, true);
         }
 
         if (member is null)
@@ -126,5 +133,17 @@ internal sealed class UserInfoCommand : ApplicationCommandModule
         // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
         return embed;
+    }
+
+    public async Task<int> GetDeletedMessageCount(DiscordUser user, DiscordGuild guild)
+    {
+        var count = 0;
+
+        await foreach (var _ in _messageDeletionService.GetDeletedMessages(user, guild))
+        {
+            count++;
+        }
+
+        return count;
     }
 }

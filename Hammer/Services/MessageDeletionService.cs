@@ -184,6 +184,18 @@ internal sealed class MessageDeletionService
         }
     }
 
+    /// <summary>
+    ///     Returns the count of deleted messages sent by the specified user.
+    /// </summary>
+    /// <param name="author">The author of the messages.</param>
+    /// <param name="guild">The guild.</param>
+    /// <returns>The number of deleted messages sent by the specified user.</returns>
+    public int GetDeletedMessageCount(DiscordUser author, DiscordGuild guild)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.DeletedMessages.Count(m => m.AuthorId == author.Id && m.GuildId == guild.Id);
+    }
+
     private static DiscordEmbed CreateMessageDeletionToAuthorEmbed(DiscordMessage message, GuildConfiguration guildConfiguration)
     {
         var author = message.Author!;

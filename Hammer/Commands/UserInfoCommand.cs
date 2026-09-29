@@ -19,6 +19,7 @@ internal sealed class UserInfoCommand
     private readonly AltAccountService _altAccountService;
     private readonly ConfigurationService _configurationService;
     private readonly InfractionService _infractionService;
+    private readonly MessageDeletionService _messageDeletionService;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="UserInfoCommand" /> class.
@@ -26,12 +27,14 @@ internal sealed class UserInfoCommand
     /// <param name="configurationService">The configuration service.</param>
     /// <param name="altAccountService">The alt account service.</param>
     /// <param name="infractionService">The infraction service.</param>
+    /// <param name="messageDeletionService">The message deletion service.</param>
     public UserInfoCommand(ConfigurationService configurationService, AltAccountService altAccountService,
-        InfractionService infractionService)
+        InfractionService infractionService, MessageDeletionService messageDeletionService)
     {
         _configurationService = configurationService;
         _altAccountService = altAccountService;
         _infractionService = infractionService;
+        _messageDeletionService = messageDeletionService;
     }
 
     [Command("userinfo")]
@@ -123,6 +126,9 @@ internal sealed class UserInfoCommand
                     _ => $"Use `/alt view user:{user.Id}` to view."
                 };
             });
+
+            var count = _messageDeletionService.GetDeletedMessageCount(user, guild);
+            embed.AddFieldIf(count > 0, "Deleted Messages", count, true);
         }
 
         if (member is null)
